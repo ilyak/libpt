@@ -6,6 +6,13 @@
 #include <getopt.h>
 #include "xutil.h"
 
+static void __dead
+usage(void)
+{
+	fprintf(stderr, "usage: pt [-l] [-o nocc] [-v nvirt]\n");
+	exit(1);
+}
+
 static double
 ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *i_ooov, const double *i_oovv, const double *i_ovvv,
@@ -42,6 +49,9 @@ main(int argc, char **argv)
 			v = strtonum(optarg, 1, INT_MAX, &errstr);
 			if (errstr)
 				errx(1, "bad v value: %s", errstr);
+			break;
+		default:
+			usage();
 			break;
 		}
 	}
