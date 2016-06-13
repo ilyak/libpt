@@ -1,9 +1,9 @@
 CC= clang
-CFLAGS= -Weverything -Wno-conversion -Wno-format-nonliteral -Wno-unused-parameter -fcolor-diagnostics -g
-LDFLAGS=
-LIBS= -lm
+CFLAGS= -I../libxutil -Weverything -Wno-conversion -Wno-format-nonliteral -Wno-unused-parameter -fcolor-diagnostics -g
+LDFLAGS= -L../libxutil
+LIBS= -lm -lxutil
 
-ALL_O= log.o vis.o xmalloc.o
+ALL_O=
 RM= rm -f
 
 all: pt
