@@ -3,7 +3,7 @@ CFLAGS= -Weverything -Wno-conversion -Wno-format-nonliteral -Wno-unused-paramete
 LDFLAGS=
 LIBS= -lm
 
-ALL_O= log.o xmalloc.o
+ALL_O= log.o vis.o xmalloc.o
 RM= rm -f
 
 all: pt
