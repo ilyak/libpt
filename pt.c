@@ -304,6 +304,8 @@ main(int argc, char **argv)
 	printf("ccsd(t) corr energy: %lf\n", e_pt);
 	if (testpath)
 		printf("ccsd(t) corr ref:    %lf\n", e_ref);
+	else
+		e_ref = e_pt;
 
 	free(d_ov);
 	free(f_ov);
