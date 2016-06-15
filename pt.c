@@ -33,38 +33,14 @@ usage(void)
     t2[i*o*v*v+j*v*v+a*v+b]
 #define T3A(i, j, k, a, b, c) \
     t3a[i*o*o*v*v*v+j*o*v*v*v+k*v*v*v+a*v*v+b*v+c]
+#define T3B(i, j, k, a, b, c) \
+    t3b[i*o*o*v*v*v+j*o*v*v*v+k*v*v*v+a*v*v+b*v+c]
 
 static void
-ccsd_t3a(size_t o, size_t v, double *t3a, const double *t2,
-    const double *i_ooov, const double *i_ovvv)
+ccsd_symm_t3(size_t o, size_t v, double *t3a)
 {
-	size_t i, j, k, l, a, b, c, d;
+	size_t i, j, k, a, b, c;
 
-	/* contract */
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-	for (d = 0; d < v; d++) {
-		T3A(i, j, k, a, b, c) +=
-		    T2(i, j, c, d) * I_OVVV(k, a, b, d);
-	}}}}}}}
-
-	/* contract */
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-	for (l = 0; l < o; l++) {
-		T3A(i, j, k, a, b, c) -=
-		    T2(k, l, a, b) * I_OOOV(l, i, j, c);
-	}}}}}}}
-
-	/* symmetrize */
 	for (i = 0; i < o; i++) {
 	for (j = i; j < o; j++) {
 	for (k = j; k < o; k++) {
@@ -86,7 +62,6 @@ ccsd_t3a(size_t o, size_t v, double *t3a, const double *t2,
 		T3A(k, i, j, a, b, c) = x;
 	}}}}}}
 
-	/* symmetrize */
 	for (i = 0; i < o; i++) {
 	for (j = 0; j < o; j++) {
 	for (k = 0; k < o; k++) {
@@ -110,9 +85,62 @@ ccsd_t3a(size_t o, size_t v, double *t3a, const double *t2,
 }
 
 static void
-ccsd_t3b(size_t o, size_t v, double *t3b, const double *t1,
+ccsd_t3a(size_t o, size_t v, double *t3a, const double *t2,
+    const double *i_ooov, const double *i_ovvv)
+{
+	size_t i, j, k, l, a, b, c, d;
+	size_t ooovvv = o * o * o * v * v * v;
+
+	memset(t3a, 0, ooovvv * sizeof(double));
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+	for (d = 0; d < v; d++) {
+		T3A(i, j, k, a, b, c) +=
+		    T2(i, j, c, d) * I_OVVV(k, a, b, d);
+	}}}}}}}
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+	for (l = 0; l < o; l++) {
+		T3A(i, j, k, a, b, c) -=
+		    T2(k, l, a, b) * I_OOOV(l, i, j, c);
+	}}}}}}}
+
+	ccsd_symm_t3(o, v, t3a);
+}
+
+static void
+ccsd_t3b(size_t o, size_t v, double *t3b, const double *t3a, const double *t1,
     const double *t2, const double *i_oovv, const double *f_ov)
 {
+	size_t i, j, k, a, b, c;
+	size_t ooovvv = o * o * o * v * v * v;
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+		T3B(i, j, k, a, b, c) =
+		    T1(i, c) * I_OOVV(k, j, a, b) +
+		    F_OV(i, c) * T2(k, j, a, b);
+	}}}}}}
+
+	ccsd_symm_t3(o, v, t3b);
+
+	for (i = 0; i < ooovvv; i++) {
+		t3b[i] += t3a[i];
+	}
 }
 
 static double
@@ -124,12 +152,11 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	double *t3a, *t3b, *t3as;
 	size_t ooovvv = o * o * o * v * v * v;
 
-	t3a = xcalloc(ooovvv, sizeof(double));
+	t3a = xmalloc(ooovvv * sizeof(double));
 	ccsd_t3a(o, v, t3a, t2, i_ooov, i_ovvv);
 
 	t3b = xmalloc(ooovvv * sizeof(double));
-	memcpy(t3b, t3a, ooovvv * sizeof(double));
-	ccsd_t3b(o, v, t3b, t1, t2, i_oovv, f_ov);
+	ccsd_t3b(o, v, t3b, t3a, t1, t2, i_oovv, f_ov);
 
 	t3as = xmalloc(ooovvv * sizeof(double));
 
