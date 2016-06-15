@@ -13,7 +13,7 @@
 static void __dead
 usage(void)
 {
-	fprintf(stderr, "usage: pt [-l] [-o nocc] [-v nvirt]\n");
+	fprintf(stderr, "usage: pt [-l] [-o nocc] [-v nvirt] [-t test]\n");
 	exit(1);
 }
 
