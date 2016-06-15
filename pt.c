@@ -244,10 +244,67 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
 	fclose(fp);
 }
 
+static double
+random_double(void)
+{
+	return (drand48());
+}
+
+static void
+load_random_data(size_t o, size_t v, double *d_ov,
+    double *f_ov, double *i_ooov, double *i_oovv, double *i_ovvv,
+    double *t1, double *t2)
+{
+	size_t i, j, k, a, b, c;
+
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+		D_OV(i, a) = random_double();
+	}}
+
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+		F_OV(i, a) = random_double();
+	}}
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+	for (a = 0; a < v; a++) {
+		I_OOOV(i, j, k, a) = random_double();
+	}}}}
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+		I_OOVV(i, j, a, b) = random_double();
+	}}}}
+
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+		I_OVVV(i, a, b, c) = random_double();
+	}}}}
+
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+		T1(i, a) = random_double();
+	}}
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+		T2(i, j, a, b) = random_double();
+	}}}}
+}
+
 int
 main(int argc, char **argv)
 {
-	size_t o = 2, v = 8;
+	size_t o = 4, v = 20;
 	double *d_ov, *f_ov;
 	double *i_ooov, *i_oovv, *i_ovvv;
 	double *t1, *t2;
@@ -297,7 +354,8 @@ main(int argc, char **argv)
 		load_test_data(testpath, o, v, d_ov, f_ov, i_ooov,
 		    i_oovv, i_ovvv, t1, t2);
 	} else {
-		// random data
+		load_random_data(o, v, d_ov, f_ov, i_ooov,
+		    i_oovv, i_ovvv, t1, t2);
 	}
 
 	e_pt = ccsd_pt(o, v, d_ov, f_ov, i_ooov, i_oovv, i_ovvv, t1, t2);
