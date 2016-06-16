@@ -1,5 +1,5 @@
 CC= clang
-CFLAGS= -I../libxutil -Weverything -Wno-conversion -Wno-format-nonliteral -Wno-unused-parameter -fcolor-diagnostics -g
+CFLAGS= -I../libxutil -Weverything -Wno-conversion -Wno-format-nonliteral -fcolor-diagnostics -g
 LDFLAGS= -L../libxutil
 LIBS= -lm -lxutil
 
