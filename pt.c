@@ -158,9 +158,9 @@ ccsd_t3as(size_t o, size_t v, double *t3as, const double *t3a,
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
 		double x;
-		x = T3A(i, j, k, a, b, c) +
-		    T3A(j, i, k, a, b, c) +
-		    T3A(k, j, i, a, b, c) +
+		x = T3A(i, j, k, a, b, c) -
+		    T3A(j, i, k, a, b, c) -
+		    T3A(k, j, i, a, b, c) -
 		    T3A(i, k, j, a, b, c) +
 		    T3A(j, k, i, a, b, c) +
 		    T3A(k, i, j, a, b, c);
