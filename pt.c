@@ -35,6 +35,8 @@ usage(void)
     t3a[i*o*o*v*v*v+j*o*v*v*v+k*v*v*v+a*v*v+b*v+c]
 #define T3B(i, j, k, a, b, c) \
     t3b[i*o*o*v*v*v+j*o*v*v*v+k*v*v*v+a*v*v+b*v+c]
+#define T3AS(i, j, k, a, b, c) \
+    t3as[i*o*o*v*v*v+j*o*v*v*v+k*v*v*v+a*v*v+b*v+c]
 
 static void
 ccsd_symm_t3(size_t o, size_t v, double *t3a)
@@ -143,6 +145,44 @@ ccsd_t3b(size_t o, size_t v, double *t3b, const double *t3a, const double *t1,
 	}
 }
 
+static void
+ccsd_t3as(size_t o, size_t v, double *t3as, const double *t3a,
+    const double *d_ov)
+{
+	size_t i, j, k, a, b, c;
+
+	for (i = 0; i < o; i++) {
+	for (j = i; j < o; j++) {
+	for (k = j; k < o; k++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+		double x;
+		x = T3A(i, j, k, a, b, c) +
+		    T3A(j, i, k, a, b, c) +
+		    T3A(k, j, i, a, b, c) +
+		    T3A(i, k, j, a, b, c) +
+		    T3A(j, k, i, a, b, c) +
+		    T3A(k, i, j, a, b, c);
+		T3AS(i, j, k, a, b, c) = x;
+		T3AS(j, i, k, a, b, c) = x;
+		T3AS(k, j, i, a, b, c) = x;
+		T3AS(i, k, j, a, b, c) = x;
+		T3AS(j, k, i, a, b, c) = x;
+		T3AS(k, i, j, a, b, c) = x;
+	}}}}}}
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+		T3AS(i, j, k, a, b, c) /=
+		    (D_OV(i, a) + D_OV(j, b) + D_OV(k, c));
+	}}}}}}
+}
+
 static double
 ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *i_ooov, const double *i_oovv, const double *i_ovvv,
@@ -159,9 +199,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	ccsd_t3b(o, v, t3b, t3a, t1, t2, i_oovv, f_ov);
 
 	t3as = xmalloc(ooovvv * sizeof(double));
-
-	//t3as = asymm(ijk, t3a)
-	//delta denom 3 t3as
+	ccsd_t3as(o, v, t3as, t3a, d_ov);
 
 	for (size_t i = 0; i < ooovvv; i++) {
 		e_pt += t3as[i] * t3b[i];
