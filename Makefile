@@ -12,9 +12,8 @@ pt: pt.o $(ALL_O)
 	$(CC) -o $@ $(CFLAGS) pt.o $(ALL_O) $(LDFLAGS) $(LIBS)
 
 check: pt
-	@./pt -t h2o.dat && echo success
-	@./pt -t nh3.dat && echo success
-	@./pt -t ch4.dat && echo success
+	@./pt -t test1.dat && echo success
+	@./pt -t test2.dat && echo success
 
 clean:
 	$(RM) $(ALL_O) pt pt.o *.core *.log
