@@ -14,6 +14,8 @@ pt: pt.o $(ALL_O)
 check: pt
 	@./pt -t test1.dat && echo success
 	@./pt -t test2.dat && echo success
+	@./pt -t test3.dat && echo success
+	@./pt -t test4.dat && echo success
 
 clean:
 	$(RM) $(ALL_O) pt pt.o *.core *.log
