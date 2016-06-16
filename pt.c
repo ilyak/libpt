@@ -35,11 +35,9 @@ usage(void)
     t3a[i*o*o*v*v*v+j*o*v*v*v+k*v*v*v+a*v*v+b*v+c]
 #define T3B(i, j, k, a, b, c) \
     t3b[i*o*o*v*v*v+j*o*v*v*v+k*v*v*v+a*v*v+b*v+c]
-#define T3AS(i, j, k, a, b, c) \
-    t3as[i*o*o*v*v*v+j*o*v*v*v+k*v*v*v+a*v*v+b*v+c]
 
 static void
-ccsd_symm_t3(size_t o, size_t v, double *t3a)
+ccsd_asymm_t3(size_t o, size_t v, double *t3a)
 {
 	size_t i, j, k, a, b, c;
 
@@ -50,9 +48,9 @@ ccsd_symm_t3(size_t o, size_t v, double *t3a)
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
 		double x;
-		x = T3A(i, j, k, a, b, c) +
-		    T3A(j, i, k, a, b, c) +
-		    T3A(k, j, i, a, b, c) +
+		x = T3A(i, j, k, a, b, c) -
+		    T3A(j, i, k, a, b, c) -
+		    T3A(k, j, i, a, b, c) -
 		    T3A(i, k, j, a, b, c) +
 		    T3A(j, k, i, a, b, c) +
 		    T3A(k, i, j, a, b, c);
@@ -71,9 +69,9 @@ ccsd_symm_t3(size_t o, size_t v, double *t3a)
 	for (b = a; b < v; b++) {
 	for (c = b; c < v; c++) {
 		double x;
-		x = T3A(i, j, k, a, b, c) +
-		    T3A(i, j, k, b, a, c) +
-		    T3A(i, j, k, c, b, a) +
+		x = T3A(i, j, k, a, b, c) -
+		    T3A(i, j, k, b, a, c) -
+		    T3A(i, j, k, c, b, a) -
 		    T3A(i, j, k, a, c, b) +
 		    T3A(i, j, k, b, c, a) +
 		    T3A(i, j, k, c, a, b);
@@ -103,7 +101,7 @@ ccsd_t3a(size_t o, size_t v, double *t3a, const double *t2,
 	for (c = 0; c < v; c++) {
 	for (d = 0; d < v; d++) {
 		T3A(i, j, k, a, b, c) +=
-		    T2(i, j, c, d) * I_OVVV(k, a, b, d);
+		    T2(i, j, a, d) * I_OVVV(k, d, c, b);
 	}}}}}}}
 
 	for (i = 0; i < o; i++) {
@@ -114,10 +112,10 @@ ccsd_t3a(size_t o, size_t v, double *t3a, const double *t2,
 	for (c = 0; c < v; c++) {
 	for (l = 0; l < o; l++) {
 		T3A(i, j, k, a, b, c) -=
-		    T2(k, l, a, b) * I_OOOV(l, i, j, c);
+		    T2(i, l, a, b) * I_OOOV(j, k, l, c);
 	}}}}}}}
 
-	ccsd_symm_t3(o, v, t3a);
+	ccsd_asymm_t3(o, v, t3a);
 }
 
 static void
@@ -134,43 +132,23 @@ ccsd_t3b(size_t o, size_t v, double *t3b, const double *t3a, const double *t1,
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
 		T3B(i, j, k, a, b, c) =
-		    T1(i, c) * I_OOVV(k, j, a, b) +
-		    F_OV(i, c) * T2(k, j, a, b);
+		    T1(i, a) * I_OOVV(j, k, b, c) +
+		    F_OV(i, a) * T2(j, k, b, c);
 	}}}}}}
 
-	ccsd_symm_t3(o, v, t3b);
+	ccsd_asymm_t3(o, v, t3b);
 
 	for (i = 0; i < ooovvv; i++) {
 		t3b[i] += t3a[i];
 	}
 }
 
-static void
-ccsd_t3as(size_t o, size_t v, double *t3as, const double *t3a,
+static double
+ccsd_pt_energy(size_t o, size_t v, const double *t3a, const double *t3b,
     const double *d_ov)
 {
+	double e_pt = 0.0;
 	size_t i, j, k, a, b, c;
-
-	for (i = 0; i < o; i++) {
-	for (j = i; j < o; j++) {
-	for (k = j; k < o; k++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-		double x;
-		x = T3A(i, j, k, a, b, c) -
-		    T3A(j, i, k, a, b, c) -
-		    T3A(k, j, i, a, b, c) -
-		    T3A(i, k, j, a, b, c) +
-		    T3A(j, k, i, a, b, c) +
-		    T3A(k, i, j, a, b, c);
-		T3AS(i, j, k, a, b, c) = x;
-		T3AS(j, i, k, a, b, c) = x;
-		T3AS(k, j, i, a, b, c) = x;
-		T3AS(i, k, j, a, b, c) = x;
-		T3AS(j, k, i, a, b, c) = x;
-		T3AS(k, i, j, a, b, c) = x;
-	}}}}}}
 
 	for (i = 0; i < o; i++) {
 	for (j = 0; j < o; j++) {
@@ -178,9 +156,13 @@ ccsd_t3as(size_t o, size_t v, double *t3as, const double *t3a,
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
-		T3AS(i, j, k, a, b, c) /=
-		    (D_OV(i, a) + D_OV(j, b) + D_OV(k, c));
+		double dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
+			    D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
+			    D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
+		e_pt += T3A(i, j, k, a, b, c) * T3B(i, j, k, a, b, c) / dn;
 	}}}}}}
+
+	return (e_pt);
 }
 
 static double
@@ -189,7 +171,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2)
 {
 	double e_pt = 0.0;
-	double *t3a, *t3b, *t3as;
+	double *t3a, *t3b;
 	size_t ooovvv = o * o * o * v * v * v;
 
 	t3a = xmalloc(ooovvv * sizeof(double));
@@ -198,17 +180,11 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	t3b = xmalloc(ooovvv * sizeof(double));
 	ccsd_t3b(o, v, t3b, t3a, t1, t2, i_oovv, f_ov);
 
-	t3as = xmalloc(ooovvv * sizeof(double));
-	ccsd_t3as(o, v, t3as, t3a, d_ov);
-
-	for (size_t i = 0; i < ooovvv; i++) {
-		e_pt += t3as[i] * t3b[i];
-	}
-	e_pt *= (1.0 / 6.0 / 16.0);
+	e_pt = ccsd_pt_energy(o, v, t3a, t3b, d_ov);
+	e_pt *= (1.0 / 12.0 / 16.0);
 
 	free(t3a);
 	free(t3b);
-	free(t3as);
 	return (e_pt);
 }
 
