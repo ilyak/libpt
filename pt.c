@@ -18,24 +18,15 @@ usage(void)
 	exit(1);
 }
 
-#define D_OV(i, a) \
-    d_ov[i*v+a]
-#define F_OV(i, a) \
-    f_ov[i*v+a]
-#define I_OOOV(i, j, k, a) \
-    i_ooov[i*o*o*v+j*o*v+k*v+a]
-#define I_OOVV(i, j, a, b) \
-    i_oovv[i*o*v*v+j*v*v+a*v+b]
-#define I_OVVV(i, a, b, c) \
-    i_ovvv[i*v*v*v+a*v*v+b*v+c]
-#define T1(i, a) \
-    t1[i*v+a]
-#define T2(i, j, a, b) \
-    t2[i*o*v*v+j*v*v+a*v+b]
-#define T3A(a, b, c) \
-    t3a[a*v*v+b*v+c]
-#define T3B(a, b, c) \
-    t3b[a*v*v+b*v+c]
+#define D_OV(i, a) d_ov[i*v+a]
+#define F_OV(i, a) f_ov[i*v+a]
+#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
+#define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
+#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
+#define T1(i, a) t1[i*v+a]
+#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
+#define T3A(a, b, c) t3a[a*v*v+b*v+c]
+#define T3B(a, b, c) t3b[a*v*v+b*v+c]
 #define T3AIJK(a, b, c) t3a[0*v*v*v+a*v*v+b*v+c]
 #define T3AJIK(a, b, c) t3a[1*v*v*v+a*v*v+b*v+c]
 #define T3AKJI(a, b, c) t3a[2*v*v*v+a*v*v+b*v+c]
