@@ -54,6 +54,7 @@ ccsd_asymm_t3(size_t v, double *t3a)
 {
 	size_t a, b, c, n;
 
+#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
@@ -73,6 +74,7 @@ ccsd_asymm_t3(size_t v, double *t3a)
 	}}}
 
 	for (n = 0; n < 6; n++) {
+#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = a; b < v; b++) {
 	for (c = b; c < v; c++) {
@@ -103,6 +105,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 
 	memset(t3a, 0, 6 * vvv * sizeof(double));
 
+#pragma omp parallel for private(a,b,c,d)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
@@ -115,6 +118,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 		T3AKIJ(a, b, c) += T2(k, i, a, d) * I_OVVV(j, d, c, b);
 	}}}}
 
+#pragma omp parallel for private(a,b,c,l)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
