@@ -139,6 +139,7 @@ ccsd_t3b(size_t o, size_t v, size_t i, size_t j, size_t k,
 {
 	size_t a, b, c;
 
+#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
@@ -164,6 +165,7 @@ ccsd_pt_energy(size_t v, size_t i, size_t j, size_t k,
 	double e_pt = 0.0;
 	size_t a, b, c;
 
+#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
@@ -193,12 +195,11 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	for (k = j+1; k < o; k++) {
 		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv);
 		ccsd_asymm_t3(v, t3a);
+
 		ccsd_t3b(o, v, i, j, k, t3b, t1, t2, i_oovv, f_ov);
 		ccsd_asymm_t3(v, t3b);
 
-		for (n = 0; n < vvv; n++) {
-			t3b[n] += t3a[n];
-		}
+		for (n = 0; n < vvv; n++) t3b[n] += t3a[n];
 
 		e_pt += ccsd_pt_energy(v, i, j, k, t3a, t3b, d_ov);
 		e_pt += ccsd_pt_energy(v, j, i, k, t3a, t3b, d_ov);
