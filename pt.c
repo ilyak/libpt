@@ -25,8 +25,6 @@ usage(void)
 #define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
 #define T1(i, a) t1[i*v+a]
 #define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
-#define T3A(a, b, c) t3a[a*v*v+b*v+c]
-#define T3B(a, b, c) t3b[a*v*v+b*v+c]
 #define T3AIJK(a, b, c) t3a[0*v*v*v+a*v*v+b*v+c]
 #define T3AJIK(a, b, c) t3a[1*v*v*v+a*v*v+b*v+c]
 #define T3AKJI(a, b, c) t3a[2*v*v*v+a*v*v+b*v+c]
@@ -70,18 +68,18 @@ ccsd_asymm_t3(size_t v, double *t3a)
 	for (b = a; b < v; b++) {
 	for (c = b; c < v; c++) {
 		double x;
-		x = T3A(a, b, c) -
-		    T3A(b, a, c) -
-		    T3A(c, b, a) -
-		    T3A(a, c, b) +
-		    T3A(b, c, a) +
-		    T3A(c, a, b);
-		T3A(a, b, c) = x;
-		T3A(b, a, c) = x;
-		T3A(c, b, a) = x;
-		T3A(a, c, b) = x;
-		T3A(b, c, a) = x;
-		T3A(c, a, b) = x;
+		x = T3AIJK(a, b, c) -
+		    T3AIJK(b, a, c) -
+		    T3AIJK(c, b, a) -
+		    T3AIJK(a, c, b) +
+		    T3AIJK(b, c, a) +
+		    T3AIJK(c, a, b);
+		T3AIJK(a, b, c) = x;
+		T3AIJK(b, a, c) = x;
+		T3AIJK(c, b, a) = x;
+		T3AIJK(a, c, b) = x;
+		T3AIJK(b, c, a) = x;
+		T3AIJK(c, a, b) = x;
 	}}}
 		t3a += v * v * v;
 	}
@@ -163,7 +161,7 @@ ccsd_pt_energy(size_t v, size_t i, size_t j, size_t k,
 		double dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
 			    D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
 			    D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
-		e_pt += T3A(a, b, c) * T3B(a, b, c) / dn;
+		e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
 	}}}
 
 	return (e_pt);
