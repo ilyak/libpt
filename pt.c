@@ -41,7 +41,7 @@ usage(void)
 static void
 ccsd_asymm_t3(size_t v, double *t3a)
 {
-	size_t a, b, c, n;
+	size_t a, b, c;
 
 #pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
@@ -55,14 +55,8 @@ ccsd_asymm_t3(size_t v, double *t3a)
 		    T3AJKI(a, b, c) +
 		    T3AKIJ(a, b, c);
 		T3AIJK(a, b, c) = x;
-		T3AJIK(a, b, c) = x;
-		T3AKJI(a, b, c) = x;
-		T3AIKJ(a, b, c) = x;
-		T3AJKI(a, b, c) = x;
-		T3AKIJ(a, b, c) = x;
 	}}}
 
-	for (n = 0; n < 6; n++) {
 #pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = a; b < v; b++) {
@@ -81,8 +75,6 @@ ccsd_asymm_t3(size_t v, double *t3a)
 		T3AIJK(b, c, a) = x;
 		T3AIJK(c, a, b) = x;
 	}}}
-		t3a += v * v * v;
-	}
 }
 
 static void
@@ -183,9 +175,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	for (j = i+1; j < o; j++) {
 	for (k = j+1; k < o; k++) {
 		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv);
-		ccsd_asymm_t3(v, t3a);
-
 		ccsd_t3b(o, v, i, j, k, t3b, t1, t2, i_oovv, f_ov);
+		ccsd_asymm_t3(v, t3a);
 		ccsd_asymm_t3(v, t3b);
 
 		for (n = 0; n < vvv; n++) t3b[n] += t3a[n];
