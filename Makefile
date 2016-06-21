@@ -1,5 +1,7 @@
-CC= clang
-CFLAGS= -I../libxutil -Weverything -Wno-conversion -Wno-format-nonliteral -fcolor-diagnostics -g
+#CC= clang
+#CFLAGS= -I../libxutil -Weverything -Wno-conversion -Wno-format-nonliteral -fcolor-diagnostics -g
+CC= cc
+CFLAGS= -I../libxutil -Wall -Wextra -g -O3 -pg
 LDFLAGS= -L../libxutil
 LIBS= -lm -lxutil
 
@@ -18,6 +20,6 @@ check: pt
 	@./pt -t test4.dat && echo success
 
 clean:
-	$(RM) $(ALL_O) pt pt.o *.core *.log
+	$(RM) $(ALL_O) pt pt.o gmon.out *.core *.log
 
 .PHONY: all check clean
