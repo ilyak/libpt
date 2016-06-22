@@ -6,6 +6,7 @@
 
 #include <err.h>
 #include <getopt.h>
+#include <unistd.h>
 
 #include <xutil.h>
 
@@ -161,6 +162,25 @@ ccsd_pt_energy(size_t v, size_t i, size_t j, size_t k,
 	return (e_pt);
 }
 
+static int
+do_fork(int nproc)
+{
+	pid_t pid;
+	int i;
+
+	for (i = 1; i < nproc; i++) {
+		switch ((pid = fork())) {
+		case -1:
+			err(1, "fork");
+			break;
+		case 0:
+			return (i);
+		}
+	}
+
+	return (0);
+}
+
 static double
 ccsd_pt(int nproc, size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
@@ -169,14 +189,15 @@ ccsd_pt(int nproc, size_t o, size_t v, const double *d_ov,
 	double e_pt = 0.0;
 	double *t3a, *t3b;
 	size_t i, j, k, n, vvv = v * v * v;
+	int id;
 
 	t3a = xmalloc(6 * vvv * sizeof(double));
 	t3b = xmalloc(6 * vvv * sizeof(double));
 
-	/* fork */
-	(void)nproc;
+	id = do_fork(nproc);
+	printf("id = %d\n", id);
 
-	for (i = 0; i < o; i++) {
+	for (i = id; i < o; i += nproc) {
 	for (j = i+1; j < o; j++) {
 	for (k = j+1; k < o; k++) {
 		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv);
