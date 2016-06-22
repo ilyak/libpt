@@ -14,7 +14,8 @@
 static void __dead
 usage(void)
 {
-	fprintf(stderr, "usage: pt [-l] [-o nocc] [-v nvirt] [-t test]\n");
+	fprintf(stderr,
+"usage: pt [-l] [-n nproc] [-o nocc] [-v nvirt] [-t test]\n");
 	exit(1);
 }
 
@@ -161,9 +162,9 @@ ccsd_pt_energy(size_t v, size_t i, size_t j, size_t k,
 }
 
 static double
-ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
-    const double *i_ooov, const double *i_oovv, const double *i_ovvv,
-    const double *t1, const double *t2)
+ccsd_pt(int nproc, size_t o, size_t v, const double *d_ov,
+    const double *f_ov, const double *i_ooov, const double *i_oovv,
+    const double *i_ovvv, const double *t1, const double *t2)
 {
 	double e_pt = 0.0;
 	double *t3a, *t3b;
@@ -171,6 +172,9 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	t3a = xmalloc(6 * vvv * sizeof(double));
 	t3b = xmalloc(6 * vvv * sizeof(double));
+
+	/* fork */
+	(void)nproc;
 
 	for (i = 0; i < o; i++) {
 	for (j = i+1; j < o; j++) {
@@ -364,14 +368,20 @@ main(int argc, char **argv)
 	double *i_ooov, *i_oovv, *i_ovvv;
 	double *t1, *t2;
 	double e_pt, e_ref = 0.0;
+	int nproc = 1;
 	const char *errstr, *testpath = NULL;
 	char ch;
 
-	while ((ch = getopt(argc, argv, "lo:t:v:")) != -1) {
+	while ((ch = getopt(argc, argv, "ln:o:t:v:")) != -1) {
 		switch (ch) {
 		case 'l':
 			log_add_level();
 			log_open("pt");
+			break;
+		case 'n':
+			nproc = strtonum(optarg, 1, INT_MAX, &errstr);
+			if (errstr)
+				errx(1, "bad nproc value: %s", errstr);
 			break;
 		case 'o':
 			o = strtonum(optarg, 1, INT_MAX, &errstr);
@@ -413,7 +423,7 @@ main(int argc, char **argv)
 		    i_oovv, i_ovvv, t1, t2);
 	}
 
-	e_pt = ccsd_pt(o, v, d_ov, f_ov, i_ooov, i_oovv, i_ovvv, t1, t2);
+	e_pt = ccsd_pt(nproc, o, v, d_ov, f_ov, i_ooov, i_oovv, i_ovvv, t1, t2);
 	printf("ccsd(t) energy: % .8lf\n", e_pt);
 	if (testpath)
 		printf("ccsd(t) ref:    % .8lf\n", e_ref);
