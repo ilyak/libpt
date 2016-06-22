@@ -186,10 +186,9 @@ ccsd_pt(int nproc, size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
     const double *i_ovvv, const double *t1, const double *t2)
 {
-	double e_pt = 0.0;
-	double *t3a, *t3b;
+	double e_pt = 0.0, *t3a, *t3b;
 	size_t i, j, k, n, vvv = v * v * v;
-	int id;
+	int id, iter;
 
 	t3a = xmalloc(6 * vvv * sizeof(double));
 	t3b = xmalloc(6 * vvv * sizeof(double));
@@ -197,9 +196,11 @@ ccsd_pt(int nproc, size_t o, size_t v, const double *d_ov,
 	id = do_fork(nproc);
 	printf("id = %d\n", id);
 
-	for (i = id; i < o; i += nproc) {
+	for (i = 0, iter = 0; i < o; i++) {
 	for (j = i+1; j < o; j++) {
-	for (k = j+1; k < o; k++) {
+	for (k = j+1; k < o; k++, iter++) {
+		if (iter % nproc != id)
+			continue;
 		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv);
 		ccsd_t3b(o, v, i, j, k, t3b, t1, t2, i_oovv, f_ov);
 		ccsd_asymm_t3(v, t3a);
