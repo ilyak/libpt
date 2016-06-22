@@ -414,12 +414,11 @@ main(int argc, char **argv)
 	}
 
 	e_pt = ccsd_pt(o, v, d_ov, f_ov, i_ooov, i_oovv, i_ovvv, t1, t2);
-	if (testpath) {
-		printf("ccsd(t) corr energy: % .8lf\n", e_pt);
-		printf("ccsd(t) corr ref:    % .8lf\n", e_ref);
-	} else {
+	printf("ccsd(t) energy: % .8lf\n", e_pt);
+	if (testpath)
+		printf("ccsd(t) ref:    % .8lf\n", e_ref);
+	else
 		e_ref = e_pt;
-	}
 
 	free(d_ov);
 	free(f_ov);
