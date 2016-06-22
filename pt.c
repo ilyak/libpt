@@ -153,6 +153,7 @@ ccsd_pt_energy(size_t v, size_t i, size_t j, size_t k,
 		double dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
 			    D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
 			    D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
+#pragma omp atomic
 		e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
 	}}}
 
