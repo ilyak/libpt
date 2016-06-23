@@ -83,10 +83,90 @@ static void
 ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
     const double *t2, const double *i_ooov, const double *i_ovvv)
 {
-	size_t l, a, b, c, d;
-	size_t vvv = v * v * v;
+//	double *mt, *ma, *mb;
+	size_t l, a, b, c, d, vvv = v * v * v;
 
+//	ma = xmalloc(v * v * v * sizeof(double));
+//	mb = xmalloc(v * v * v * sizeof(double));
 	memset(t3a, 0, 6 * vvv * sizeof(double));
+//
+//	mt = ma;
+//	for (a = 0; a < v; a++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = T2(i, j, a, d);
+//	}}
+//	mt = mb;
+//	for (b = 0; b < v; b++) {
+//	for (c = 0; c < v; c++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(k, d, c, b);
+//	}}}
+//	gemm(v, v*v, v, 1.0, ma, mb, 0.0, t3a+0*vvv);
+//
+//	mt = ma;
+//	for (a = 0; a < v; a++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = T2(k, j, a, d);
+//	}}
+//	mt = mb;
+//	for (b = 0; b < v; b++) {
+//	for (c = 0; c < v; c++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(i, d, c, b);
+//	}}}
+//	gemm(v, v*v, v, 1.0, ma, mb, 0.0, t3a+1*vvv);
+//
+//	mt = ma;
+//	for (a = 0; a < v; a++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = T2(i, k, a, d);
+//	}}
+//	mt = mb;
+//	for (b = 0; b < v; b++) {
+//	for (c = 0; c < v; c++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(j, d, c, b);
+//	}}}
+//	gemm(v, v*v, v, 1.0, ma, mb, 0.0, t3a+2*vvv);
+//
+//	mt = ma;
+//	for (a = 0; a < v; a++) {
+//	for (b = 0; b < v; b++) {
+//	for (l = 0; l < o; l++) {
+//		*mt++ = T2(i, l, a, b);
+//	}}
+//	mt = mb;
+//	for (c = 0; c < v; c++) {
+//	for (l = 0; l < o; l++) {
+//		*mt++ = I_OOOV(j, k, l, c);
+//	}}}
+//	gemm(v*v, v, o, 1.0, ma, mb, 0.0, t3a+3*vvv);
+//
+//	mt = ma;
+//	for (a = 0; a < v; a++) {
+//	for (b = 0; b < v; b++) {
+//	for (l = 0; l < o; l++) {
+//		*mt++ = T2(j, l, a, b);
+//	}}
+//	mt = mb;
+//	for (c = 0; c < v; c++) {
+//	for (l = 0; l < o; l++) {
+//		*mt++ = I_OOOV(i, k, l, c);
+//	}}}
+//	gemm(v*v, v, o, 1.0, ma, mb, 0.0, t3a+4*vvv);
+//
+//	mt = ma;
+//	for (a = 0; a < v; a++) {
+//	for (b = 0; b < v; b++) {
+//	for (l = 0; l < o; l++) {
+//		*mt++ = T2(k, l, a, b);
+//	}}
+//	mt = mb;
+//	for (c = 0; c < v; c++) {
+//	for (l = 0; l < o; l++) {
+//		*mt++ = I_OOOV(j, i, l, c);
+//	}}}
+//	gemm(v*v, v, o, 1.0, ma, mb, 0.0, t3a+5*vvv);
 
 //#pragma omp parallel for private(a,b,c,d)
 	for (a = 0; a < v; a++) {
@@ -126,6 +206,9 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 		T3AJKI(a, b, c) = t3ajki - t3bjki;
 		T3AKIJ(a, b, c) = t3akij - t3bkij;
 	}}}
+
+//	free(ma);
+//	free(mb);
 }
 
 static void
