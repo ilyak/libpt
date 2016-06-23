@@ -92,27 +92,40 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
-	for (d = 0; d < v; d++) {
-		T3AIJK(a, b, c) += T2(i, j, a, d) * I_OVVV(k, d, c, b);
-		T3AJIK(a, b, c) += T2(j, i, a, d) * I_OVVV(k, d, c, b);
-		T3AKJI(a, b, c) += T2(k, j, a, d) * I_OVVV(i, d, c, b);
-		T3AIKJ(a, b, c) += T2(i, k, a, d) * I_OVVV(j, d, c, b);
-		T3AJKI(a, b, c) += T2(j, k, a, d) * I_OVVV(i, d, c, b);
-		T3AKIJ(a, b, c) += T2(k, i, a, d) * I_OVVV(j, d, c, b);
-	}}}}
+		for (d = 0; d < v; d++) {
+			T3AIJK(a, b, c) += T2(i, j, a, d) * I_OVVV(k, d, c, b);
+			T3AKJI(a, b, c) += T2(k, j, a, d) * I_OVVV(i, d, c, b);
+			T3AIKJ(a, b, c) += T2(i, k, a, d) * I_OVVV(j, d, c, b);
+		}
+		for (l = 0; l < o; l++) {
+			T3AJIK(a, b, c) += T2(i, l, a, b) * I_OOOV(j, k, l, c);
+			T3AJKI(a, b, c) += T2(j, l, a, b) * I_OOOV(i, k, l, c);
+			T3AKIJ(a, b, c) += T2(k, l, a, b) * I_OOOV(j, i, l, c);
+		}
+	}}}
 
-//#pragma omp parallel for private(a,b,c,l)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
-	for (l = 0; l < o; l++) {
-		T3AIJK(a, b, c) -= T2(i, l, a, b) * I_OOOV(j, k, l, c);
-		T3AJIK(a, b, c) -= T2(j, l, a, b) * I_OOOV(i, k, l, c);
-		T3AKJI(a, b, c) -= T2(k, l, a, b) * I_OOOV(j, i, l, c);
-		T3AIKJ(a, b, c) -= T2(i, l, a, b) * I_OOOV(k, j, l, c);
-		T3AJKI(a, b, c) -= T2(j, l, a, b) * I_OOOV(k, i, l, c);
-		T3AKIJ(a, b, c) -= T2(k, l, a, b) * I_OOOV(i, j, l, c);
-	}}}}
+		double t3aijk = T3AIJK(a, b, c);
+		double t3akji = T3AKJI(a, b, c);
+		double t3aikj = T3AIKJ(a, b, c);
+		double t3ajik = -t3aijk;
+		double t3ajki = -t3akji;
+		double t3akij = -t3aikj;
+		double t3bijk = T3AJIK(a, b, c);
+		double t3bjik = T3AJKI(a, b, c);
+		double t3bkji = T3AKIJ(a, b, c);
+		double t3bikj = -t3bijk;
+		double t3bjki = -t3bjik;
+		double t3bkij = -t3bkji;
+		T3AIJK(a, b, c) = t3aijk - t3bijk;
+		T3AJIK(a, b, c) = t3ajik - t3bjik;
+		T3AKJI(a, b, c) = t3akji - t3bkji;
+		T3AIKJ(a, b, c) = t3aikj - t3bikj;
+		T3AJKI(a, b, c) = t3ajki - t3bjki;
+		T3AKIJ(a, b, c) = t3akij - t3bkij;
+	}}}
 }
 
 static void
