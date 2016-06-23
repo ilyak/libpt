@@ -79,6 +79,21 @@ ccsd_asymm_t3(size_t v, double *t3a)
 	}}}
 }
 
+static int
+is_zero(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t c)
+{
+	o /= 2;
+	v /= 2;
+	i /= o;
+	j /= o;
+	k /= o;
+	a /= v;
+	b /= v;
+	c /= v;
+	return ((i+j+k+a+b+c) & 1);
+}
+
 static void
 ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
     const double *t2, const double *i_ooov, const double *i_ovvv)
@@ -172,6 +187,8 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
+		if (is_zero(o,v,i,j,k,a,b,c))
+			continue;
 		for (d = 0; d < v; d++) {
 			T3AIJK(a, b, c) += T2(i, j, a, d) * I_OVVV(k, d, c, b);
 			T3AKJI(a, b, c) += T2(k, j, a, d) * I_OVVV(i, d, c, b);
@@ -238,19 +255,21 @@ ccsd_t3b(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static double
-ccsd_pt_energy(size_t v, size_t i, size_t j, size_t k,
+ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
     const double *t3a, const double *t3b, const double *d_ov)
 {
-	double e_pt = 0.0;
+	double dn, e_pt = 0.0;
 	size_t a, b, c;
 
 //#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
-		double dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
-			    D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
-			    D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
+		if (is_zero(o,v,i,j,k,a,b,c))
+			continue;
+		dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
+		     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
+		     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
 //#pragma omp atomic
 		e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
 	}}}
@@ -304,12 +323,12 @@ ccsd_pt(int nproc, size_t o, size_t v, const double *d_ov,
 
 		for (n = 0; n < vvv; n++) t3b[n] += t3a[n];
 
-		e_pt += ccsd_pt_energy(v, i, j, k, t3a, t3b, d_ov);
-		e_pt += ccsd_pt_energy(v, j, i, k, t3a, t3b, d_ov);
-		e_pt += ccsd_pt_energy(v, k, j, i, t3a, t3b, d_ov);
-		e_pt += ccsd_pt_energy(v, i, k, j, t3a, t3b, d_ov);
-		e_pt += ccsd_pt_energy(v, j, k, i, t3a, t3b, d_ov);
-		e_pt += ccsd_pt_energy(v, k, i, j, t3a, t3b, d_ov);
+		e_pt += ccsd_pt_energy(o, v, i, j, k, t3a, t3b, d_ov);
+		e_pt += ccsd_pt_energy(o, v, j, i, k, t3a, t3b, d_ov);
+		e_pt += ccsd_pt_energy(o, v, k, j, i, t3a, t3b, d_ov);
+		e_pt += ccsd_pt_energy(o, v, i, k, j, t3a, t3b, d_ov);
+		e_pt += ccsd_pt_energy(o, v, j, k, i, t3a, t3b, d_ov);
+		e_pt += ccsd_pt_energy(o, v, k, i, j, t3a, t3b, d_ov);
 	}}}
 	e_pt *= (1.0 / 12.0 / 16.0);
 
