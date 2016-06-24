@@ -177,20 +177,46 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-		if (is_zero(o,v,i,j,k,a,b,c))
-			continue;
-		for (d = 0; d < v; d++) {
-			T3AIJK(a, b, c) += T2(i, j, a, d) * I_OVVV(k, d, c, b);
-			T3AKJI(a, b, c) += T2(k, j, a, d) * I_OVVV(i, d, c, b);
-			T3AIKJ(a, b, c) += T2(i, k, a, d) * I_OVVV(j, d, c, b);
+		if (!is_zero(o,v,i,j,k,a,b,0)) {
+			for (c = 0; c < v/2; c++) {
+				for (d = 0; d < v; d++) {
+					T3AIJK(a, b, c) +=
+					    T2(i, j, a, d) * I_OVVV(k, d, c, b);
+					T3AKJI(a, b, c) +=
+					    T2(k, j, a, d) * I_OVVV(i, d, c, b);
+					T3AIKJ(a, b, c) +=
+					    T2(i, k, a, d) * I_OVVV(j, d, c, b);
+				}
+				for (l = 0; l < o; l++) {
+					T3AJIK(a, b, c) +=
+					    T2(i, l, a, b) * I_OOOV(j, k, l, c);
+					T3AJKI(a, b, c) +=
+					    T2(j, l, a, b) * I_OOOV(i, k, l, c);
+					T3AKIJ(a, b, c) +=
+					    T2(k, l, a, b) * I_OOOV(j, i, l, c);
+				}
+			}
+		} else {
+			for (c = v/2; c < v; c++) {
+				for (d = 0; d < v; d++) {
+					T3AIJK(a, b, c) +=
+					    T2(i, j, a, d) * I_OVVV(k, d, c, b);
+					T3AKJI(a, b, c) +=
+					    T2(k, j, a, d) * I_OVVV(i, d, c, b);
+					T3AIKJ(a, b, c) +=
+					    T2(i, k, a, d) * I_OVVV(j, d, c, b);
+				}
+				for (l = 0; l < o; l++) {
+					T3AJIK(a, b, c) +=
+					    T2(i, l, a, b) * I_OOOV(j, k, l, c);
+					T3AJKI(a, b, c) +=
+					    T2(j, l, a, b) * I_OOOV(i, k, l, c);
+					T3AKIJ(a, b, c) +=
+					    T2(k, l, a, b) * I_OOOV(j, i, l, c);
+				}
+			}
 		}
-		for (l = 0; l < o; l++) {
-			T3AJIK(a, b, c) += T2(i, l, a, b) * I_OOOV(j, k, l, c);
-			T3AJKI(a, b, c) += T2(j, l, a, b) * I_OOOV(i, k, l, c);
-			T3AKIJ(a, b, c) += T2(k, l, a, b) * I_OOOV(j, i, l, c);
-		}
-	}}}
+	}}
 
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
@@ -253,14 +279,22 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
 
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-		if (is_zero(o,v,i,j,k,a,b,c))
-			continue;
-		dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
-		     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
-		     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
-		e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
-	}}}
+		if (!is_zero(o,v,i,j,k,a,b,0)) {
+			for (c = 0; c < v/2; c++) {
+				dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
+				     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
+				     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
+				e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
+			}
+		} else {
+			for (c = v/2; c < v; c++) {
+				dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
+				     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
+				     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
+				e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
+			}
+		}
+	}}
 
 	return (e_pt);
 }
