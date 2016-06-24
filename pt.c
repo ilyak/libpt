@@ -414,7 +414,7 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
 static double
 random_double(void)
 {
-	return (drand48());
+	return (drand48() / 100.0);
 }
 
 static void
