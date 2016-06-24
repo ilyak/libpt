@@ -86,18 +86,32 @@ is_zero(size_t o, size_t v, size_t i, size_t j, size_t k,
 	return ((i/o + j/o + k/o + a/v + b/v + c/v) & 1);
 }
 
+void dgemm_(char *, char *, int *, int *, int *, double *, double *,
+    int *, double *, int *, double *, double *, int *);
+
 static void
 gemm(int m, int n, int k, const double *a, const double *b, double *c)
 {
-	int i, j, l;
+//	int i, j, l;
+//
+//	for (i = 0; i < m; i++) {
+//	for (j = 0; j < n; j++) {
+//		c[j*m+i] = 0.0;
+//		for (l = 0; l < k; l++) {
+//			c[j*m+i] += a[l*m+i] * b[j*k+l];
+//		}
+//	}}
 
-	for (i = 0; i < m; i++) {
-	for (j = 0; j < n; j++) {
-		c[j*m+i] = 0.0;
-		for (l = 0; l < k; l++) {
-			c[j*m+i] += a[l*m+i] * b[j*k+l];
-		}
-	}}
+	double alpha = 1.0;
+	double beta = 0.0;
+	int lda = m;
+	int ldb = k;
+	int ldc = m;
+	char transa = 'N';
+	char transb = 'N';
+
+	dgemm_(&transa, &transb, &m, &n, &k, &alpha, (double *)a, &lda,
+	    (double *)b, &ldb, &beta, c, &ldc);
 }
 
 static void
