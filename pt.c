@@ -16,8 +16,7 @@
 static void __dead
 usage(void)
 {
-	fprintf(stderr,
-"usage: pt [-l] [-n nproc] [-o nocc] [-v nvirt] [-t test]\n");
+	fprintf(stderr, "usage: pt [-l] [-o nocc] [-v nvirt] [-t test]\n");
 	exit(1);
 }
 
@@ -483,23 +482,18 @@ main(int argc, char **argv)
 	double *i_ooov, *i_oovv, *i_ovvv;
 	double *t1, *t2;
 	double e_pt, e_ref = 0.0;
-	int nproc = 1, rank;
+	int rank;
 	const char *errstr, *testpath = NULL;
 	char ch;
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	while ((ch = getopt(argc, argv, "ln:o:t:v:")) != -1) {
+	while ((ch = getopt(argc, argv, "lo:t:v:")) != -1) {
 		switch (ch) {
 		case 'l':
 			log_add_level();
 			log_open("pt");
-			break;
-		case 'n':
-			nproc = strtonum(optarg, 1, INT_MAX, &errstr);
-			if (errstr)
-				errx(1, "bad nproc value: %s", errstr);
 			break;
 		case 'o':
 			o = strtonum(optarg, 1, INT_MAX, &errstr);
