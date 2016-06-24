@@ -83,13 +83,7 @@ is_zero(size_t o, size_t v, size_t i, size_t j, size_t k,
 {
 	o /= 2;
 	v /= 2;
-	i /= o;
-	j /= o;
-	k /= o;
-	a /= v;
-	b /= v;
-	c /= v;
-	return ((i+j+k+a+b+c) & 1);
+	return ((i/o + j/o + k/o + a/v + b/v + c/v) & 1);
 }
 
 static void
