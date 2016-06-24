@@ -8,6 +8,7 @@
 #include <getopt.h>
 #include <unistd.h>
 
+#include <mpi.h>
 #include <xutil.h>
 
 #define EPSILON 1.0e-8
@@ -277,44 +278,47 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
 	return (e_pt);
 }
 
-static int
-do_fork(int nproc)
-{
-	pid_t pid;
-	int i;
-
-	for (i = 1; i < nproc; i++) {
-		switch ((pid = fork())) {
-		case -1:
-			err(1, "fork");
-			break;
-		case 0:
-			return (i);
-		}
-	}
-
-	return (0);
-}
+//static int
+//do_fork(int nproc)
+//{
+//	pid_t pid;
+//	int i;
+//
+//	for (i = 1; i < nproc; i++) {
+//		switch ((pid = fork())) {
+//		case -1:
+//			err(1, "fork");
+//			break;
+//		case 0:
+//			return (i);
+//		}
+//	}
+//
+//	return (0);
+//}
 
 static double
-ccsd_pt(int nproc, size_t o, size_t v, const double *d_ov,
+ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
     const double *i_ovvv, const double *t1, const double *t2)
 {
 	double e_pt = 0.0, *t3a, *t3b;
 	size_t i, j, k, n, vvv = v * v * v;
-	int id, iter;
+	int rank, world, iter;
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &world);
 
 	t3a = xmalloc(6 * vvv * sizeof(double));
 	t3b = xmalloc(6 * vvv * sizeof(double));
 
-	id = do_fork(nproc);
-	printf("id = %d\n", id);
+//	id = do_fork(nproc);
+//	printf("id = %d\n", id);
 
 	for (i = 0, iter = 0; i < o; i++) {
 	for (j = i+1; j < o; j++) {
 	for (k = j+1; k < o; k++, iter++) {
-		if (iter % nproc != id)
+		if (iter % world != rank)
 			continue;
 		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv);
 		ccsd_t3b(o, v, i, j, k, t3b, t1, t2, i_oovv, f_ov);
@@ -334,6 +338,8 @@ ccsd_pt(int nproc, size_t o, size_t v, const double *d_ov,
 
 	free(t3a);
 	free(t3b);
+
+	MPI_Allreduce(&e_pt, &e_pt, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	return (e_pt);
 }
 
@@ -505,9 +511,12 @@ main(int argc, char **argv)
 	double *i_ooov, *i_oovv, *i_ovvv;
 	double *t1, *t2;
 	double e_pt, e_ref = 0.0;
-	int nproc = 1;
+	int nproc = 1, rank;
 	const char *errstr, *testpath = NULL;
 	char ch;
+
+	MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	while ((ch = getopt(argc, argv, "ln:o:t:v:")) != -1) {
 		switch (ch) {
@@ -552,19 +561,31 @@ main(int argc, char **argv)
 	t1 = xmalloc(o * v * sizeof(double));
 	t2 = xmalloc(o * o * v * v * sizeof(double));
 
-	if (testpath) {
-		load_test_data(testpath, o, v, d_ov, f_ov, i_ooov,
-		    i_oovv, i_ovvv, t1, t2);
-	} else {
-		load_random_data(o, v, d_ov, f_ov, i_ooov,
-		    i_oovv, i_ovvv, t1, t2);
+	if (rank == 0) {
+		if (testpath) {
+			load_test_data(testpath, o, v, d_ov, f_ov, i_ooov,
+			    i_oovv, i_ovvv, t1, t2);
+		} else {
+			load_random_data(o, v, d_ov, f_ov, i_ooov,
+			    i_oovv, i_ovvv, t1, t2);
+		}
 	}
 
-	e_pt = ccsd_pt(nproc, o, v, d_ov, f_ov, i_ooov, i_oovv, i_ovvv, t1, t2);
-	printf("ccsd(t) energy: % .8lf\n", e_pt);
-	if (testpath)
-		printf("ccsd(t) ref:    % .8lf\n", e_ref);
-	else
+	MPI_Bcast(d_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(f_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(i_ooov, o*o*o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(i_oovv, o*o*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(i_ovvv, o*v*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(t1, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(t2, o*o*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+	e_pt = ccsd_pt(o, v, d_ov, f_ov, i_ooov, i_oovv, i_ovvv, t1, t2);
+	if (rank == 0)
+		printf("ccsd(t) energy: % .8lf\n", e_pt);
+	if (testpath) {
+		if (rank == 0)
+			printf("ccsd(t) ref:    % .8lf\n", e_ref);
+	} else
 		e_ref = e_pt;
 
 	free(d_ov);
@@ -575,5 +596,6 @@ main(int argc, char **argv)
 	free(t1);
 	free(t2);
 	log_close();
+	MPI_Finalize();
 	return (fabs(e_pt - e_ref) < EPSILON ? 0 : 1);
 }
