@@ -87,136 +87,152 @@ is_zero(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static void
+gemm(int m, int n, int k, const double *a, const double *b, double *c)
+{
+	int i, j, l;
+
+	for (i = 0; i < m; i++) {
+	for (j = 0; j < n; j++) {
+		c[j*m+i] = 0.0;
+		for (l = 0; l < k; l++) {
+			c[j*m+i] += a[l*m+i] * b[j*k+l];
+		}
+	}}
+}
+
+static void
 ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
     const double *t2, const double *i_ooov, const double *i_ovvv)
 {
-//	double *mt, *ma, *mb;
+	double *mt, *mov, *mvv, *movv, *mvvv;
 	size_t l, a, b, c, d, vvv = v * v * v;
 
-//	ma = xmalloc(v * v * v * sizeof(double));
-//	mb = xmalloc(v * v * v * sizeof(double));
-	memset(t3a, 0, 6 * vvv * sizeof(double));
-//
-//	mt = ma;
-//	for (a = 0; a < v; a++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = T2(i, j, a, d);
-//	}}
-//	mt = mb;
-//	for (b = 0; b < v; b++) {
-//	for (c = 0; c < v; c++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = I_OVVV(k, d, c, b);
-//	}}}
-//	gemm(v, v*v, v, 1.0, ma, mb, 0.0, t3a+0*vvv);
-//
-//	mt = ma;
-//	for (a = 0; a < v; a++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = T2(k, j, a, d);
-//	}}
-//	mt = mb;
-//	for (b = 0; b < v; b++) {
-//	for (c = 0; c < v; c++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = I_OVVV(i, d, c, b);
-//	}}}
-//	gemm(v, v*v, v, 1.0, ma, mb, 0.0, t3a+1*vvv);
-//
-//	mt = ma;
-//	for (a = 0; a < v; a++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = T2(i, k, a, d);
-//	}}
-//	mt = mb;
-//	for (b = 0; b < v; b++) {
-//	for (c = 0; c < v; c++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = I_OVVV(j, d, c, b);
-//	}}}
-//	gemm(v, v*v, v, 1.0, ma, mb, 0.0, t3a+2*vvv);
-//
-//	mt = ma;
-//	for (a = 0; a < v; a++) {
-//	for (b = 0; b < v; b++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = T2(i, l, a, b);
-//	}}
-//	mt = mb;
-//	for (c = 0; c < v; c++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = I_OOOV(j, k, l, c);
-//	}}}
-//	gemm(v*v, v, o, 1.0, ma, mb, 0.0, t3a+3*vvv);
-//
-//	mt = ma;
-//	for (a = 0; a < v; a++) {
-//	for (b = 0; b < v; b++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = T2(j, l, a, b);
-//	}}
-//	mt = mb;
-//	for (c = 0; c < v; c++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = I_OOOV(i, k, l, c);
-//	}}}
-//	gemm(v*v, v, o, 1.0, ma, mb, 0.0, t3a+4*vvv);
-//
-//	mt = ma;
-//	for (a = 0; a < v; a++) {
-//	for (b = 0; b < v; b++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = T2(k, l, a, b);
-//	}}
-//	mt = mb;
-//	for (c = 0; c < v; c++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = I_OOOV(j, i, l, c);
-//	}}}
-//	gemm(v*v, v, o, 1.0, ma, mb, 0.0, t3a+5*vvv);
+	mov = xmalloc(o * v * sizeof(double));
+	mvv = xmalloc(v * v * sizeof(double));
+	movv = xmalloc(o * v * v * sizeof(double));
+	mvvv = xmalloc(v * v * v * sizeof(double));
+//	memset(t3a, 0, 6 * vvv * sizeof(double));
 
+	mt = mvv;
+	for (d = 0; d < v; d++) {
+	for (a = 0; a < v; a++) {
+		*mt++ = T2(i, j, a, d);
+	}}
+	mt = mvvv;
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+	for (d = 0; d < v; d++) {
+		*mt++ = I_OVVV(k, d, c, b);
+	}}}
+	gemm(v, v*v, v, mvv, mvvv, t3a+0*vvv);
+
+	mt = mvv;
+	for (d = 0; d < v; d++) {
+	for (a = 0; a < v; a++) {
+		*mt++ = T2(k, j, a, d);
+	}}
+	mt = mvvv;
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+	for (d = 0; d < v; d++) {
+		*mt++ = I_OVVV(i, d, c, b);
+	}}}
+	gemm(v, v*v, v, mvv, mvvv, t3a+1*vvv);
+
+	mt = mvv;
+	for (d = 0; d < v; d++) {
+	for (a = 0; a < v; a++) {
+		*mt++ = T2(i, k, a, d);
+	}}
+	mt = mvvv;
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+	for (d = 0; d < v; d++) {
+		*mt++ = I_OVVV(j, d, c, b);
+	}}}
+	gemm(v, v*v, v, mvv, mvvv, t3a+2*vvv);
+
+	mt = movv;
+	for (l = 0; l < o; l++) {
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
-		if (!is_zero(o,v,i,j,k,a,b,0)) {
-			for (c = 0; c < v/2; c++) {
-				for (d = 0; d < v; d++) {
-					T3AIJK(a, b, c) +=
-					    T2(i, j, a, d) * I_OVVV(k, d, c, b);
-					T3AKJI(a, b, c) +=
-					    T2(k, j, a, d) * I_OVVV(i, d, c, b);
-					T3AIKJ(a, b, c) +=
-					    T2(i, k, a, d) * I_OVVV(j, d, c, b);
-				}
-				for (l = 0; l < o; l++) {
-					T3AJIK(a, b, c) +=
-					    T2(i, l, a, b) * I_OOOV(j, k, l, c);
-					T3AJKI(a, b, c) +=
-					    T2(j, l, a, b) * I_OOOV(i, k, l, c);
-					T3AKIJ(a, b, c) +=
-					    T2(k, l, a, b) * I_OOOV(j, i, l, c);
-				}
-			}
-		} else {
-			for (c = v/2; c < v; c++) {
-				for (d = 0; d < v; d++) {
-					T3AIJK(a, b, c) +=
-					    T2(i, j, a, d) * I_OVVV(k, d, c, b);
-					T3AKJI(a, b, c) +=
-					    T2(k, j, a, d) * I_OVVV(i, d, c, b);
-					T3AIKJ(a, b, c) +=
-					    T2(i, k, a, d) * I_OVVV(j, d, c, b);
-				}
-				for (l = 0; l < o; l++) {
-					T3AJIK(a, b, c) +=
-					    T2(i, l, a, b) * I_OOOV(j, k, l, c);
-					T3AJKI(a, b, c) +=
-					    T2(j, l, a, b) * I_OOOV(i, k, l, c);
-					T3AKIJ(a, b, c) +=
-					    T2(k, l, a, b) * I_OOOV(j, i, l, c);
-				}
-			}
-		}
+		*mt++ = T2(i, l, a, b);
+	}}}
+	mt = mov;
+	for (c = 0; c < v; c++) {
+	for (l = 0; l < o; l++) {
+		*mt++ = I_OOOV(j, k, l, c);
 	}}
+	gemm(v*v, v, o, movv, mov, t3a+3*vvv);
+
+	mt = movv;
+	for (l = 0; l < o; l++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+		*mt++ = T2(j, l, a, b);
+	}}}
+	mt = mov;
+	for (c = 0; c < v; c++) {
+	for (l = 0; l < o; l++) {
+		*mt++ = I_OOOV(i, k, l, c);
+	}}
+	gemm(v*v, v, o, movv, mov, t3a+4*vvv);
+
+	mt = movv;
+	for (l = 0; l < o; l++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+		*mt++ = T2(k, l, a, b);
+	}}}
+	mt = mov;
+	for (c = 0; c < v; c++) {
+	for (l = 0; l < o; l++) {
+		*mt++ = I_OOOV(j, i, l, c);
+	}}
+	gemm(v*v, v, o, movv, mov, t3a+5*vvv);
+
+//	for (a = 0; a < v; a++) {
+//	for (b = 0; b < v; b++) {
+//		if (!is_zero(o,v,i,j,k,a,b,0)) {
+//			for (c = 0; c < v/2; c++) {
+//				for (d = 0; d < v; d++) {
+//					T3AIJK(a, b, c) +=
+//					    T2(i, j, a, d) * I_OVVV(k, d, c, b);
+//					T3AKJI(a, b, c) +=
+//					    T2(k, j, a, d) * I_OVVV(i, d, c, b);
+//					T3AIKJ(a, b, c) +=
+//					    T2(i, k, a, d) * I_OVVV(j, d, c, b);
+//				}
+//				for (l = 0; l < o; l++) {
+//					T3AJIK(a, b, c) +=
+//					    T2(i, l, a, b) * I_OOOV(j, k, l, c);
+//					T3AJKI(a, b, c) +=
+//					    T2(j, l, a, b) * I_OOOV(i, k, l, c);
+//					T3AKIJ(a, b, c) +=
+//					    T2(k, l, a, b) * I_OOOV(j, i, l, c);
+//				}
+//			}
+//		} else {
+//			for (c = v/2; c < v; c++) {
+//				for (d = 0; d < v; d++) {
+//					T3AIJK(a, b, c) +=
+//					    T2(i, j, a, d) * I_OVVV(k, d, c, b);
+//					T3AKJI(a, b, c) +=
+//					    T2(k, j, a, d) * I_OVVV(i, d, c, b);
+//					T3AIKJ(a, b, c) +=
+//					    T2(i, k, a, d) * I_OVVV(j, d, c, b);
+//				}
+//				for (l = 0; l < o; l++) {
+//					T3AJIK(a, b, c) +=
+//					    T2(i, l, a, b) * I_OOOV(j, k, l, c);
+//					T3AJKI(a, b, c) +=
+//					    T2(j, l, a, b) * I_OOOV(i, k, l, c);
+//					T3AKIJ(a, b, c) +=
+//					    T2(k, l, a, b) * I_OOOV(j, i, l, c);
+//				}
+//			}
+//		}
+//	}}
 
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
@@ -241,8 +257,10 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 		T3AKIJ(a, b, c) = t3akij - t3bkij;
 	}}}
 
-//	free(ma);
-//	free(mb);
+	free(mov);
+	free(mvv);
+	free(movv);
+	free(mvvv);
 }
 
 static void
