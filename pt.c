@@ -46,7 +46,6 @@ ccsd_asymm_t3(size_t v, double *t3a)
 {
 	size_t a, b, c;
 
-//#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
@@ -60,7 +59,6 @@ ccsd_asymm_t3(size_t v, double *t3a)
 		T3AIJK(a, b, c) = x;
 	}}}
 
-//#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = a; b < v; b++) {
 	for (c = b; c < v; c++) {
@@ -184,7 +182,6 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 //	}}}
 //	gemm(v*v, v, o, 1.0, ma, mb, 0.0, t3a+5*vvv);
 
-//#pragma omp parallel for private(a,b,c,d)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
@@ -236,7 +233,6 @@ ccsd_t3b(size_t o, size_t v, size_t i, size_t j, size_t k,
 {
 	size_t a, b, c;
 
-//#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
@@ -262,7 +258,6 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
 	double dn, e_pt = 0.0;
 	size_t a, b, c;
 
-//#pragma omp parallel for private(a,b,c)
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
@@ -271,7 +266,6 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
 		dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
 		     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
 		     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
-//#pragma omp atomic
 		e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
 	}}}
 
