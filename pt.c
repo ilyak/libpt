@@ -278,25 +278,6 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
 	return (e_pt);
 }
 
-//static int
-//do_fork(int nproc)
-//{
-//	pid_t pid;
-//	int i;
-//
-//	for (i = 1; i < nproc; i++) {
-//		switch ((pid = fork())) {
-//		case -1:
-//			err(1, "fork");
-//			break;
-//		case 0:
-//			return (i);
-//		}
-//	}
-//
-//	return (0);
-//}
-
 static double
 ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
@@ -311,9 +292,6 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 
 	t3a = xmalloc(6 * vvv * sizeof(double));
 	t3b = xmalloc(6 * vvv * sizeof(double));
-
-//	id = do_fork(nproc);
-//	printf("id = %d\n", id);
 
 	for (i = 0, iter = 0; i < o; i++) {
 	for (j = i+1; j < o; j++) {
