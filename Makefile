@@ -1,6 +1,6 @@
 #CC= clang
 #CFLAGS= -I../libxutil -Weverything -Wno-conversion -Wno-format-nonliteral -fcolor-diagnostics -g
-CC= cc
+CC= mpicc
 CFLAGS= -I../libxutil -Wall -Wextra -g -O3
 LDFLAGS= -L../libxutil
 LIBS= -lm -lxutil
