@@ -116,15 +116,21 @@ gemm(int m, int n, int k, const double *a, const double *b, double *c)
 
 static void
 ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
-    const double *t2, const double *i_ooov, const double *i_ovvv)
+    const double *t2, const double *i_ooov, const double *i_ovvv,
+    double *work)
 {
 	double *mt, *mov, *mvv, *movv, *mvvv;
 	size_t l, a, b, c, d, vvv = v * v * v;
 
-	mov = xmalloc(o * v * sizeof(double));
-	mvv = xmalloc(v * v * sizeof(double));
-	movv = xmalloc(o * v * v * sizeof(double));
-	mvvv = xmalloc(v * v * v * sizeof(double));
+	mov = work;
+	mvv = mov + o*v;
+	movv = mvv + v*v;
+	mvvv = movv + o*v*v;
+
+//	mov = xmalloc(o * v * sizeof(double));
+//	mvv = xmalloc(v * v * sizeof(double));
+//	movv = xmalloc(o * v * v * sizeof(double));
+//	mvvv = xmalloc(v * v * v * sizeof(double));
 //	memset(t3a, 0, 6 * vvv * sizeof(double));
 
 	mt = mvv;
@@ -271,10 +277,10 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 		T3AKIJ(a, b, c) = t3akij - t3bkij;
 	}}}
 
-	free(mov);
-	free(mvv);
-	free(movv);
-	free(mvvv);
+//	free(mov);
+//	free(mvv);
+//	free(movv);
+//	free(mvvv);
 }
 
 static void
@@ -336,7 +342,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
     const double *i_ovvv, const double *t1, const double *t2)
 {
-	double e_pt = 0.0, *t3a, *t3b;
+	double e_pt = 0.0, *t3a, *t3b, *work;
 	size_t i, j, k, n, vvv = v * v * v;
 	int rank, world, iter;
 
@@ -345,13 +351,14 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 
 	t3a = xmalloc(6 * vvv * sizeof(double));
 	t3b = xmalloc(6 * vvv * sizeof(double));
+	work = xmalloc((o*v + v*v + o*v*v + v*v*v) * sizeof(double));
 
 	for (i = 0, iter = 0; i < o; i++) {
 	for (j = i+1; j < o; j++) {
 	for (k = j+1; k < o; k++, iter++) {
 		if (iter % world != rank)
 			continue;
-		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv);
+		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv, work);
 		ccsd_t3b(o, v, i, j, k, t3b, t1, t2, i_oovv, f_ov);
 		ccsd_asymm_t3(v, t3a);
 		ccsd_asymm_t3(v, t3b);
@@ -369,6 +376,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 
 	free(t3a);
 	free(t3b);
+	free(work);
 
 	MPI_Allreduce(&e_pt, &e_pt, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	return (e_pt);
