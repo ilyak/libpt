@@ -584,6 +584,8 @@ main(int argc, char **argv)
 
 	if (testpath)
 		load_test_header(testpath, &o, &v, &e_ref);
+	if ((o & 1) || (v & 1))
+		errx(1, "o and v must be even");
 
 	d_ov = xmalloc(o * v * sizeof(double));
 	f_ov = xmalloc(o * v * sizeof(double));
