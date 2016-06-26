@@ -3,7 +3,7 @@
 CC= mpicc
 CFLAGS= -I../libxutil -Wall -Wextra -g -O3
 LDFLAGS= -L../libxutil
-LIBS= -lblas -lg2c -lm -lxutil
+LIBS= -lxutil -lblas -lg2c -lm
 
 ALL_O=
 RM= rm -f
