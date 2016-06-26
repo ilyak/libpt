@@ -77,13 +77,19 @@ ccsd_asymm_t3(size_t v, double *t3a)
 	}}}
 }
 
-static int
-is_zero(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t c)
+static void
+rangec(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t *fromc, size_t *toc)
 {
 	o /= 2;
 	v /= 2;
-	return ((i/o + j/o + k/o + a/v + b/v + c/v) & 1);
+	if ((i/o + j/o + k/o + a/v + b/v) & 1) {
+		*fromc = v;
+		*toc = 2*v;
+	} else {
+		*fromc = 0;
+		*toc = v;
+	}
 }
 
 void dgemm_(char *, char *, int *, int *, int *, double *, double *,
@@ -313,24 +319,16 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
     const double *t3a, const double *t3b, const double *d_ov)
 {
 	double dn, e_pt = 0.0;
-	size_t a, b, c;
+	size_t a, b, c, fromc, toc;
 
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
-		if (!is_zero(o,v,i,j,k,a,b,0)) {
-			for (c = 0; c < v/2; c++) {
-				dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
-				     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
-				     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
-				e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
-			}
-		} else {
-			for (c = v/2; c < v; c++) {
-				dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
-				     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
-				     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
-				e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
-			}
+		rangec(o,v,i,j,k,a,b,&fromc,&toc);
+		for (c = fromc; c < toc; c++) {
+			dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
+			     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
+			     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
+			e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
 		}
 	}}
 
