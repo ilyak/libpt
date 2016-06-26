@@ -312,24 +312,26 @@ static double
 ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
     const double *t3a, const double *t3b, const double *d_ov)
 {
-	double dn, e_pt = 0.0;
+	double dab, dc, e_pt = 0.0;
 	size_t a, b, c;
 
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
+		dab = D_OV(i, a) + D_OV(j, a) + D_OV(k, a) +
+		      D_OV(i, b) + D_OV(j, b) + D_OV(k, b);
 		if (!is_zero(o,v,i,j,k,a,b,0)) {
 			for (c = 0; c < v/2; c++) {
-				dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
-				     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
-				     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
-				e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
+				dc = D_OV(i, c) + D_OV(j, c) + D_OV(k, c);
+				e_pt += (*t3a++) * (*t3b++) / (dab + dc);
 			}
+			t3a += v/2;
+			t3b += v/2;
 		} else {
+			t3a += v/2;
+			t3b += v/2;
 			for (c = v/2; c < v; c++) {
-				dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
-				     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
-				     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
-				e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
+				dc = D_OV(i, c) + D_OV(j, c) + D_OV(k, c);
+				e_pt += (*t3a++) * (*t3b++) / (dab + dc);
 			}
 		}
 	}}
