@@ -80,68 +80,46 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
     double *t1, double *t2)
 {
 	FILE *fp;
-	size_t i, j, k, a, b, c;
+	size_t i;
 
 	if ((fp = fopen(testpath, "r")) == NULL)
 		err(1, "unable to open %s", testpath);
 
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-		D_OV(i, a) = read_next_double(fp);
-	}}
-
+	for (i = 0; i < o*v; i++) {
+		d_ov[i] = read_next_double(fp);
+	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-		F_OV(i, a) = read_next_double(fp);
-	}}
-
+	for (i = 0; i < o*v; i++) {
+		f_ov[i] = read_next_double(fp);
+	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-	for (a = 0; a < v; a++) {
-		I_OOOV(i, j, k, a) = read_next_double(fp);
-	}}}}
-
+	for (i = 0; i < o*o*o*v; i++) {
+		i_ooov[i] = read_next_double(fp);
+	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-		I_OOVV(i, j, a, b) = read_next_double(fp);
-	}}}}
-
+	for (i = 0; i < o*o*v*v; i++) {
+		i_oovv[i] = read_next_double(fp);
+	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-		I_OVVV(i, a, b, c) = read_next_double(fp);
-	}}}}
-
+	for (i = 0; i < o*v*v*v; i++) {
+		i_ovvv[i] = read_next_double(fp);
+	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-		T1(i, a) = read_next_double(fp);
-	}}
-
+	for (i = 0; i < o*v; i++) {
+		t1[i] = read_next_double(fp);
+	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-		T2(i, j, a, b) = read_next_double(fp);
-	}}}}
-
+	for (i = 0; i < o*o*v*v; i++) {
+		t2[i] = read_next_double(fp);
+	}
 	fclose(fp);
 }
 
@@ -156,50 +134,29 @@ load_random_data(size_t o, size_t v, double *d_ov,
     double *f_ov, double *i_ooov, double *i_oovv, double *i_ovvv,
     double *t1, double *t2)
 {
-	size_t i, j, k, a, b, c;
+	size_t i;
 
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-		D_OV(i, a) = random_double();
-	}}
-
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-		F_OV(i, a) = random_double();
-	}}
-
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-	for (a = 0; a < v; a++) {
-		I_OOOV(i, j, k, a) = random_double();
-	}}}}
-
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-		I_OOVV(i, j, a, b) = random_double();
-	}}}}
-
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-		I_OVVV(i, a, b, c) = random_double();
-	}}}}
-
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-		T1(i, a) = random_double();
-	}}
-
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-		T2(i, j, a, b) = random_double();
-	}}}}
+	for (i = 0; i < o*v; i++) {
+		d_ov[i] = random_double();
+	}
+	for (i = 0; i < o*v; i++) {
+		f_ov[i] = random_double();
+	}
+	for (i = 0; i < o*o*o*v; i++) {
+		i_ooov[i] = random_double();
+	}
+	for (i = 0; i < o*o*v*v; i++) {
+		i_oovv[i] = random_double();
+	}
+	for (i = 0; i < o*v*v*v; i++) {
+		i_ovvv[i] = random_double();
+	}
+	for (i = 0; i < o*v; i++) {
+		t1[i] = random_double();
+	}
+	for (i = 0; i < o*o*v*v; i++) {
+		t2[i] = random_double();
+	}
 }
 
 int
