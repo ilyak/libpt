@@ -344,6 +344,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	size_t i, j, k, n, vvv = v * v * v;
 	int rank, world, iter;
 
+	if ((o & 1) || (v & 1))
+		errx(1, "o and v size must be even");
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &world);
 
@@ -584,9 +586,6 @@ main(int argc, char **argv)
 
 	if (testpath)
 		load_test_header(testpath, &o, &v, &e_ref);
-	if ((o & 1) || (v & 1))
-		errx(1, "o and v must be even");
-
 	d_ov = xmalloc(o * v * sizeof(double));
 	f_ov = xmalloc(o * v * sizeof(double));
 	i_ooov = xmalloc(o * o * o * v * sizeof(double));
