@@ -11,6 +11,8 @@
 #include <mpi.h>
 #include <xutil.h>
 
+#include "pt.h"
+
 #define EPSILON 1.0e-8
 
 static void __dead
@@ -314,7 +316,7 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
 	return (e_pt);
 }
 
-static double
+double
 ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
     const double *i_ovvv, const double *t1, const double *t2)
