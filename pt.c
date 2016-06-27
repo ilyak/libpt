@@ -98,16 +98,6 @@ void dgemm_(char *, char *, int *, int *, int *, double *, double *,
 static void
 gemm(int m, int n, int k, const double *a, const double *b, double *c)
 {
-//	int i, j, l;
-//
-//	for (i = 0; i < m; i++) {
-//	for (j = 0; j < n; j++) {
-//		c[j*m+i] = 0.0;
-//		for (l = 0; l < k; l++) {
-//			c[j*m+i] += a[l*m+i] * b[j*k+l];
-//		}
-//	}}
-
 	double alpha = 1.0;
 	double beta = 0.0;
 	int lda = m;
