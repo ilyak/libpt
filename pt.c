@@ -1,6 +1,8 @@
-#include <mpi.h>
+#include <stdlib.h>
 #include <err.h>
-#include <xutil.h>
+#include <mpi.h>
+
+#include "pt.h"
 
 #define D_OV(i, a) d_ov[i*v+a]
 #define F_OV(i, a) f_ov[i*v+a]
@@ -310,9 +312,15 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &world);
 
-	t3a = xmalloc(6 * v*v*v * sizeof(double));
-	t3b = xmalloc(6 * v*v*v * sizeof(double));
-	work = xmalloc((o*v + v*v + o*v*v + v*v*v) * sizeof(double));
+	t3a = malloc(6 * v*v*v * sizeof(double));
+	if (t3a == NULL)
+		err(1, "malloc");
+	t3b = malloc(6 * v*v*v * sizeof(double));
+	if (t3b == NULL)
+		err(1, "malloc");
+	work = malloc((o*v + v*v + o*v*v + v*v*v) * sizeof(double));
+	if (work == NULL)
+		err(1, "malloc");
 
 	for (i = 0, iter = 0; i < o; i++) {
 	for (j = i+1; j < o; j++) {
