@@ -324,7 +324,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	int rank, world, iter;
 
 	if ((o & 1) || (v & 1))
-		errx(1, "o and v size must be even");
+		errx(1, "o and v sizes must be even");
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &world);
 
