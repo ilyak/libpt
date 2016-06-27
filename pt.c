@@ -126,7 +126,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
     double *work)
 {
 	double *mt, *mov, *mvv, *movv, *mvvv;
-	size_t l, a, b, c, d, vvv = v * v * v;
+	size_t l, a, b, c, d;
 
 	mov = work;
 	mvv = mov + o*v;
@@ -150,7 +150,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (d = 0; d < v; d++) {
 		*mt++ = I_OVVV(k, d, c, b);
 	}}}
-	gemm(v, v*v, v, mvv, mvvv, t3a+0*vvv);
+	gemm(v, v*v, v, mvv, mvvv, t3a+0*v*v*v);
 
 	mt = mvv;
 	for (d = 0; d < v; d++) {
@@ -163,7 +163,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (d = 0; d < v; d++) {
 		*mt++ = I_OVVV(i, d, c, b);
 	}}}
-	gemm(v, v*v, v, mvv, mvvv, t3a+1*vvv);
+	gemm(v, v*v, v, mvv, mvvv, t3a+1*v*v*v);
 
 	mt = mvv;
 	for (d = 0; d < v; d++) {
@@ -176,7 +176,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (d = 0; d < v; d++) {
 		*mt++ = I_OVVV(j, d, c, b);
 	}}}
-	gemm(v, v*v, v, mvv, mvvv, t3a+2*vvv);
+	gemm(v, v*v, v, mvv, mvvv, t3a+2*v*v*v);
 
 	mt = movv;
 	for (l = 0; l < o; l++) {
@@ -189,7 +189,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (l = 0; l < o; l++) {
 		*mt++ = I_OOOV(j, k, l, c);
 	}}
-	gemm(v*v, v, o, movv, mov, t3a+3*vvv);
+	gemm(v*v, v, o, movv, mov, t3a+3*v*v*v);
 
 	mt = movv;
 	for (l = 0; l < o; l++) {
@@ -202,7 +202,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (l = 0; l < o; l++) {
 		*mt++ = I_OOOV(i, k, l, c);
 	}}
-	gemm(v*v, v, o, movv, mov, t3a+4*vvv);
+	gemm(v*v, v, o, movv, mov, t3a+4*v*v*v);
 
 	mt = movv;
 	for (l = 0; l < o; l++) {
@@ -215,7 +215,7 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (l = 0; l < o; l++) {
 		*mt++ = I_OOOV(j, i, l, c);
 	}}
-	gemm(v*v, v, o, movv, mov, t3a+5*vvv);
+	gemm(v*v, v, o, movv, mov, t3a+5*v*v*v);
 
 //	for (a = 0; a < v; a++) {
 //	for (b = 0; b < v; b++) {
@@ -341,7 +341,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *i_ovvv, const double *t1, const double *t2)
 {
 	double e_pt = 0.0, *t3a, *t3b, *work;
-	size_t i, j, k, n, vvv = v * v * v;
+	size_t i, j, k, n;
 	int rank, world, iter;
 
 	if ((o & 1) || (v & 1))
@@ -349,8 +349,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &world);
 
-	t3a = xmalloc(6 * vvv * sizeof(double));
-	t3b = xmalloc(6 * vvv * sizeof(double));
+	t3a = xmalloc(6 * v*v*v * sizeof(double));
+	t3b = xmalloc(6 * v*v*v * sizeof(double));
 	work = xmalloc((o*v + v*v + o*v*v + v*v*v) * sizeof(double));
 
 	for (i = 0, iter = 0; i < o; i++) {
@@ -363,7 +363,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 		ccsd_asymm_t3(v, t3a);
 		ccsd_asymm_t3(v, t3b);
 
-		for (n = 0; n < vvv; n++) t3b[n] += t3a[n];
+		for (n = 0; n < v*v*v; n++) t3b[n] += t3a[n];
 
 		e_pt += ccsd_pt_energy(o, v, i, j, k, t3a, t3b, d_ov);
 		e_pt += ccsd_pt_energy(o, v, j, i, k, t3a, t3b, d_ov);
