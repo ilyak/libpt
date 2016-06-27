@@ -22,26 +22,6 @@ usage(void)
 	exit(1);
 }
 
-#define D_OV(i, a) d_ov[i*v+a]
-#define F_OV(i, a) f_ov[i*v+a]
-#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
-#define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
-#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
-#define T1(i, a) t1[i*v+a]
-#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
-#define T3AIJK(a, b, c) t3a[0*v*v*v+a*v*v+b*v+c]
-#define T3AJIK(a, b, c) t3a[1*v*v*v+a*v*v+b*v+c]
-#define T3AKJI(a, b, c) t3a[2*v*v*v+a*v*v+b*v+c]
-#define T3AIKJ(a, b, c) t3a[3*v*v*v+a*v*v+b*v+c]
-#define T3AJKI(a, b, c) t3a[4*v*v*v+a*v*v+b*v+c]
-#define T3AKIJ(a, b, c) t3a[5*v*v*v+a*v*v+b*v+c]
-#define T3BIJK(a, b, c) t3b[0*v*v*v+a*v*v+b*v+c]
-#define T3BJIK(a, b, c) t3b[1*v*v*v+a*v*v+b*v+c]
-#define T3BKJI(a, b, c) t3b[2*v*v*v+a*v*v+b*v+c]
-#define T3BIKJ(a, b, c) t3b[3*v*v*v+a*v*v+b*v+c]
-#define T3BJKI(a, b, c) t3b[4*v*v*v+a*v*v+b*v+c]
-#define T3BKIJ(a, b, c) t3b[5*v*v*v+a*v*v+b*v+c]
-
 static void
 load_test_header(const char *testpath, size_t *o, size_t *v, double *e_ref)
 {
