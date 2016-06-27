@@ -123,12 +123,6 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	movv = mvv + v*v;
 	mvvv = movv + o*v*v;
 
-//	mov = xmalloc(o * v * sizeof(double));
-//	mvv = xmalloc(v * v * sizeof(double));
-//	movv = xmalloc(o * v * v * sizeof(double));
-//	mvvv = xmalloc(v * v * v * sizeof(double));
-//	memset(t3a, 0, 6 * vvv * sizeof(double));
-
 	mt = mvv;
 	for (d = 0; d < v; d++) {
 	for (a = 0; a < v; a++) {
@@ -272,11 +266,6 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 		T3AJKI(a, b, c) = t3ajki - t3bjki;
 		T3AKIJ(a, b, c) = t3akij - t3bkij;
 	}}}
-
-//	free(mov);
-//	free(mvv);
-//	free(movv);
-//	free(mvvv);
 }
 
 static void
