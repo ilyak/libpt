@@ -4,13 +4,13 @@ LDFLAGS= -L../libxutil
 #LIBS= -lxutil -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lm
 LIBS= -lxutil -lblas -lg2c -lm
 
-ALL_O=
+ALL_O= pt.o
 RM= rm -f
 
 all: pt
 
-pt: pt.o $(ALL_O)
-	$(CC) -o $@ $(CFLAGS) pt.o $(ALL_O) $(LDFLAGS) $(LIBS)
+pt: ptcmd.o $(ALL_O)
+	$(CC) -o $@ $(CFLAGS) ptcmd.o $(ALL_O) $(LDFLAGS) $(LIBS)
 
 check: pt
 	@./pt -t test1.dat && echo success
@@ -20,6 +20,6 @@ check: pt
 	@./pt -t test5.dat && echo success
 
 clean:
-	$(RM) $(ALL_O) pt pt.o gmon.out *.core *.log
+	$(RM) $(ALL_O) pt ptcmd.o gmon.out *.core *.log
 
 .PHONY: all check clean
