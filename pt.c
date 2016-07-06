@@ -1,6 +1,8 @@
-#include <stdlib.h>
 #include <err.h>
+#include <stdlib.h>
+
 #include <mpi.h>
+#include <omp.h>
 
 #include "pt.h"
 
@@ -255,19 +257,14 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
 	return (e_pt);
 }
 
-double
-ccsd_pt(size_t o, size_t v, const double *d_ov,
+static double
+ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
     const double *i_ovvv, const double *t1, const double *t2)
 {
 	double e_pt = 0.0, *t3a, *t3b, *work;
 	size_t i, j, k, n;
-	int rank, world, iter;
-
-	if ((o & 1) || (v & 1))
-		errx(1, "o and v sizes must be even");
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &world);
+	int iter;
 
 	t3a = malloc(6 * v*v*v * sizeof(double));
 	if (t3a == NULL)
@@ -282,7 +279,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	for (i = 0, iter = 0; i < o; i++) {
 	for (j = i+1; j < o; j++) {
 	for (k = j+1; k < o; k++, iter++) {
-		if (iter % world != rank)
+		if (iter % nid != id)
 			continue;
 		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv, work);
 		ccsd_t3b(o, v, i, j, k, t3b, t1, t2, i_oovv, f_ov);
@@ -303,6 +300,34 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	free(t3a);
 	free(t3b);
 	free(work);
+	return (e_pt);
+}
+
+double
+ccsd_pt(size_t o, size_t v, const double *d_ov,
+    const double *f_ov, const double *i_ooov, const double *i_oovv,
+    const double *i_ovvv, const double *t1, const double *t2)
+{
+	double e_pt = 0.0;
+	int pid, npid;
+
+	if ((o & 1) || (v & 1))
+		errx(1, "o and v sizes must be even");
+	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+	MPI_Comm_size(MPI_COMM_WORLD, &npid);
+
+#pragma omp parallel reduction(+:e_pt)
+	{
+		int id, nid, tid, ntid;
+
+		tid = omp_get_thread_num();
+		ntid = omp_get_num_threads();
+		id = pid * ntid + tid;
+		nid = npid * ntid;
+
+		e_pt = ccsd_pt_worker(id, nid, o, v, d_ov, f_ov, i_ooov,
+		    i_oovv, i_ovvv, t1, t2);
+	}
 
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE, MPI_SUM,
 	    MPI_COMM_WORLD);
