@@ -304,6 +304,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	free(t3b);
 	free(work);
 
-	MPI_Allreduce(&e_pt, &e_pt, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE, MPI_SUM,
+	    MPI_COMM_WORLD);
 	return (e_pt);
 }
