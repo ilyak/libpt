@@ -18,3 +18,8 @@ The benchmark shown above was performed on a computer cluster with Ethernet
 interconnect. Each node had two Quadcore AMD Opteron 2.3 GHz processors with
 16 Gb of main memory. One MPI process per node with 8 threads per process were
 used. Benchmark size parameters were `o = 30` and `v = 230`.
+
+### Code structure
+
+The code was designed to be easily embeddable. Simply include `pt.h` header and
+add `pt.c` to the list of project sources.
