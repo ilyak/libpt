@@ -22,4 +22,5 @@ used. Benchmark size parameters were `o = 30` and `v = 230`.
 ### Code structure
 
 The code was designed to be easily embeddable. Simply include `pt.h` header and
-add `pt.c` to the list of project sources.
+add `pt.c` to the list of project sources. Note that you must compile your
+project with MPI and OpenMP enabled.
