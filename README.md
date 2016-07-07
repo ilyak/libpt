@@ -14,5 +14,7 @@ Total worker threads | Execution time, min |
          128         |          8          |
          256         |          5          |
 
-The benchmark was performed using 1 MPI process per node with 8 threads per
-process. The benchmark parameters were `o = 30` and `v = 230`.
+The benchmark shown above was performed on a computer cluster with Ethernet
+interconnect. Each node had two Quadcore AMD Opteron 2.3 GHz processors with
+16 Gb of main memory. One MPI process per node with 8 threads per process were
+used. Benchmark size parameters were `o = 30` and `v = 230`.
