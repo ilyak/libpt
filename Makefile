@@ -1,9 +1,12 @@
 CC= mpicc
 CFLAGS= -I../libxutil -Wall -Wextra -g -O3
-#CFLAGS= -I../libxutil -Wall -Wextra -g -O3 -fopenmp
 LDFLAGS= -L../libxutil
-#LIBS= -lxutil -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lm
 LIBS= -lxutil -lblas -lg2c -lm
+
+#CC= mpicc
+#CFLAGS= -I../libxutil -Wall -Wextra -g -O3 -fopenmp
+#LDFLAGS= -L../libxutil
+#LIBS= -lxutil -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lm
 
 ALL_O= pt.o
 RM= rm -f
