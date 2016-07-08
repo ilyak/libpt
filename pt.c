@@ -2,7 +2,9 @@
 #include <stdlib.h>
 
 #include <mpi.h>
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #include "pt.h"
 
@@ -316,12 +318,15 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &npid);
 
+#ifdef _OPENMP
 #pragma omp parallel reduction(+:e_pt)
+#endif
 	{
-		int id, nid, tid, ntid;
-
+		int id, nid, tid = 0, ntid = 1;
+#ifdef _OPENMP
 		tid = omp_get_thread_num();
 		ntid = omp_get_num_threads();
+#endif
 		id = pid * ntid + tid;
 		nid = npid * ntid;
 
