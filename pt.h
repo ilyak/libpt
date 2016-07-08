@@ -2,6 +2,7 @@
 #define LIBPT_PT_H
 
 #include <sys/cdefs.h>
+#include <sys/types.h>
 
 __BEGIN_DECLS
 
