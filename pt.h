@@ -15,6 +15,8 @@ __BEGIN_DECLS
  * i_ovvv - OVVV integrals (size o*v*v*v)
  * t1 - CCSD T1 amplitudes (size o*v)
  * t2 - CCSD T2 amplitudes (size o*o*v*v)
+ *
+ * The function returns CCSD(T) energy correction.
  */
 double ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
