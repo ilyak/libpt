@@ -71,13 +71,8 @@ rangec(size_t o, size_t v, size_t i, size_t j, size_t k,
 {
 	o /= 2;
 	v /= 2;
-	if ((i/o + j/o + k/o + a/v + b/v) & 1) {
-		*fromc = v;
-		*toc = 2*v;
-	} else {
-		*fromc = 0;
-		*toc = v;
-	}
+	*fromc = ((i/o + j/o + k/o + a/v + b/v) & 1) * v;
+	*toc = *fromc + v;
 }
 
 void dgemm_(char *, char *, int *, int *, int *, double *, double *,
