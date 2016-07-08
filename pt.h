@@ -1,8 +1,8 @@
 #ifndef LIBPT_PT_H
 #define LIBPT_PT_H
 
+#include <stddef.h>
 #include <sys/cdefs.h>
-#include <sys/types.h>
 
 __BEGIN_DECLS
 
