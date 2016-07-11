@@ -306,6 +306,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	double e_pt = 0.0;
 	int pid, npid;
 
+	if (o == 0 || v == 0)
+		errx(1, "o and v must be positive");
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &npid);
 
