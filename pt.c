@@ -259,7 +259,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 {
 	double e_pt = 0.0, *t3a, *t3b, *work;
 	size_t i, j, k, n;
-	int iter;
+	int iter = 0;
 
 	t3a = malloc(6 * v*v*v * sizeof(double));
 	if (t3a == NULL)
@@ -271,9 +271,9 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 	if (work == NULL)
 		err(1, "malloc");
 
-	for (i = 0, iter = 0; i < o; i++) {
+	for (i = 0;   i < o; i++) {
 	for (j = i+1; j < o; j++) {
-	for (k = j+1; k < o; k++, iter++) {
+	for (k = j+1; k < o; k++) {
 		if (iter % nid != id)
 			continue;
 		ccsd_t3a(o, v, i, j, k, t3a, t2, i_ooov, i_ovvv, work);
@@ -289,6 +289,8 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 		e_pt += ccsd_pt_energy(o, v, i, k, j, t3a, t3b, d_ov);
 		e_pt += ccsd_pt_energy(o, v, j, k, i, t3a, t3b, d_ov);
 		e_pt += ccsd_pt_energy(o, v, k, i, j, t3a, t3b, d_ov);
+
+		iter++;
 	}}}
 	e_pt *= (1.0 / 12.0 / 16.0);
 
