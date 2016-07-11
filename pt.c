@@ -65,15 +65,15 @@ ccsd_asymm_t3(size_t v, double *t3a)
 	}}}
 }
 
-static void
-rangec(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t *fromc, size_t *toc)
-{
-	o /= 2;
-	v /= 2;
-	*fromc = ((i/o + j/o + k/o + a/v + b/v) & 1) * v;
-	*toc = *fromc + v;
-}
+//static void
+//rangec(size_t o, size_t v, size_t i, size_t j, size_t k,
+//    size_t a, size_t b, size_t *fromc, size_t *toc)
+//{
+//	o /= 2;
+//	v /= 2;
+//	*fromc = ((i/o + j/o + k/o + a/v + b/v) & 1) * v;
+//	*toc = *fromc + v;
+//}
 
 void dgemm_(char *, char *, int *, int *, int *, double *, double *,
     int *, double *, int *, double *, double *, int *);
@@ -238,18 +238,16 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
     const double *t3a, const double *t3b, const double *d_ov)
 {
 	double dn, e_pt = 0.0;
-	size_t a, b, c, fromc, toc;
+	size_t a, b, c;
 
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
-		rangec(o,v,i,j,k,a,b,&fromc,&toc);
-		for (c = fromc; c < toc; c++) {
-			dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
-			     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
-			     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
-			e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
-		}
-	}}
+	for (c = 0; c < v; c++) {
+		dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
+		     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
+		     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
+		e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
+	}}}
 
 	return (e_pt);
 }
@@ -308,8 +306,6 @@ ccsd_pt(size_t o, size_t v, const double *d_ov,
 	double e_pt = 0.0;
 	int pid, npid;
 
-	if ((o & 1) || (v & 1))
-		errx(1, "o and v sizes must be even");
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &npid);
 
