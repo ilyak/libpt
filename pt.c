@@ -221,15 +221,15 @@ ccsd_t3b(size_t o, size_t v, size_t i, size_t j, size_t k,
 		T3BIJK(a, b, c) = T1(i, a) * I_OOVV(j, k, b, c) +
 		    F_OV(i, a) * T2(j, k, b, c);
 		T3BJIK(a, b, c) = T1(j, a) * I_OOVV(i, k, b, c) +
-		    F_OV(i, a) * T2(j, k, b, c);
+		    F_OV(j, a) * T2(i, k, b, c);
 		T3BKJI(a, b, c) = T1(k, a) * I_OOVV(j, i, b, c) +
-		    F_OV(i, a) * T2(j, k, b, c);
+		    F_OV(k, a) * T2(j, i, b, c);
 		T3BIKJ(a, b, c) = T1(i, a) * I_OOVV(k, j, b, c) +
-		    F_OV(i, a) * T2(j, k, b, c);
+		    F_OV(i, a) * T2(k, j, b, c);
 		T3BJKI(a, b, c) = T1(j, a) * I_OOVV(k, i, b, c) +
-		    F_OV(i, a) * T2(j, k, b, c);
+		    F_OV(j, a) * T2(k, i, b, c);
 		T3BKIJ(a, b, c) = T1(k, a) * I_OOVV(i, j, b, c) +
-		    F_OV(i, a) * T2(j, k, b, c);
+		    F_OV(k, a) * T2(i, j, b, c);
 	}}}
 }
 
