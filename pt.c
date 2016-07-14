@@ -243,9 +243,7 @@ ccsd_pt_energy(size_t o, size_t v, size_t i, size_t j, size_t k,
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
-		dn = D_OV(i, a) + D_OV(i, b) + D_OV(i, c) +
-		     D_OV(j, a) + D_OV(j, b) + D_OV(j, c) +
-		     D_OV(k, a) + D_OV(k, b) + D_OV(k, c);
+		dn = D_OV(i, a) + D_OV(j, b) + D_OV(k, c);
 		e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
 	}}}
 
@@ -285,7 +283,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 
 		e_pt += ccsd_pt_energy(o, v, i, j, k, t3a, t3b, d_ov);
 	}}}
-	e_pt *= (1.0 / 2.0 / 16.0);
+	e_pt *= (1.0 / 6.0 / 16.0);
 
 	free(t3a);
 	free(t3b);
