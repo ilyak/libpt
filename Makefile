@@ -25,6 +25,7 @@ check: pt
 	@./pt -t test6.dat && echo success
 	@./pt -t test7.dat && echo success
 	@./pt -t test8.dat && echo success
+	@./pt -t test9.dat && echo success
 
 clean:
 	$(RM) $(ALL_O) pt ptcmd.o gmon.out *.core *.log
