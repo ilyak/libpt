@@ -65,16 +65,6 @@ ccsd_asymm_t3(size_t v, double *t3a)
 	}}}
 }
 
-//static void
-//rangec(size_t o, size_t v, size_t i, size_t j, size_t k,
-//    size_t a, size_t b, size_t *fromc, size_t *toc)
-//{
-//	o /= 2;
-//	v /= 2;
-//	*fromc = ((i/o + j/o + k/o + a/v + b/v) & 1) * v;
-//	*toc = *fromc + v;
-//}
-
 void dgemm_(char *, char *, int *, int *, int *, double *, double *,
     int *, double *, int *, double *, double *, int *);
 
