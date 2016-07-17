@@ -17,15 +17,15 @@ pt: ptcmd.o $(ALL_O)
 	$(CC) -o $@ $(CFLAGS) ptcmd.o $(ALL_O) $(LDFLAGS) $(LIBS)
 
 check: pt
-	@./pt -t tests/test1.dat && echo success
-	@./pt -t tests/test2.dat && echo success
-	@./pt -t tests/test3.dat && echo success
-	@./pt -t tests/test4.dat && echo success
-	@./pt -t tests/test5.dat && echo success
-	@./pt -t tests/test6.dat && echo success
-	@./pt -t tests/test7.dat && echo success
-	@./pt -t tests/test8.dat && echo success
-	@./pt -t tests/test9.dat && echo success
+	@./pt -t tests/test01.dat && echo success
+	@./pt -t tests/test02.dat && echo success
+	@./pt -t tests/test03.dat && echo success
+	@./pt -t tests/test04.dat && echo success
+	@./pt -t tests/test05.dat && echo success
+	@./pt -t tests/test06.dat && echo success
+	@./pt -t tests/test07.dat && echo success
+	@./pt -t tests/test08.dat && echo success
+	@./pt -t tests/test09.dat && echo success
 
 clean:
 	$(RM) $(ALL_O) pt ptcmd.o gmon.out *.core *.log
