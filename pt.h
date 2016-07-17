@@ -17,6 +17,10 @@ __BEGIN_DECLS
  * t1 - CCSD T1 amplitudes (size o*v)
  * t2 - CCSD T2 amplitudes (size o*o*v*v)
  *
+ * All arrays should be arranged contiguously in memory by last index first.
+ * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
+ * d_ov[o=0,v=1], d_ov[o=0,v=2], and so forth.
+ *
  * The function returns CCSD(T) energy correction.
  */
 double ccsd_pt(size_t o, size_t v, const double *d_ov,
