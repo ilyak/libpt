@@ -63,8 +63,8 @@ ccsd_asymm_t3(size_t v, double *t3a)
 	}}}
 
 	for (a = 0; a < v; a++) {
-	for (b = a; b < v; b++) {
-	for (c = b; c < v; c++) {
+	for (b = a+1; b < v; b++) {
+	for (c = b+1; c < v; c++) {
 		double x;
 		x = T3AIJK(a, b, c) -
 		    T3AIJK(b, a, c) -
@@ -73,11 +73,6 @@ ccsd_asymm_t3(size_t v, double *t3a)
 		    T3AIJK(b, c, a) +
 		    T3AIJK(c, a, b);
 		T3AIJK(a, b, c) = x;
-		T3AIJK(b, a, c) = x;
-		T3AIJK(c, b, a) = x;
-		T3AIJK(a, c, b) = x;
-		T3AIJK(b, c, a) = x;
-		T3AIJK(c, a, b) = x;
 	}}}
 }
 
@@ -247,8 +242,8 @@ ccsd_pt_energy(size_t v, size_t i, size_t j, size_t k,
 	size_t a, b, c;
 
 	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
+	for (b = a+1; b < v; b++) {
+	for (c = b+1; c < v; c++) {
 		dn = D_OV(i, a) + D_OV(j, b) + D_OV(k, c);
 		e_pt += T3AIJK(a, b, c) * T3BIJK(a, b, c) / dn;
 	}}}
@@ -289,7 +284,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 
 		e_pt += ccsd_pt_energy(v, i, j, k, t3a, t3b, d_ov);
 	}}}
-	e_pt *= (1.0 / 6.0 / 16.0);
+	e_pt *= (1.0 / 16.0);
 
 	free(t3a);
 	free(t3b);
