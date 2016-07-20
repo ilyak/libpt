@@ -35,7 +35,8 @@ __BEGIN_DECLS
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
- * d_ov[o=0,v=1], d_ov[o=0,v=2], and so forth.
+ * d_ov[o=0,v=1], d_ov[o=0,v=2], and so forth. The tensors are expected to
+ * be properly (anti-)symmetrized.
  *
  * The function returns CCSD(T) energy correction.
  */
