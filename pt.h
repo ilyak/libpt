@@ -39,6 +39,9 @@ __BEGIN_DECLS
  * be properly (anti-)symmetrized.
  *
  * The function returns CCSD(T) energy correction.
+ *
+ * References:
+ *   J. Chem. Phys. 98, 8718 (1993); http://dx.doi.org/10.1063/1.464480
  */
 double ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
