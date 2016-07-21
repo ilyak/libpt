@@ -9,17 +9,27 @@
 #include <unistd.h>
 
 #include <mpi.h>
-#include <xutil.h>
 
 #include "pt.h"
+#include "ut.h"
 
 #define EPSILON 1.0e-8
 
 static void __dead
 usage(void)
 {
-	fprintf(stderr, "usage: pt [-l] [-o nocc] [-v nvirt] [-t test]\n");
+	fprintf(stderr, "usage: pt [-o nocc] [-v nvirt] [-t test]\n");
 	exit(1);
+}
+
+static void *
+xmalloc(size_t sz)
+{
+	void *p;
+
+	if ((p = malloc(sz)) == NULL)
+		err(1, "malloc");
+	return (p);
 }
 
 static void
@@ -154,12 +164,8 @@ main(int argc, char **argv)
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	while ((ch = getopt(argc, argv, "lo:t:v:")) != -1) {
+	while ((ch = getopt(argc, argv, "o:t:v:")) != -1) {
 		switch (ch) {
-		case 'l':
-			log_add_level();
-			log_open("pt");
-			break;
 		case 'o':
 			o = strtonum(optarg, 1, INT_MAX, &errstr);
 			if (errstr)
@@ -225,7 +231,6 @@ main(int argc, char **argv)
 	free(i_ovvv);
 	free(t1);
 	free(t2);
-	log_close();
 	MPI_Finalize();
 	return (fabs(e_pt - e_ref) < EPSILON ? 0 : 1);
 }
