@@ -18,9 +18,10 @@
 #define LIBPT_PT_H
 
 #include <stddef.h>
-#include <sys/cdefs.h>
 
-__BEGIN_DECLS
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Compute CCSD(T) energy correction in parallel.
  *
@@ -49,6 +50,8 @@ double ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
     const double *i_ovvv, const double *t1, const double *t2);
 
-__END_DECLS
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* LIBPT_PT_H */
