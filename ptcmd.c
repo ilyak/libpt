@@ -11,11 +11,10 @@
 #include <mpi.h>
 
 #include "pt.h"
-#include "ut.h"
 
 #define EPSILON 1.0e-8
 
-static void __dead
+static void
 usage(void)
 {
 	fprintf(stderr, "usage: pt [-o nocc] [-v nvirt] [-t test]\n");
