@@ -14,6 +14,8 @@
 
 #define EPSILON 1.0e-8
 
+long long strtonum(const char *, long long, long long, const char **);
+
 static void
 usage(void)
 {
