@@ -188,24 +188,24 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < v; b++) {
 	for (c = 0; c < v; c++) {
-		double t3aijk = T3AIJK(a, b, c);
-		double t3akji = T3AKJI(a, b, c);
-		double t3aikj = T3AIKJ(a, b, c);
-		double t3ajik = -t3aijk;
-		double t3ajki = -t3akji;
-		double t3akij = -t3aikj;
-		double t3bijk = T3AJIK(a, b, c);
-		double t3bjik = T3AJKI(a, b, c);
-		double t3bkji = T3AKIJ(a, b, c);
-		double t3bikj = -t3bijk;
-		double t3bjki = -t3bjik;
-		double t3bkij = -t3bkji;
-		T3AIJK(a, b, c) = t3aijk - t3bijk;
-		T3AJIK(a, b, c) = t3ajik - t3bjik;
-		T3AKJI(a, b, c) = t3akji - t3bkji;
-		T3AIKJ(a, b, c) = t3aikj - t3bikj;
-		T3AJKI(a, b, c) = t3ajki - t3bjki;
-		T3AKIJ(a, b, c) = t3akij - t3bkij;
+		double t3a1ijk = T3AIJK(a, b, c);
+		double t3a1kji = T3AKJI(a, b, c);
+		double t3a1ikj = T3AIKJ(a, b, c);
+		double t3a1jik = -t3a1ijk;
+		double t3a1jki = -t3a1kji;
+		double t3a1kij = -t3a1ikj;
+		double t3a2ijk = T3AJIK(a, b, c);
+		double t3a2jik = T3AJKI(a, b, c);
+		double t3a2kji = T3AKIJ(a, b, c);
+		double t3a2ikj = -t3a2ijk;
+		double t3a2jki = -t3a2jik;
+		double t3a2kij = -t3a2kji;
+		T3AIJK(a, b, c) = t3a1ijk - t3a2ijk;
+		T3AJIK(a, b, c) = t3a1jik - t3a2jik;
+		T3AKJI(a, b, c) = t3a1kji - t3a2kji;
+		T3AIKJ(a, b, c) = t3a1ikj - t3a2ikj;
+		T3AJKI(a, b, c) = t3a1jki - t3a2jki;
+		T3AKIJ(a, b, c) = t3a1kij - t3a2kij;
 	}}}
 }
 
