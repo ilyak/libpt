@@ -1,5 +1,7 @@
 # libpt
 
+This is work-in-progress.
+
 Libpt is a fast hybrid MPI/OpenMP parallel implementation of the CCSD(T) energy
 correction for the distributed multiprocessor systems. Due to hybrid design the
 code efficiently uses fast memory by sharing data within a single node while
