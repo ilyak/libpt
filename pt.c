@@ -16,6 +16,7 @@
 
 #include <err.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <mpi.h>
 #ifdef _OPENMP
@@ -43,6 +44,7 @@
 #define T3BIKJ(a, b, c) t3b[3*v*v*v+a*v*v+b*v+c]
 #define T3BJKI(a, b, c) t3b[4*v*v*v+a*v*v+b*v+c]
 #define T3BKIJ(a, b, c) t3b[5*v*v*v+a*v*v+b*v+c]
+#define MVVV(a, b, c) mvvv[a*v*v+b*v+c]
 
 static void
 ccsd_asymm_t3(size_t v, double *t3a)
@@ -96,7 +98,7 @@ gemm(int m, int n, int k, const double *a, const double *b, double *c)
 
 static void
 ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
-    const double *t2, const double *i_ooov, const double *i_ovvv,
+    const double *t2, const double *i_ooov, const struct st4 *i_ovvv,
     double *work)
 {
 	double *mt, *mov, *mvv, *movv, *mvvv;
@@ -112,12 +114,20 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (a = 0; a < v; a++) {
 		*mt++ = T2(i, j, a, d);
 	}}
-	mt = mvvv;
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-	for (d = 0; d < v; d++) {
-		*mt++ = I_OVVV(k, d, c, b);
-	}}}
+//	mt = mvvv;
+//	for (b = 0; b < v; b++) {
+//	for (c = 0; c < v; c++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(k, d, c, b);
+//	}}}
+	memset(mvvv, 0, v*v*v*sizeof(double));
+	for (l = 0; l < i_ovvv->len; l++)
+		if (i_ovvv->idx[l].a == k) {
+			d = i_ovvv->idx[l].b;
+			c = i_ovvv->idx[l].c;
+			b = i_ovvv->idx[l].d;
+			MVVV(b, c, d) = i_ovvv->data[l];
+		}
 	gemm(v, v*v, v, mvv, mvvv, t3a+0*v*v*v);
 
 	mt = mvv;
@@ -125,12 +135,20 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (a = 0; a < v; a++) {
 		*mt++ = T2(k, j, a, d);
 	}}
-	mt = mvvv;
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-	for (d = 0; d < v; d++) {
-		*mt++ = I_OVVV(i, d, c, b);
-	}}}
+//	mt = mvvv;
+//	for (b = 0; b < v; b++) {
+//	for (c = 0; c < v; c++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(i, d, c, b);
+//	}}}
+	memset(mvvv, 0, v*v*v*sizeof(double));
+	for (l = 0; l < i_ovvv->len; l++)
+		if (i_ovvv->idx[l].a == i) {
+			d = i_ovvv->idx[l].b;
+			c = i_ovvv->idx[l].c;
+			b = i_ovvv->idx[l].d;
+			MVVV(b, c, d) = i_ovvv->data[l];
+		}
 	gemm(v, v*v, v, mvv, mvvv, t3a+1*v*v*v);
 
 	mt = mvv;
@@ -138,12 +156,20 @@ ccsd_t3a(size_t o, size_t v, size_t i, size_t j, size_t k, double *t3a,
 	for (a = 0; a < v; a++) {
 		*mt++ = T2(i, k, a, d);
 	}}
-	mt = mvvv;
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-	for (d = 0; d < v; d++) {
-		*mt++ = I_OVVV(j, d, c, b);
-	}}}
+//	mt = mvvv;
+//	for (b = 0; b < v; b++) {
+//	for (c = 0; c < v; c++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(j, d, c, b);
+//	}}}
+	memset(mvvv, 0, v*v*v*sizeof(double));
+	for (l = 0; l < i_ovvv->len; l++)
+		if (i_ovvv->idx[l].a == j) {
+			d = i_ovvv->idx[l].b;
+			c = i_ovvv->idx[l].c;
+			b = i_ovvv->idx[l].d;
+			MVVV(b, c, d) = i_ovvv->data[l];
+		}
 	gemm(v, v*v, v, mvv, mvvv, t3a+2*v*v*v);
 
 	mt = movv;
@@ -254,7 +280,7 @@ ccsd_pt_energy(size_t v, size_t i, size_t j, size_t k,
 static double
 ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
-    const double *i_ovvv, const double *t1, const double *t2)
+    const struct st4 *i_ovvv, const double *t1, const double *t2)
 {
 	double e_pt = 0.0, *t3a, *t3b, *work;
 	size_t i, j, k, n;
@@ -295,7 +321,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 double
 ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
-    const double *i_ovvv, const double *t1, const double *t2)
+    const struct st4 *i_ovvv, const double *t1, const double *t2)
 {
 	double e_pt = 0.0;
 	int pid, npid;
