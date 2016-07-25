@@ -59,7 +59,7 @@ struct st4 {
  */
 double ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
-    const struct st4 *i_ovvv, const double *t1, const double *t2);
+    const double *i_ovvv, const double *t1, const double *t2);
 
 #ifdef __cplusplus
 } /* extern "C" */
