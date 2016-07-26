@@ -8,7 +8,7 @@ LIBS= -lblas -lg2c -lm
 #LDFLAGS=
 #LIBS= -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lm
 
-ALL_O= pt.o ptcmd.o strtonum.o
+ALL_O= pt.o ptcmd.o strtonum.o reallocarray.o
 RM= rm -f
 
 all: pt
