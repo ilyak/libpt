@@ -282,12 +282,20 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 		    F_OV(i, b) * T2(j, k, a, c);
 		T3BCBA(i, j, k) = T1(i, c) * I_OOVV(j, k, b, a) +
 		    F_OV(i, c) * T2(j, k, b, a);
-		T3BACB(i, j, k) = T1(i, a) * I_OOVV(j, k, c, b) +
-		    F_OV(i, a) * T2(j, k, c, b);
-		T3BBCA(i, j, k) = T1(i, b) * I_OOVV(j, k, c, a) +
-		    F_OV(i, b) * T2(j, k, c, a);
-		T3BCAB(i, j, k) = T1(i, c) * I_OOVV(j, k, a, b) +
-		    F_OV(i, c) * T2(j, k, a, b);
+//		T3BACB(i, j, k) = T1(i, a) * I_OOVV(j, k, c, b) +
+//		    F_OV(i, a) * T2(j, k, c, b);
+//		T3BBCA(i, j, k) = T1(i, b) * I_OOVV(j, k, c, a) +
+//		    F_OV(i, b) * T2(j, k, c, a);
+//		T3BCAB(i, j, k) = T1(i, c) * I_OOVV(j, k, a, b) +
+//		    F_OV(i, c) * T2(j, k, a, b);
+	}}}
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+		T3BACB(i, j, k) = -T3BABC(i, j, k);
+		T3BBCA(i, j, k) = -T3BBAC(i, j, k);
+		T3BCAB(i, j, k) = -T3BCBA(i, j, k);
 	}}}
 }
 
