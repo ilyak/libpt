@@ -101,43 +101,149 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
     const double *t2, const double *i_ooov, const double *i_ovvv,
     double *work)
 {
-	//double *mt, *moo, *mov, *mooo, *moov;
+	double *mt, *moo, *mov, *mooo, *moov;
 	size_t i, j, k, l, d;
 
-	memset(t3a, 0, 6*o*o*o*sizeof(double));
-
+	/*memset(t3a, 0, 6*o*o*o*sizeof(double));
 	for (i = 0; i < o; i++) {
 	for (j = 0; j < o; j++) {
 	for (k = 0; k < o; k++) {
 		for (d = 0; d < v; d++) {
-			T3AABC(i, j, k) -=
+			T3AABC(i, j, k) +=
 			    T2(i, j, a, d) * I_OVVV(k, d, b, c);
-			T3ACBA(i, j, k) -=
+			T3ACBA(i, j, k) +=
 			    T2(i, j, c, d) * I_OVVV(k, d, b, a);
-//			T3AACB(i, j, k) -=
+//			T3AACB(i, j, k) +=
 //			    T2(i, j, a, d) * I_OVVV(k, d, c, b);
-			T3ABAC(i, j, k) -=
+			T3ABAC(i, j, k) +=
 			    T2(i, j, b, d) * I_OVVV(k, d, a, c);
-//			T3ABCA(i, j, k) -=
+//			T3ABCA(i, j, k) +=
 //			    T2(i, j, b, d) * I_OVVV(k, d, c, a);
-//			T3ACAB(i, j, k) -=
+//			T3ACAB(i, j, k) +=
 //			    T2(i, j, c, d) * I_OVVV(k, d, a, b);
 		}
 		for (l = 0; l < o; l++) {
-			T3ACAB(i, j, k) -=
+			T3ACAB(i, j, k) +=
 			    T2(i, l, a, b) * I_OOOV(j, k, l, c);
-			T3AACB(i, j, k) -=
+			T3AACB(i, j, k) +=
 			    T2(i, l, c, b) * I_OOOV(j, k, l, a);
-			T3ABCA(i, j, k) -=
+			T3ABCA(i, j, k) +=
 			    T2(i, l, a, c) * I_OOOV(j, k, l, b);
-//			T3ABAC(i, j, k) -=
+//			T3ABAC(i, j, k) +=
 //			    T2(i, l, b, a) * I_OOOV(j, k, l, c);
-//			T3ABCA(i, j, k) -=
+//			T3ABCA(i, j, k) +=
 //			    T2(i, l, b, c) * I_OOOV(j, k, l, a);
-//			T3ACAB(i, j, k) -=
+//			T3ACAB(i, j, k) +=
 //			    T2(i, l, c, a) * I_OOOV(j, k, l, b);
 		}
+	}}}*/
+
+	moo = work;
+	mov = moo + o*o;
+	mooo = mov + o*v;
+	moov = mooo + o*o*o;
+
+	mt = moov;
+	for (d = 0; d < v; d++) {
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+		*mt++ = T2(i, j, a, d);
 	}}}
+	mt = mov;
+	for (k = 0; k < o; k++) {
+	for (d = 0; d < v; d++) {
+		*mt++ = I_OVVV(k, d, b, c);
+	}}
+//	memset(mvvv, 0, v*v*v*sizeof(double));
+//	for (l = 0; l < i_ovvv->len; l++)
+//		if (i_ovvv->idx[l].a == k) {
+//			d = i_ovvv->idx[l].b;
+//			c = i_ovvv->idx[l].c;
+//			b = i_ovvv->idx[l].d;
+//			MVVV(b, c, d) = i_ovvv->data[l];
+//		}
+	gemm(o*o, o, v, moov, mov, &(T3AABC(0,0,0)));
+
+	mt = moov;
+	for (d = 0; d < v; d++) {
+	for (k = 0; k < o; k++) {
+	for (j = 0; j < o; j++) {
+		*mt++ = T2(k, j, c, d);
+	}}}
+	mt = mov;
+	for (i = 0; i < o; i++) {
+	for (d = 0; d < v; d++) {
+		*mt++ = I_OVVV(i, d, b, a);
+	}}
+//	memset(mvvv, 0, v*v*v*sizeof(double));
+//	for (l = 0; l < i_ovvv->len; l++)
+//		if (i_ovvv->idx[l].a == i) {
+//			d = i_ovvv->idx[l].b;
+//			c = i_ovvv->idx[l].c;
+//			b = i_ovvv->idx[l].d;
+//			MVVV(b, c, d) = i_ovvv->data[l];
+//		}
+	gemm(o*o, o, v, moov, mov, &(T3ACBA(0,0,0)));
+
+	mt = moov;
+	for (d = 0; d < v; d++) {
+	for (i = 0; i < o; i++) {
+	for (k = 0; k < o; k++) {
+		*mt++ = T2(i, k, b, d);
+	}}}
+	mt = mov;
+	for (j = 0; j < o; j++) {
+	for (d = 0; d < v; d++) {
+		*mt++ = I_OVVV(j, d, a, c);
+	}}
+//	memset(mvvv, 0, v*v*v*sizeof(double));
+//	for (l = 0; l < i_ovvv->len; l++)
+//		if (i_ovvv->idx[l].a == j) {
+//			d = i_ovvv->idx[l].b;
+//			c = i_ovvv->idx[l].c;
+//			b = i_ovvv->idx[l].d;
+//			MVVV(b, c, d) = i_ovvv->data[l];
+//		}
+	gemm(o*o, o, v, moov, mov, &(T3ABAC(0,0,0)));
+
+	mt = moo;
+	for (l = 0; l < o; l++) {
+	for (i = 0; i < o; i++) {
+		*mt++ = T2(i, l, a, b);
+	}}
+	mt = mooo;
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+	for (l = 0; l < o; l++) {
+		*mt++ = I_OOOV(j, k, l, c);
+	}}}
+	gemm(o, o*o, o, moo, mooo, &(T3ACAB(0,0,0)));
+
+	mt = moo;
+	for (l = 0; l < o; l++) {
+	for (j = 0; j < o; j++) {
+		*mt++ = T2(j, l, c, b);
+	}}
+	mt = mooo;
+	for (i = 0; i < o; i++) {
+	for (k = 0; k < o; k++) {
+	for (l = 0; l < o; l++) {
+		*mt++ = I_OOOV(i, k, l, a);
+	}}}
+	gemm(o, o*o, o, moo, mooo, &(T3AACB(0,0,0)));
+
+	mt = moo;
+	for (l = 0; l < o; l++) {
+	for (k = 0; k < o; k++) {
+		*mt++ = T2(k, l, a, c);
+	}}
+	mt = mooo;
+	for (j = 0; j < o; j++) {
+	for (i = 0; i < o; i++) {
+	for (l = 0; l < o; l++) {
+		*mt++ = I_OOOV(j, i, l, b);
+	}}}
+	gemm(o, o*o, o, moo, mooo, &(T3ABCA(0,0,0)));
 
 	for (i = 0; i < o; i++) {
 	for (j = 0; j < o; j++) {
@@ -154,120 +260,13 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 		double t3a2bac = -t3a2abc;
 		double t3a2bca = -t3a2cba;
 		double t3a2cab = -t3a2acb;
-		T3AABC(i, j, k) = t3a1abc + t3a2abc;
-		T3ABAC(i, j, k) = t3a1bac + t3a2bac;
-		T3ACBA(i, j, k) = t3a1cba + t3a2cba;
-		T3AACB(i, j, k) = t3a1acb + t3a2acb;
-		T3ABCA(i, j, k) = t3a1bca + t3a2bca;
-		T3ACAB(i, j, k) = t3a1cab + t3a2cab;
+		T3AABC(i, j, k) = -(t3a1abc + t3a2abc);
+		T3ABAC(i, j, k) = -(t3a1bac + t3a2bac);
+		T3ACBA(i, j, k) = -(t3a1cba + t3a2cba);
+		T3AACB(i, j, k) = -(t3a1acb + t3a2acb);
+		T3ABCA(i, j, k) = -(t3a1bca + t3a2bca);
+		T3ACAB(i, j, k) = -(t3a1cab + t3a2cab);
 	}}}
-
-//	moo = work;
-//	mov = moo + o*o;
-//	mooo = mov + o*v;
-//	moov = mooo + o*o*o;
-//
-//	mt = moov;
-//	for (d = 0; d < v; d++) {
-//	for (i = 0; i < o; i++) {
-//	for (j = 0; j < o; j++) {
-//		*mt++ = T2(i, j, a, d);
-//	}}}
-//	mt = mov;
-//	for (k = 0; k < o; k++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = I_OVVV(k, d, c, b);
-//	}}
-////	memset(mvvv, 0, v*v*v*sizeof(double));
-////	for (l = 0; l < i_ovvv->len; l++)
-////		if (i_ovvv->idx[l].a == k) {
-////			d = i_ovvv->idx[l].b;
-////			c = i_ovvv->idx[l].c;
-////			b = i_ovvv->idx[l].d;
-////			MVVV(b, c, d) = i_ovvv->data[l];
-////		}
-//	gemm(o*o, o, v, moov, mov, t3a+0*o*o*o);
-//
-//	mt = moov;
-//	for (d = 0; d < v; d++) {
-//	for (k = 0; k < o; k++) {
-//	for (j = 0; j < o; j++) {
-//		*mt++ = T2(k, j, a, d);
-//	}}}
-//	mt = mov;
-//	for (i = 0; i < o; i++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = I_OVVV(i, d, c, b);
-//	}}
-////	memset(mvvv, 0, v*v*v*sizeof(double));
-////	for (l = 0; l < i_ovvv->len; l++)
-////		if (i_ovvv->idx[l].a == i) {
-////			d = i_ovvv->idx[l].b;
-////			c = i_ovvv->idx[l].c;
-////			b = i_ovvv->idx[l].d;
-////			MVVV(b, c, d) = i_ovvv->data[l];
-////		}
-//	gemm(o*o, o, v, moov, mov, t3a+1*o*o*o);
-//
-//	mt = moov;
-//	for (d = 0; d < v; d++) {
-//	for (i = 0; i < o; i++) {
-//	for (k = 0; k < o; k++) {
-//		*mt++ = T2(i, k, a, d);
-//	}}}
-//	mt = mov;
-//	for (j = 0; j < o; j++) {
-//	for (d = 0; d < v; d++) {
-//		*mt++ = I_OVVV(j, d, c, b);
-//	}}
-////	memset(mvvv, 0, v*v*v*sizeof(double));
-////	for (l = 0; l < i_ovvv->len; l++)
-////		if (i_ovvv->idx[l].a == j) {
-////			d = i_ovvv->idx[l].b;
-////			c = i_ovvv->idx[l].c;
-////			b = i_ovvv->idx[l].d;
-////			MVVV(b, c, d) = i_ovvv->data[l];
-////		}
-//	gemm(o*o, o, v, moov, mov, t3a+2*o*o*o);
-//
-//	mt = moo;
-//	for (l = 0; l < o; l++) {
-//	for (i = 0; i < o; i++) {
-//		*mt++ = T2(i, l, a, b);
-//	}}
-//	mt = mooo;
-//	for (j = 0; j < o; j++) {
-//	for (k = 0; k < o; k++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = I_OOOV(j, k, l, c);
-//	}}}
-//	gemm(o, o*o, o, moo, mooo, t3a+3*o*o*o);
-//
-//	mt = moo;
-//	for (l = 0; l < o; l++) {
-//	for (j = 0; j < o; j++) {
-//		*mt++ = T2(j, l, a, b);
-//	}}
-//	mt = mooo;
-//	for (i = 0; i < o; i++) {
-//	for (k = 0; k < o; k++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = I_OOOV(i, k, l, c);
-//	}}}
-//	gemm(o, o*o, o, moo, mooo, t3a+4*o*o*o);
-//
-//	mt = moo;
-//	for (l = 0; l < o; l++) {
-//	for (k = 0; k < o; k++) {
-//		*mt++ = T2(k, l, a, b);
-//	}}
-//	mt = mooo;
-//	for (j = 0; j < o; j++) {
-//	for (i = 0; i < o; i++) {
-//	for (l = 0; l < o; l++) {
-//		*mt++ = I_OOOV(j, i, l, c);
-//	}}}
-//	gemm(o, o*o, o, moo, mooo, t3a+5*o*o*o);
 }
 
 static void
