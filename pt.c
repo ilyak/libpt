@@ -29,7 +29,7 @@
 #define F_OV(i, a) f_ov[i*v+a]
 #define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
 #define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
-#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
+//#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
 #define T1(i, a) t1[i*v+a]
 #define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
 #define T3AABC(i, j, k) t3a[0*o*o*o+i*o*o+j*o+k]
@@ -44,7 +44,7 @@
 #define T3BACB(i, j, k) t3b[3*o*o*o+i*o*o+j*o+k]
 #define T3BBCA(i, j, k) t3b[4*o*o*o+i*o*o+j*o+k]
 #define T3BCAB(i, j, k) t3b[5*o*o*o+i*o*o+j*o+k]
-#define MVVV(a, b, c) mvvv[a*v*v+b*v+c]
+#define MOV(i, a) mov[i*v+a]
 
 static void
 ccsd_asymm_t3(size_t o, double *t3a)
@@ -98,7 +98,7 @@ gemm(int m, int n, int k, const double *a, const double *b, double *c)
 
 static void
 ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
-    const double *t2, const double *i_ooov, const double *i_ovvv,
+    const double *t2, const double *i_ooov, const struct st4 *i_ovvv,
     double *work)
 {
 	double *mt, *moo, *mov, *mooo, *moov;
@@ -149,19 +149,18 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	for (j = 0; j < o; j++) {
 		*mt++ = T2(i, j, a, d);
 	}}}
-	mt = mov;
-	for (k = 0; k < o; k++) {
-	for (d = 0; d < v; d++) {
-		*mt++ = I_OVVV(k, d, b, c);
-	}}
-//	memset(mvvv, 0, v*v*v*sizeof(double));
-//	for (l = 0; l < i_ovvv->len; l++)
-//		if (i_ovvv->idx[l].a == k) {
-//			d = i_ovvv->idx[l].b;
-//			c = i_ovvv->idx[l].c;
-//			b = i_ovvv->idx[l].d;
-//			MVVV(b, c, d) = i_ovvv->data[l];
-//		}
+//	mt = mov;
+//	for (k = 0; k < o; k++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(k, d, b, c);
+//	}}
+	memset(mov, 0, o*v*sizeof(double));
+	for (l = 0; l < i_ovvv->len; l++)
+		if (i_ovvv->idx[l].c == b && i_ovvv->idx[l].d == c) {
+			k = i_ovvv->idx[l].a;
+			d = i_ovvv->idx[l].b;
+			MOV(k, d) = i_ovvv->data[l];
+		}
 	gemm(o*o, o, v, moov, mov, &(T3AABC(0,0,0)));
 
 	mt = moov;
@@ -170,19 +169,18 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	for (j = 0; j < o; j++) {
 		*mt++ = T2(k, j, c, d);
 	}}}
-	mt = mov;
-	for (i = 0; i < o; i++) {
-	for (d = 0; d < v; d++) {
-		*mt++ = I_OVVV(i, d, b, a);
-	}}
-//	memset(mvvv, 0, v*v*v*sizeof(double));
-//	for (l = 0; l < i_ovvv->len; l++)
-//		if (i_ovvv->idx[l].a == i) {
-//			d = i_ovvv->idx[l].b;
-//			c = i_ovvv->idx[l].c;
-//			b = i_ovvv->idx[l].d;
-//			MVVV(b, c, d) = i_ovvv->data[l];
-//		}
+//	mt = mov;
+//	for (i = 0; i < o; i++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(i, d, b, a);
+//	}}
+	memset(mov, 0, o*v*sizeof(double));
+	for (l = 0; l < i_ovvv->len; l++)
+		if (i_ovvv->idx[l].c == b && i_ovvv->idx[l].d == a) {
+			i = i_ovvv->idx[l].a;
+			d = i_ovvv->idx[l].b;
+			MOV(i, d) = i_ovvv->data[l];
+		}
 	gemm(o*o, o, v, moov, mov, &(T3ACBA(0,0,0)));
 
 	mt = moov;
@@ -191,19 +189,18 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	for (k = 0; k < o; k++) {
 		*mt++ = T2(i, k, b, d);
 	}}}
-	mt = mov;
-	for (j = 0; j < o; j++) {
-	for (d = 0; d < v; d++) {
-		*mt++ = I_OVVV(j, d, a, c);
-	}}
-//	memset(mvvv, 0, v*v*v*sizeof(double));
-//	for (l = 0; l < i_ovvv->len; l++)
-//		if (i_ovvv->idx[l].a == j) {
-//			d = i_ovvv->idx[l].b;
-//			c = i_ovvv->idx[l].c;
-//			b = i_ovvv->idx[l].d;
-//			MVVV(b, c, d) = i_ovvv->data[l];
-//		}
+//	mt = mov;
+//	for (j = 0; j < o; j++) {
+//	for (d = 0; d < v; d++) {
+//		*mt++ = I_OVVV(j, d, a, c);
+//	}}
+	memset(mov, 0, o*v*sizeof(double));
+	for (l = 0; l < i_ovvv->len; l++)
+		if (i_ovvv->idx[l].c == a && i_ovvv->idx[l].d == c) {
+			j = i_ovvv->idx[l].a;
+			d = i_ovvv->idx[l].b;
+			MOV(j, d) = i_ovvv->data[l];
+		}
 	gemm(o*o, o, v, moov, mov, &(T3ABAC(0,0,0)));
 
 	mt = moo;
@@ -314,7 +311,7 @@ ccsd_pt_energy(size_t o, size_t v, size_t a, size_t b, size_t c,
 static double
 ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
-    const double *i_ovvv, const double *t1, const double *t2)
+    const struct st4 *i_ovvv, const double *t1, const double *t2)
 {
 	double e_pt = 0.0, *t3a, *t3b, *work;
 	size_t a, b, c, n;
@@ -355,7 +352,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 double
 ccsd_pt(size_t o, size_t v, const double *d_ov,
     const double *f_ov, const double *i_ooov, const double *i_oovv,
-    const double *i_ovvv, const double *t1, const double *t2)
+    const struct st4 *i_ovvv, const double *t1, const double *t2)
 {
 	double e_pt = 0.0;
 	int pid, npid;
