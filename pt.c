@@ -78,23 +78,23 @@ ccsd_asymm_t3(size_t o, double *t3a)
 	}}}
 }
 
-//void dgemm_(char *, char *, int *, int *, int *, double *, double *,
-//    int *, double *, int *, double *, double *, int *);
+void dgemm_(char *, char *, int *, int *, int *, double *, double *,
+    int *, double *, int *, double *, double *, int *);
 
-//static void
-//gemm(int m, int n, int k, const double *a, const double *b, double *c)
-//{
-//	double alpha = 1.0;
-//	double beta = 0.0;
-//	int lda = m;
-//	int ldb = k;
-//	int ldc = m;
-//	char transa = 'N';
-//	char transb = 'N';
-//
-//	dgemm_(&transa, &transb, &m, &n, &k, &alpha, (double *)a, &lda,
-//	    (double *)b, &ldb, &beta, c, &ldc);
-//}
+static void
+gemm(int m, int n, int k, const double *a, const double *b, double *c)
+{
+	double alpha = 1.0;
+	double beta = 0.0;
+	int lda = m;
+	int ldb = k;
+	int ldc = m;
+	char transa = 'N';
+	char transb = 'N';
+
+	dgemm_(&transa, &transb, &m, &n, &k, &alpha, (double *)a, &lda,
+	    (double *)b, &ldb, &beta, c, &ldc);
+}
 
 static void
 ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
@@ -104,40 +104,62 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	//double *mt, *moo, *mov, *mooo, *moov;
 	size_t i, j, k, l, d;
 
-	(void)work;
 	memset(t3a, 0, 6*o*o*o*sizeof(double));
 
 	for (i = 0; i < o; i++) {
 	for (j = 0; j < o; j++) {
 	for (k = 0; k < o; k++) {
 		for (d = 0; d < v; d++) {
-			T3AABC(i, j, k) +=
-			    T2(i, j, a, d) * I_OVVV(k, d, c, b);
-			T3ACBA(i, j, k) +=                    
-			    T2(i, j, c, d) * I_OVVV(k, d, a, b);
-			T3AACB(i, j, k) +=                    
+			T3AABC(i, j, k) -=
 			    T2(i, j, a, d) * I_OVVV(k, d, b, c);
-			T3ABAC(i, j, k) +=                    
-			    T2(i, j, b, d) * I_OVVV(k, d, c, a);
-			T3ABCA(i, j, k) +=                    
+			T3ACBA(i, j, k) -=
+			    T2(i, j, c, d) * I_OVVV(k, d, b, a);
+//			T3AACB(i, j, k) -=
+//			    T2(i, j, a, d) * I_OVVV(k, d, c, b);
+			T3ABAC(i, j, k) -=
 			    T2(i, j, b, d) * I_OVVV(k, d, a, c);
-			T3ACBA(i, j, k) +=                    
-			    T2(i, j, c, d) * I_OVVV(k, d, a, b);
+//			T3ABCA(i, j, k) -=
+//			    T2(i, j, b, d) * I_OVVV(k, d, c, a);
+//			T3ACAB(i, j, k) -=
+//			    T2(i, j, c, d) * I_OVVV(k, d, a, b);
 		}
 		for (l = 0; l < o; l++) {
-			T3AABC(i, j, k) -=
-			    T2(i, l, a, b) * I_OOOV(j, k, l, c);
-			T3ACBA(i, j, k) -=
-			    T2(i, l, c, b) * I_OOOV(j, k, l, a);
-			T3AACB(i, j, k) -=
-			    T2(i, l, a, c) * I_OOOV(j, k, l, b);
-			T3ABAC(i, j, k) -=
-			    T2(i, l, b, a) * I_OOOV(j, k, l, c);
-			T3ABCA(i, j, k) -=
-			    T2(i, l, b, c) * I_OOOV(j, k, l, a);
 			T3ACAB(i, j, k) -=
-			    T2(i, l, c, a) * I_OOOV(j, k, l, b);
+			    T2(i, l, a, b) * I_OOOV(j, k, l, c);
+			T3AACB(i, j, k) -=
+			    T2(i, l, c, b) * I_OOOV(j, k, l, a);
+			T3ABCA(i, j, k) -=
+			    T2(i, l, a, c) * I_OOOV(j, k, l, b);
+//			T3ABAC(i, j, k) -=
+//			    T2(i, l, b, a) * I_OOOV(j, k, l, c);
+//			T3ABCA(i, j, k) -=
+//			    T2(i, l, b, c) * I_OOOV(j, k, l, a);
+//			T3ACAB(i, j, k) -=
+//			    T2(i, l, c, a) * I_OOOV(j, k, l, b);
 		}
+	}}}
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+		double t3a1abc = T3AABC(i, j, k);
+		double t3a1cba = T3ACBA(i, j, k);
+		double t3a1bac = T3ABAC(i, j, k);
+		double t3a1acb = -t3a1abc;
+		double t3a1cab = -t3a1cba;
+		double t3a1bca = -t3a1bac;
+		double t3a2abc = T3ACAB(i, j, k);
+		double t3a2cba = T3AACB(i, j, k);
+		double t3a2acb = T3ABCA(i, j, k);
+		double t3a2bac = -t3a2abc;
+		double t3a2bca = -t3a2cba;
+		double t3a2cab = -t3a2acb;
+		T3AABC(i, j, k) = t3a1abc + t3a2abc;
+		T3ABAC(i, j, k) = t3a1bac + t3a2bac;
+		T3ACBA(i, j, k) = t3a1cba + t3a2cba;
+		T3AACB(i, j, k) = t3a1acb + t3a2acb;
+		T3ABCA(i, j, k) = t3a1bca + t3a2bca;
+		T3ACAB(i, j, k) = t3a1cab + t3a2cab;
 	}}}
 
 //	moo = work;
@@ -246,29 +268,6 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 //		*mt++ = I_OOOV(j, i, l, c);
 //	}}}
 //	gemm(o, o*o, o, moo, mooo, t3a+5*o*o*o);
-//
-//	for (i = 0; i < o; i++) {
-//	for (j = 0; j < o; j++) {
-//	for (k = 0; k < o; k++) {
-//		double t3a1ijk = T3AABC(i, j, k);
-//		double t3a1kji = T3ACBA(i, j, k);
-//		double t3a1ikj = T3AACB(i, j, k);
-//		double t3a1jik = -t3a1ijk;
-//		double t3a1jki = -t3a1kji;
-//		double t3a1kij = -t3a1ikj;
-//		double t3a2ijk = T3ABAC(i, j, k);
-//		double t3a2jik = T3ABCA(i, j, k);
-//		double t3a2kji = T3ACAB(i, j, k);
-//		double t3a2ikj = -t3a2ijk;
-//		double t3a2jki = -t3a2jik;
-//		double t3a2kij = -t3a2kji;
-//		T3AABC(i, j, k) = t3a1ijk - t3a2ijk;
-//		T3ABAC(i, j, k) = t3a1jik - t3a2jik;
-//		T3ACBA(i, j, k) = t3a1kji - t3a2kji;
-//		T3AACB(i, j, k) = t3a1ikj - t3a2ikj;
-//		T3ABCA(i, j, k) = t3a1jki - t3a2jki;
-//		T3ACAB(i, j, k) = t3a1kij - t3a2kij;
-//	}}}
 }
 
 static void
