@@ -41,9 +41,9 @@
 #define T3BABC(i, j, k) t3b[0*o*o*o+i*o*o+j*o+k]
 #define T3BBAC(i, j, k) t3b[1*o*o*o+i*o*o+j*o+k]
 #define T3BCBA(i, j, k) t3b[2*o*o*o+i*o*o+j*o+k]
-#define T3BACB(i, j, k) t3b[3*o*o*o+i*o*o+j*o+k]
-#define T3BBCA(i, j, k) t3b[4*o*o*o+i*o*o+j*o+k]
-#define T3BCAB(i, j, k) t3b[5*o*o*o+i*o*o+j*o+k]
+//#define T3BACB(i, j, k) t3b[3*o*o*o+i*o*o+j*o+k]
+//#define T3BBCA(i, j, k) t3b[4*o*o*o+i*o*o+j*o+k]
+//#define T3BCAB(i, j, k) t3b[5*o*o*o+i*o*o+j*o+k]
 #define MOV(i, a) mov[i*v+a]
 #define MOO1(i, j) moo1[i*o+j]
 #define MOO2(i, j) moo2[i*o+j]
@@ -51,7 +51,7 @@
 #define MVOO(a, i, j) mvoo[a*o*o+i*o+j]
 
 static void
-ccsd_asymm_t3(size_t o, double *t3a)
+ccsd_asymm_t3a(size_t o, double *t3a)
 {
 	size_t i, j, k;
 
@@ -79,6 +79,35 @@ ccsd_asymm_t3(size_t o, double *t3a)
 		    T3AABC(j, k, i) +
 		    T3AABC(k, i, j);
 		T3AABC(i, j, k) = x;
+	}}}
+}
+
+static void
+ccsd_asymm_t3b(size_t o, double *t3b)
+{
+	size_t i, j, k;
+
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+		double x;
+		x = T3BABC(i, j, k) -
+		    T3BBAC(i, j, k) -
+		    T3BCBA(i, j, k);
+		T3BABC(i, j, k) = 2.0 * x;
+	}}}
+
+	for (i = 0; i < o; i++) {
+	for (j = i+1; j < o; j++) {
+	for (k = j+1; k < o; k++) {
+		double x;
+		x = T3BABC(i, j, k) -
+		    T3BABC(j, i, k) -
+		    T3BABC(k, j, i) -
+		    T3BABC(i, k, j) +
+		    T3BABC(j, k, i) +
+		    T3BABC(k, i, j);
+		T3BABC(i, j, k) = x;
 	}}}
 }
 
@@ -370,7 +399,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	for (k = 0; k < o; k++) {
 		T3BABC(i, j, k) = T1(i, a) * MOO1(j, k) +
 		    F_OV(i, a) * MOO2(j, k);
-		T3BACB(i, j, k) = -T3BABC(i, j, k);
+//		T3BACB(i, j, k) = -T3BABC(i, j, k);
 	}}}
 
 	memset(moo1, 0, o*o*sizeof(double));
@@ -392,7 +421,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	for (k = 0; k < o; k++) {
 		T3BBAC(i, j, k) = T1(i, b) * MOO1(j, k) +
 		    F_OV(i, b) * MOO2(j, k);
-		T3BBCA(i, j, k) = -T3BBAC(i, j, k);
+//		T3BBCA(i, j, k) = -T3BBAC(i, j, k);
 	}}}
 
 	memset(moo1, 0, o*o*sizeof(double));
@@ -414,7 +443,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	for (k = 0; k < o; k++) {
 		T3BCBA(i, j, k) = T1(i, c) * MOO1(j, k) +
 		    F_OV(i, c) * MOO2(j, k);
-		T3BCAB(i, j, k) = -T3BCBA(i, j, k);
+//		T3BCAB(i, j, k) = -T3BCBA(i, j, k);
 	}}}
 
 //	for (i = 0; i < o; i++) {
@@ -466,8 +495,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 	t3a = malloc(6*o*o*o*sizeof(double));
 	if (t3a == NULL)
 		err(1, "malloc");
-	//XXX make 3*ooo
-	t3b = malloc(6*o*o*o*sizeof(double));
+	t3b = malloc(3*o*o*o*sizeof(double));
 	if (t3b == NULL)
 		err(1, "malloc");
 	n = o > v ? o : v;
@@ -482,8 +510,8 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 			continue;
 		ccsd_t3a(o, v, a, b, c, t3a, t2, i_ooov, i_ovvv, work);
 		ccsd_t3b(o, v, a, b, c, t3b, f_ov, t1, t2, i_oovv, work);
-		ccsd_asymm_t3(o, t3a);
-		ccsd_asymm_t3(o, t3b);
+		ccsd_asymm_t3a(o, t3a);
+		ccsd_asymm_t3b(o, t3b);
 
 		for (n = 0; n < o*o*o; n++) t3b[n] += t3a[n];
 
