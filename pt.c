@@ -33,11 +33,11 @@
 #define T1(i, a) t1[i*v+a]
 //#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
 #define T3AABC(i, j, k) t3a[0*o*o*o+i*o*o+j*o+k]
-#define T3ABAC(i, j, k) t3a[1*o*o*o+i*o*o+j*o+k]
-#define T3ACBA(i, j, k) t3a[2*o*o*o+i*o*o+j*o+k]
-#define T3AACB(i, j, k) t3a[3*o*o*o+i*o*o+j*o+k]
-#define T3ABCA(i, j, k) t3a[4*o*o*o+i*o*o+j*o+k]
-#define T3ACAB(i, j, k) t3a[5*o*o*o+i*o*o+j*o+k]
+//#define T3ABAC(i, j, k) t3a[1*o*o*o+i*o*o+j*o+k]
+#define T3ACBA(i, j, k) t3a[1*o*o*o+i*o*o+j*o+k]
+#define T3AACB(i, j, k) t3a[2*o*o*o+i*o*o+j*o+k]
+//#define T3ABCA(i, j, k) t3a[4*o*o*o+i*o*o+j*o+k]
+//#define T3ACAB(i, j, k) t3a[5*o*o*o+i*o*o+j*o+k]
 #define T3BABC(i, j, k) t3b[0*o*o*o+i*o*o+j*o+k]
 #define T3BBAC(i, j, k) t3b[1*o*o*o+i*o*o+j*o+k]
 #define T3BCBA(i, j, k) t3b[2*o*o*o+i*o*o+j*o+k]
@@ -60,12 +60,9 @@ ccsd_asymm_t3a(size_t o, double *t3a)
 	for (k = 0; k < o; k++) {
 		double x;
 		x = T3AABC(i, j, k) -
-		    T3ABAC(i, j, k) -
 		    T3ACBA(i, j, k) -
-		    T3AACB(i, j, k) +
-		    T3ABCA(i, j, k) +
-		    T3ACAB(i, j, k);
-		T3AABC(i, j, k) = x;
+		    T3AACB(i, j, k);
+		T3AABC(i, j, k) = 2.0 * x;
 	}}}
 
 	for (i = 0; i < o; i++) {
@@ -131,8 +128,8 @@ gemm(int m, int n, int k, const double *a, const double *b, double *c)
 
 static void
 ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
-    const struct st4 *t2, const struct st4 *i_ooov, const struct st4 *i_ovvv,
-    double *work)
+    double *t3b, const struct st4 *t2, const struct st4 *i_ooov,
+    const struct st4 *i_ovvv, double *work)
 {
 	double *moo1, *mov, *mooo, *mvoo;
 	size_t i, j, k, l, d;
@@ -200,7 +197,7 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 			d = i_ovvv->idx[l].b;
 			MOV(k, d) = i_ovvv->data[l];
 		}
-	gemm(o*o, o, v, mvoo, mov, &(T3AABC(0,0,0)));
+	gemm(o*o, o, v, mvoo, mov, &(T3BABC(0,0,0)));
 
 //	mt = moov;
 //	for (d = 0; d < v; d++) {
@@ -228,7 +225,7 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 			d = i_ovvv->idx[l].b;
 			MOV(i, d) = i_ovvv->data[l];
 		}
-	gemm(o*o, o, v, mvoo, mov, &(T3ACBA(0,0,0)));
+	gemm(o*o, o, v, mvoo, mov, &(T3BCBA(0,0,0)));
 
 //	mt = moov;
 //	for (d = 0; d < v; d++) {
@@ -256,7 +253,7 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 			d = i_ovvv->idx[l].b;
 			MOV(j, d) = i_ovvv->data[l];
 		}
-	gemm(o*o, o, v, mvoo, mov, &(T3ABAC(0,0,0)));
+	gemm(o*o, o, v, mvoo, mov, &(T3BBAC(0,0,0)));
 
 	moo1 = work;
 	mooo = moo1 + o*o;
@@ -287,7 +284,7 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 			d = i_ooov->idx[l].c;
 			MOOO(j, k, d) = i_ooov->data[l];
 		}
-	gemm(o, o*o, o, moo1, mooo, &(T3ACAB(0,0,0)));
+	gemm(o, o*o, o, moo1, mooo, &(T3AABC(0,0,0)));
 
 //	mt = moo;
 //	for (l = 0; l < o; l++) {
@@ -315,7 +312,7 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 			d = i_ooov->idx[l].c;
 			MOOO(i, k, d) = i_ooov->data[l];
 		}
-	gemm(o, o*o, o, moo1, mooo, &(T3AACB(0,0,0)));
+	gemm(o, o*o, o, moo1, mooo, &(T3ACBA(0,0,0)));
 
 //	mt = moo;
 //	for (l = 0; l < o; l++) {
@@ -343,30 +340,30 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 			d = i_ooov->idx[l].c;
 			MOOO(j, i, d) = i_ooov->data[l];
 		}
-	gemm(o, o*o, o, moo1, mooo, &(T3ABCA(0,0,0)));
+	gemm(o, o*o, o, moo1, mooo, &(T3AACB(0,0,0)));
 
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-		double t3a1abc = T3AABC(i, j, k);
-		double t3a1cba = T3ACBA(i, j, k);
-		double t3a1bac = T3ABAC(i, j, k);
-		double t3a1acb = -t3a1abc;
-		double t3a1cab = -t3a1cba;
-		double t3a1bca = -t3a1bac;
-		double t3a2abc = T3ACAB(i, j, k);
-		double t3a2cba = T3AACB(i, j, k);
-		double t3a2acb = T3ABCA(i, j, k);
-		double t3a2bac = -t3a2abc;
-		double t3a2bca = -t3a2cba;
-		double t3a2cab = -t3a2acb;
-		T3AABC(i, j, k) = -(t3a1abc + t3a2abc);
-		T3ABAC(i, j, k) = -(t3a1bac + t3a2bac);
-		T3ACBA(i, j, k) = -(t3a1cba + t3a2cba);
-		T3AACB(i, j, k) = -(t3a1acb + t3a2acb);
-		T3ABCA(i, j, k) = -(t3a1bca + t3a2bca);
-		T3ACAB(i, j, k) = -(t3a1cab + t3a2cab);
-	}}}
+//	for (i = 0; i < o; i++) {
+//	for (j = 0; j < o; j++) {
+//	for (k = 0; k < o; k++) {
+//		double t3a1abc = T3AABC(i, j, k);
+//		double t3a1cba = T3ACBA(i, j, k);
+//		double t3a1bac = T3ABAC(i, j, k);
+//		double t3a1acb = -t3a1abc;
+//		double t3a1cab = -t3a1cba;
+//		double t3a1bca = -t3a1bac;
+//		double t3a2abc = T3ACAB(i, j, k);
+//		double t3a2cba = T3AACB(i, j, k);
+//		double t3a2acb = T3ABCA(i, j, k);
+//		double t3a2bac = -t3a2abc;
+//		double t3a2bca = -t3a2cba;
+//		double t3a2cab = -t3a2acb;
+//		T3AABC(i, j, k) = -(t3a1abc + t3a2abc);
+//		T3ABAC(i, j, k) = -(t3a1bac + t3a2bac);
+//		T3ACBA(i, j, k) = -(t3a1cba + t3a2cba);
+//		T3AACB(i, j, k) = -(t3a1acb + t3a2acb);
+//		T3ABCA(i, j, k) = -(t3a1bca + t3a2bca);
+//		T3ACAB(i, j, k) = -(t3a1cab + t3a2cab);
+//	}}}
 }
 
 static void
@@ -491,8 +488,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 	size_t a, b, c, n;
 	int iter;
 
-	//XXX make 3*ooo
-	t3a = malloc(6*o*o*o*sizeof(double));
+	t3a = malloc(3*o*o*o*sizeof(double));
 	if (t3a == NULL)
 		err(1, "malloc");
 	t3b = malloc(3*o*o*o*sizeof(double));
@@ -508,9 +504,13 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 	for (c = b+1; c < v; c++, iter++) {
 		if (iter % nid != id)
 			continue;
-		ccsd_t3a(o, v, a, b, c, t3a, t2, i_ooov, i_ovvv, work);
-		ccsd_t3b(o, v, a, b, c, t3b, f_ov, t1, t2, i_oovv, work);
+		ccsd_t3a(o, v, a, b, c, t3a, t3b, t2, i_ooov, i_ovvv, work);
 		ccsd_asymm_t3a(o, t3a);
+		ccsd_asymm_t3b(o, t3b);
+
+		for (n = 0; n < o*o*o; n++) t3a[n] = -(t3a[n]+t3b[n]);
+
+		ccsd_t3b(o, v, a, b, c, t3b, f_ov, t1, t2, i_oovv, work);
 		ccsd_asymm_t3b(o, t3b);
 
 		for (n = 0; n < o*o*o; n++) t3b[n] += t3a[n];
