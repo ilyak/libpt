@@ -142,10 +142,8 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 		}
 	}}}*/
 
-	moo1 = work;
-	mov = moo1 + o*o;
-	mooo = mov + o*v;
-	mvoo = mooo + o*o*o;
+	mov = work;
+	mvoo = mov + o*v;
 
 //	mt = moov;
 //	for (d = 0; d < v; d++) {
@@ -230,6 +228,9 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 			MOV(j, d) = i_ovvv->data[l];
 		}
 	gemm(o*o, o, v, mvoo, mov, &(T3ABAC(0,0,0)));
+
+	moo1 = work;
+	mooo = moo1 + o*o;
 
 //	mt = moo;
 //	for (l = 0; l < o; l++) {
@@ -461,13 +462,16 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 	size_t a, b, c, n;
 	int iter;
 
+	//XXX make 3*ooo
 	t3a = malloc(6*o*o*o*sizeof(double));
 	if (t3a == NULL)
 		err(1, "malloc");
+	//XXX make 3*ooo
 	t3b = malloc(6*o*o*o*sizeof(double));
 	if (t3b == NULL)
 		err(1, "malloc");
-	work = malloc((o*o + o*v + o*o*o + o*o*v) * sizeof(double));
+	n = o > v ? o : v;
+	work = malloc((o*n + o*o*n) * sizeof(double));
 	if (work == NULL)
 		err(1, "malloc");
 
