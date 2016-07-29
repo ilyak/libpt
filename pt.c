@@ -485,8 +485,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
     const struct st4 *i_ovvv)
 {
 	double e_pt = 0.0, *t3a, *t3b, *work;
-	size_t a, b, c, n;
-	int iter;
+	size_t a, b, c, n, iter;
 
 	t3a = malloc(3*o*o*o*sizeof(double));
 	if (t3a == NULL)
