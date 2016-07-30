@@ -29,9 +29,10 @@ struct i4 {
 };
 
 struct st4 {
-	size_t len;
-	struct i4 *idx;
-	double *data;
+	size_t len;     /* number of elements in idx and data arrays */
+	struct i4 *idx; /* indices of nonzero elements, sorted by last index */
+	double *data;   /* values of nonzero elements */
+	size_t *offset; /* last index offset */
 };
 
 /* Compute CCSD(T) energy correction in parallel.
