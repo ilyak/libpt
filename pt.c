@@ -184,10 +184,10 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 //	}}
 	memset(mvoo, 0, v*o*o*sizeof(double));
 	for (l = 0; l < t2->len; l++)
-		if (t2->idx[l].c == a) {
+		if (t2->idx[l].d == a) {
 			i = t2->idx[l].a;
 			j = t2->idx[l].b;
-			d = t2->idx[l].d;
+			d = t2->idx[l].c;
 			MVOO(d, i, j) = t2->data[l];
 		}
 	memset(mov, 0, o*v*sizeof(double));
@@ -212,10 +212,10 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 //	}}
 	memset(mvoo, 0, v*o*o*sizeof(double));
 	for (l = 0; l < t2->len; l++)
-		if (t2->idx[l].c == c) {
+		if (t2->idx[l].d == c) {
 			k = t2->idx[l].a;
 			j = t2->idx[l].b;
-			d = t2->idx[l].d;
+			d = t2->idx[l].c;
 			MVOO(d, k, j) = t2->data[l];
 		}
 	memset(mov, 0, o*v*sizeof(double));
@@ -240,10 +240,10 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 //	}}
 	memset(mvoo, 0, v*o*o*sizeof(double));
 	for (l = 0; l < t2->len; l++)
-		if (t2->idx[l].c == b) {
+		if (t2->idx[l].d == b) {
 			i = t2->idx[l].a;
 			k = t2->idx[l].b;
-			d = t2->idx[l].d;
+			d = t2->idx[l].c;
 			MVOO(d, i, k) = t2->data[l];
 		}
 	memset(mov, 0, o*v*sizeof(double));
@@ -507,7 +507,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, const double *d_ov,
 		ccsd_asymm_t3a(o, t3a);
 		ccsd_asymm_t3b(o, t3b);
 
-		for (n = 0; n < o*o*o; n++) t3a[n] = -(t3a[n]+t3b[n]);
+		for (n = 0; n < o*o*o; n++) t3a[n] = t3b[n]-t3a[n];
 
 		ccsd_t3b(o, v, a, b, c, t3b, f_ov, t1, t2, i_oovv, work);
 		ccsd_asymm_t3b(o, t3b);
