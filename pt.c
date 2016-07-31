@@ -400,7 +400,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	double *moo1, *moo2;
 	size_t i, j, k, l;
 
-	/*XXX document what this func computes*/
+	/* t3b(i,j,k,a,b,c) = t1(i,a)*i_oovv(j,k,b,c)+f_ov(i,a)*t2(j,k,b,c) */
 
 	moo1 = work;
 	moo2 = moo1 + o*o;
