@@ -438,11 +438,11 @@ main(int argc, char **argv)
 		load_test_header(testpath, &o, &v, &e_ref);
 	d_ov = xmalloc(o*v * sizeof(double));
 	f_ov = xmalloc(o*v * sizeof(double));
+	t1 = xmalloc(o*v * sizeof(double));
+	t2 = xmalloc(o*o*v*v * sizeof(double));
 	i_ooov = xmalloc(o*o*o*v * sizeof(double));
 	i_oovv = xmalloc(o*o*v*v * sizeof(double));
 	i_ovvv = xmalloc(o*v*v*v * sizeof(double));
-	t1 = xmalloc(o*v * sizeof(double));
-	t2 = xmalloc(o*o*v*v * sizeof(double));
 
 	if (rank == 0) {
 		if (testpath) {
