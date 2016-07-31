@@ -407,9 +407,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 
 	memset(moo1, 0, o*o*sizeof(double));
 	for (l = i_oovv->offset[c]; l < i_oovv->offset[c+1]; l++) {
-//	for (l = 0; l < i_oovv->len; l++)
 		if (i_oovv->idx[l].c == b) {
-//		if (i_oovv->idx[l].c == b && i_oovv->idx[l].d == c) {
 			j = i_oovv->idx[l].a;
 			k = i_oovv->idx[l].b;
 			MOO1(j, k) = i_oovv->data[l];
@@ -417,9 +415,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	}
 	memset(moo2, 0, o*o*sizeof(double));
 	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
-//	for (l = 0; l < t2->len; l++)
 		if (t2->idx[l].c == b) {
-//		if (t2->idx[l].c == b && t2->idx[l].d == c) {
 			j = t2->idx[l].a;
 			k = t2->idx[l].b;
 			MOO2(j, k) = t2->data[l];
@@ -430,14 +426,11 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	for (k = 0; k < o; k++) {
 		T3BABC(i, j, k) = T1(i, a) * MOO1(j, k) +
 		    F_OV(i, a) * MOO2(j, k);
-//		T3BACB(i, j, k) = -T3BABC(i, j, k);
 	}}}
 
 	memset(moo1, 0, o*o*sizeof(double));
 	for (l = i_oovv->offset[c]; l < i_oovv->offset[c+1]; l++) {
-//	for (l = 0; l < i_oovv->len; l++)
 		if (i_oovv->idx[l].c == a) {
-//		if (i_oovv->idx[l].c == a && i_oovv->idx[l].d == c) {
 			j = i_oovv->idx[l].a;
 			k = i_oovv->idx[l].b;
 			MOO1(j, k) = i_oovv->data[l];
@@ -445,9 +438,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	}
 	memset(moo2, 0, o*o*sizeof(double));
 	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
-//	for (l = 0; l < t2->len; l++)
 		if (t2->idx[l].c == a) {
-//		if (t2->idx[l].c == a && t2->idx[l].d == c) {
 			j = t2->idx[l].a;
 			k = t2->idx[l].b;
 			MOO2(j, k) = t2->data[l];
@@ -458,14 +449,11 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	for (k = 0; k < o; k++) {
 		T3BBAC(i, j, k) = T1(i, b) * MOO1(j, k) +
 		    F_OV(i, b) * MOO2(j, k);
-//		T3BBCA(i, j, k) = -T3BBAC(i, j, k);
 	}}}
 
 	memset(moo1, 0, o*o*sizeof(double));
 	for (l = i_oovv->offset[a]; l < i_oovv->offset[a+1]; l++) {
-//	for (l = 0; l < i_oovv->len; l++)
 		if (i_oovv->idx[l].c == b) {
-//		if (i_oovv->idx[l].c == b && i_oovv->idx[l].d == a) {
 			j = i_oovv->idx[l].a;
 			k = i_oovv->idx[l].b;
 			MOO1(j, k) = i_oovv->data[l];
@@ -473,9 +461,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	}
 	memset(moo2, 0, o*o*sizeof(double));
 	for (l = t2->offset[a]; l < t2->offset[a+1]; l++) {
-//	for (l = 0; l < t2->len; l++)
 		if (t2->idx[l].c == b) {
-//		if (t2->idx[l].c == b && t2->idx[l].d == a) {
 			j = t2->idx[l].a;
 			k = t2->idx[l].b;
 			MOO2(j, k) = t2->data[l];
@@ -486,25 +472,7 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	for (k = 0; k < o; k++) {
 		T3BCBA(i, j, k) = T1(i, c) * MOO1(j, k) +
 		    F_OV(i, c) * MOO2(j, k);
-//		T3BCAB(i, j, k) = -T3BCBA(i, j, k);
 	}}}
-
-//	for (i = 0; i < o; i++) {
-//	for (j = 0; j < o; j++) {
-//	for (k = 0; k < o; k++) {
-//		T3BABC(i, j, k) = T1(i, a) * I_OOVV(j, k, b, c) +
-//		    F_OV(i, a) * T2(j, k, b, c);
-//		T3BBAC(i, j, k) = T1(i, b) * I_OOVV(j, k, a, c) +
-//		    F_OV(i, b) * T2(j, k, a, c);
-//		T3BCBA(i, j, k) = T1(i, c) * I_OOVV(j, k, b, a) +
-//		    F_OV(i, c) * T2(j, k, b, a);
-////		T3BACB(i, j, k) = T1(i, a) * I_OOVV(j, k, c, b) +
-////		    F_OV(i, a) * T2(j, k, c, b);
-////		T3BBCA(i, j, k) = T1(i, b) * I_OOVV(j, k, c, a) +
-////		    F_OV(i, b) * T2(j, k, c, a);
-////		T3BCAB(i, j, k) = T1(i, c) * I_OOVV(j, k, a, b) +
-////		    F_OV(i, c) * T2(j, k, a, b);
-//	}}}
 }
 
 static double
