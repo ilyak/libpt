@@ -128,8 +128,8 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	double *moo1, *mov, *mooo, *mvoo;
 	size_t i, j, k, l, d;
 
-	/* t3b = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
-	/* t3a = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
+	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
+	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
 
 	/*memset(t3a, 0, 6*o*o*o*sizeof(double));
 	for (i = 0; i < o; i++) {
