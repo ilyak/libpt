@@ -412,19 +412,25 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	moo2 = moo1 + o*o;
 
 	memset(moo1, 0, o*o*sizeof(double));
-	for (l = 0; l < i_oovv->len; l++)
-		if (i_oovv->idx[l].c == b && i_oovv->idx[l].d == c) {
+	for (l = i_oovv->offset[c]; l < i_oovv->offset[c+1]; l++) {
+//	for (l = 0; l < i_oovv->len; l++)
+		if (i_oovv->idx[l].c == b) {
+//		if (i_oovv->idx[l].c == b && i_oovv->idx[l].d == c) {
 			j = i_oovv->idx[l].a;
 			k = i_oovv->idx[l].b;
 			MOO1(j, k) = i_oovv->data[l];
 		}
+	}
 	memset(moo2, 0, o*o*sizeof(double));
-	for (l = 0; l < t2->len; l++)
-		if (t2->idx[l].c == b && t2->idx[l].d == c) {
+	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
+//	for (l = 0; l < t2->len; l++)
+		if (t2->idx[l].c == b) {
+//		if (t2->idx[l].c == b && t2->idx[l].d == c) {
 			j = t2->idx[l].a;
 			k = t2->idx[l].b;
 			MOO2(j, k) = t2->data[l];
 		}
+	}
 	for (i = 0; i < o; i++) {
 	for (j = 0; j < o; j++) {
 	for (k = 0; k < o; k++) {
@@ -434,19 +440,25 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	}}}
 
 	memset(moo1, 0, o*o*sizeof(double));
-	for (l = 0; l < i_oovv->len; l++)
-		if (i_oovv->idx[l].c == a && i_oovv->idx[l].d == c) {
+	for (l = i_oovv->offset[c]; l < i_oovv->offset[c+1]; l++) {
+//	for (l = 0; l < i_oovv->len; l++)
+		if (i_oovv->idx[l].c == a) {
+//		if (i_oovv->idx[l].c == a && i_oovv->idx[l].d == c) {
 			j = i_oovv->idx[l].a;
 			k = i_oovv->idx[l].b;
 			MOO1(j, k) = i_oovv->data[l];
 		}
+	}
 	memset(moo2, 0, o*o*sizeof(double));
-	for (l = 0; l < t2->len; l++)
-		if (t2->idx[l].c == a && t2->idx[l].d == c) {
+	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
+//	for (l = 0; l < t2->len; l++)
+		if (t2->idx[l].c == a) {
+//		if (t2->idx[l].c == a && t2->idx[l].d == c) {
 			j = t2->idx[l].a;
 			k = t2->idx[l].b;
 			MOO2(j, k) = t2->data[l];
 		}
+	}
 	for (i = 0; i < o; i++) {
 	for (j = 0; j < o; j++) {
 	for (k = 0; k < o; k++) {
@@ -456,19 +468,25 @@ ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
 	}}}
 
 	memset(moo1, 0, o*o*sizeof(double));
-	for (l = 0; l < i_oovv->len; l++)
-		if (i_oovv->idx[l].c == b && i_oovv->idx[l].d == a) {
+	for (l = i_oovv->offset[a]; l < i_oovv->offset[a+1]; l++) {
+//	for (l = 0; l < i_oovv->len; l++)
+		if (i_oovv->idx[l].c == b) {
+//		if (i_oovv->idx[l].c == b && i_oovv->idx[l].d == a) {
 			j = i_oovv->idx[l].a;
 			k = i_oovv->idx[l].b;
 			MOO1(j, k) = i_oovv->data[l];
 		}
+	}
 	memset(moo2, 0, o*o*sizeof(double));
-	for (l = 0; l < t2->len; l++)
-		if (t2->idx[l].c == b && t2->idx[l].d == a) {
+	for (l = t2->offset[a]; l < t2->offset[a+1]; l++) {
+//	for (l = 0; l < t2->len; l++)
+		if (t2->idx[l].c == b) {
+//		if (t2->idx[l].c == b && t2->idx[l].d == a) {
 			j = t2->idx[l].a;
 			k = t2->idx[l].b;
 			MOO2(j, k) = t2->data[l];
 		}
+	}
 	for (i = 0; i < o; i++) {
 	for (j = 0; j < o; j++) {
 	for (k = 0; k < o; k++) {
