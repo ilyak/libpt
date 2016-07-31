@@ -128,62 +128,8 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	double *moo1, *mov, *mooo, *mvoo;
 	size_t i, j, k, l, d;
 
-	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
 	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
-
-	mov = work;
-	mvoo = mov + o*v;
-
-	memset(mvoo, 0, v*o*o*sizeof(double));
-	for (l = t2->offset[a]; l < t2->offset[a+1]; l++) {
-			i = t2->idx[l].a;
-			j = t2->idx[l].b;
-			d = t2->idx[l].c;
-			MVOO(d, i, j) = t2->data[l];
-	}
-	memset(mov, 0, o*v*sizeof(double));
-	for (l = i_ovvv->offset[c]; l < i_ovvv->offset[c+1]; l++) {
-		if (i_ovvv->idx[l].c == b) {
-			k = i_ovvv->idx[l].a;
-			d = i_ovvv->idx[l].b;
-			MOV(k, d) = i_ovvv->data[l];
-		}
-	}
-	gemm(o*o, o, v, mvoo, mov, &(T3BABC(0,0,0)));
-
-	memset(mvoo, 0, v*o*o*sizeof(double));
-	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
-			k = t2->idx[l].a;
-			j = t2->idx[l].b;
-			d = t2->idx[l].c;
-			MVOO(d, k, j) = t2->data[l];
-	}
-	memset(mov, 0, o*v*sizeof(double));
-	for (l = i_ovvv->offset[a]; l < i_ovvv->offset[a+1]; l++) {
-		if (i_ovvv->idx[l].c == b) {
-			i = i_ovvv->idx[l].a;
-			d = i_ovvv->idx[l].b;
-			MOV(i, d) = i_ovvv->data[l];
-		}
-	}
-	gemm(o*o, o, v, mvoo, mov, &(T3BCBA(0,0,0)));
-
-	memset(mvoo, 0, v*o*o*sizeof(double));
-	for (l = t2->offset[b]; l < t2->offset[b+1]; l++) {
-			i = t2->idx[l].a;
-			k = t2->idx[l].b;
-			d = t2->idx[l].c;
-			MVOO(d, i, k) = t2->data[l];
-	}
-	memset(mov, 0, o*v*sizeof(double));
-	for (l = i_ovvv->offset[c]; l < i_ovvv->offset[c+1]; l++) {
-		if (i_ovvv->idx[l].c == a) {
-			j = i_ovvv->idx[l].a;
-			d = i_ovvv->idx[l].b;
-			MOV(j, d) = i_ovvv->data[l];
-		}
-	}
-	gemm(o*o, o, v, mvoo, mov, &(T3BBAC(0,0,0)));
+	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
 
 	moo1 = work;
 	mooo = moo1 + o*o;
@@ -198,10 +144,10 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	}
 	memset(mooo, 0, o*o*o*sizeof(double));
 	for (l = i_ooov->offset[c]; l < i_ooov->offset[c+1]; l++) {
-			j = i_ooov->idx[l].a;
-			k = i_ooov->idx[l].b;
-			d = i_ooov->idx[l].c;
-			MOOO(j, k, d) = i_ooov->data[l];
+		j = i_ooov->idx[l].a;
+		k = i_ooov->idx[l].b;
+		d = i_ooov->idx[l].c;
+		MOOO(j, k, d) = i_ooov->data[l];
 	}
 	gemm(o, o*o, o, moo1, mooo, &(T3AABC(0,0,0)));
 
@@ -215,10 +161,10 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	}
 	memset(mooo, 0, o*o*o*sizeof(double));
 	for (l = i_ooov->offset[a]; l < i_ooov->offset[a+1]; l++) {
-			i = i_ooov->idx[l].a;
-			k = i_ooov->idx[l].b;
-			d = i_ooov->idx[l].c;
-			MOOO(i, k, d) = i_ooov->data[l];
+		i = i_ooov->idx[l].a;
+		k = i_ooov->idx[l].b;
+		d = i_ooov->idx[l].c;
+		MOOO(i, k, d) = i_ooov->data[l];
 	}
 	gemm(o, o*o, o, moo1, mooo, &(T3ACBA(0,0,0)));
 
@@ -232,12 +178,66 @@ ccsd_t3a(size_t o, size_t v, size_t a, size_t b, size_t c, double *t3a,
 	}
 	memset(mooo, 0, o*o*o*sizeof(double));
 	for (l = i_ooov->offset[b]; l < i_ooov->offset[b+1]; l++) {
-			j = i_ooov->idx[l].a;
-			i = i_ooov->idx[l].b;
-			d = i_ooov->idx[l].c;
-			MOOO(j, i, d) = i_ooov->data[l];
+		j = i_ooov->idx[l].a;
+		i = i_ooov->idx[l].b;
+		d = i_ooov->idx[l].c;
+		MOOO(j, i, d) = i_ooov->data[l];
 	}
 	gemm(o, o*o, o, moo1, mooo, &(T3AACB(0,0,0)));
+
+	mov = work;
+	mvoo = mov + o*v;
+
+	memset(mvoo, 0, v*o*o*sizeof(double));
+	for (l = t2->offset[a]; l < t2->offset[a+1]; l++) {
+		i = t2->idx[l].a;
+		j = t2->idx[l].b;
+		d = t2->idx[l].c;
+		MVOO(d, i, j) = t2->data[l];
+	}
+	memset(mov, 0, o*v*sizeof(double));
+	for (l = i_ovvv->offset[c]; l < i_ovvv->offset[c+1]; l++) {
+		if (i_ovvv->idx[l].c == b) {
+			k = i_ovvv->idx[l].a;
+			d = i_ovvv->idx[l].b;
+			MOV(k, d) = i_ovvv->data[l];
+		}
+	}
+	gemm(o*o, o, v, mvoo, mov, &(T3BABC(0,0,0)));
+
+	memset(mvoo, 0, v*o*o*sizeof(double));
+	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
+		k = t2->idx[l].a;
+		j = t2->idx[l].b;
+		d = t2->idx[l].c;
+		MVOO(d, k, j) = t2->data[l];
+	}
+	memset(mov, 0, o*v*sizeof(double));
+	for (l = i_ovvv->offset[a]; l < i_ovvv->offset[a+1]; l++) {
+		if (i_ovvv->idx[l].c == b) {
+			i = i_ovvv->idx[l].a;
+			d = i_ovvv->idx[l].b;
+			MOV(i, d) = i_ovvv->data[l];
+		}
+	}
+	gemm(o*o, o, v, mvoo, mov, &(T3BCBA(0,0,0)));
+
+	memset(mvoo, 0, v*o*o*sizeof(double));
+	for (l = t2->offset[b]; l < t2->offset[b+1]; l++) {
+		i = t2->idx[l].a;
+		k = t2->idx[l].b;
+		d = t2->idx[l].c;
+		MVOO(d, i, k) = t2->data[l];
+	}
+	memset(mov, 0, o*v*sizeof(double));
+	for (l = i_ovvv->offset[c]; l < i_ovvv->offset[c+1]; l++) {
+		if (i_ovvv->idx[l].c == a) {
+			j = i_ovvv->idx[l].a;
+			d = i_ovvv->idx[l].b;
+			MOV(j, d) = i_ovvv->data[l];
+		}
+	}
+	gemm(o*o, o, v, mvoo, mov, &(T3BBAC(0,0,0)));
 }
 
 static void
