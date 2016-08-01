@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <err.h>
 #include <getopt.h>
@@ -41,12 +42,22 @@ usage(void)
 }
 
 static void *
-xmalloc(size_t sz)
+xmalloc(size_t size)
 {
 	void *p;
 
-	if ((p = malloc(sz)) == NULL)
+	if ((p = malloc(size)) == NULL)
 		err(1, "malloc");
+	return (p);
+}
+
+static void *
+xcalloc(size_t nmemb, size_t size)
+{
+	void *p;
+
+	if ((p = calloc(nmemb, size)) == NULL)
+		err(1, "calloc");
 	return (p);
 }
 
@@ -65,13 +76,14 @@ xreallocarray(void *ptr, size_t nmemb, size_t size)
 }
 
 static void
-load_test_header(const char *testpath, size_t *o, size_t *v, double *e_ref)
+load_test_header(const char *testpath, size_t *o, size_t *v, size_t *x,
+    double *e_ref)
 {
 	FILE *fp;
 
 	if ((fp = fopen(testpath, "r")) == NULL)
 		err(1, "unable to open %s", testpath);
-	if (fscanf(fp, "%zu %zu %lf", o, v, e_ref) != 3)
+	if (fscanf(fp, "%zu %zu %zu %lf", o, v, x, e_ref) != 4)
 		errx(1, "error parsing test file header");
 	fclose(fp);
 }
@@ -166,9 +178,9 @@ scan_next_line_st4(FILE *fp, struct st4 *st)
 //}
 
 static void
-load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
+load_test_data(const char *testpath, size_t o, size_t v, size_t x, double *d_ov,
     double *f_ov, struct st4 *i_ooov, struct st4 *i_oovv, struct st4 *i_ovvv,
-    double *t1, struct st4 *t2)
+    double *t1, struct st4 *t2, double *ovx, double *vvx)
 {
 	FILE *fp;
 	size_t i, len;
@@ -220,17 +232,28 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
 //		i_oovv[i] = read_next_double(fp);
 //	}
 //	skip_line(fp);
-	skip_line(fp);
-	if (fscanf(fp, "%zu\n", &len) != 1)
-		errx(1, "bad file format");
-	for (i = 0; i < len; i++)
-		scan_next_line_st4(fp, i_ovvv);
+
+//	skip_line(fp);
+//	if (fscanf(fp, "%zu\n", &len) != 1)
+//		errx(1, "bad file format");
+//	for (i = 0; i < len; i++)
+//		scan_next_line_st4(fp, i_ovvv);
+
 //	for (i = 0; i < o*v*v*v; i++) {
 //		i_ovvv[i] = read_next_double(fp);
 //	}
 //	for (i = 0; i < o*o*v*v; i++) {
 //		t2[i] = read_next_double(fp);
 //	}
+	skip_line(fp);
+	for (i = 0; i < o*v*x; i++) {
+		ovx[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < v*v*x; i++) {
+		vvx[i] = read_next_double(fp);
+	}
 	fclose(fp);
 }
 
@@ -395,15 +418,42 @@ print_st(const struct st4 *st)
 	}
 }
 
+static void
+setup_offsets(size_t ldim, struct st4 *st)
+{
+	size_t cur, i;
+	int diff, j;
+
+	st->offset = xmalloc((ldim+1)*sizeof(*st->offset));
+
+	cur = 0;
+	st->offset[cur] = 0;
+	for (i = 0; i < st->len; i++) {
+		diff = st->idx[i].d - st->idx[st->offset[cur]].d;
+		if (diff > 0) {
+			for (j = 0; j < diff; j++) {
+				cur++;
+				if (cur >= ldim)
+					errx(1, "index out of range");
+				st->offset[cur] = i;
+			}
+		} else if (diff < 0)
+			errx(1, "last sparse index not sorted");
+	}
+	while (cur < ldim)
+		st->offset[++cur] = st->len;
+}
+
 int
 main(int argc, char **argv)
 {
-	size_t o = 4, v = 20;
+	size_t o = 4, v = 20, x = 100;
 	double *d_ov, *f_ov;
 	double *i_ooov, *i_oovv, *i_ovvv;
-	double *t1, *t2;
+	double *t1, *t2, *ovx, *vvx;
 	double e_pt, e_ref = 0.0;
 	struct st4 tt2, it_ooov, it_oovv, it_ovvv;
+	time_t tim;
 	int rank;
 	const char *errstr, *testpath = NULL;
 	char ch;
@@ -435,7 +485,7 @@ main(int argc, char **argv)
 	argc -= optind;
 
 	if (testpath)
-		load_test_header(testpath, &o, &v, &e_ref);
+		load_test_header(testpath, &o, &v, &x, &e_ref);
 	d_ov = xmalloc(o*v * sizeof(double));
 	f_ov = xmalloc(o*v * sizeof(double));
 	t1 = xmalloc(o*v * sizeof(double));
@@ -443,16 +493,23 @@ main(int argc, char **argv)
 	i_ooov = xmalloc(o*o*o*v * sizeof(double));
 	i_oovv = xmalloc(o*o*v*v * sizeof(double));
 	i_ovvv = xmalloc(o*v*v*v * sizeof(double));
+	ovx = xmalloc(o*v*x * sizeof(double));
+	vvx = xmalloc(v*v*x * sizeof(double));
 
 	if (rank == 0) {
 		if (testpath) {
-			load_test_data(testpath, o, v, d_ov, f_ov, &it_ooov,
-			    &it_oovv, &it_ovvv, t1, &tt2);
+			load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
+			    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
 		} else {
 			load_random_data(o, v, d_ov, f_ov, i_ooov,
 			    i_oovv, i_ovvv, t1, t2);
 		}
 	}
+
+	setup_offsets(v, &tt2);
+	setup_offsets(v, &it_ooov);
+	setup_offsets(v, &it_oovv);
+	setup_offsets(v, &it_ovvv);
 
 	//XXX
 //	MPI_Bcast(d_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -476,8 +533,17 @@ main(int argc, char **argv)
 //	printf("ovvv\n");
 //	print_st(&it_ovvv);
 
-	e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, &tt2, &it_ooov,
-	    &it_oovv, &it_ovvv);
+	if (rank == 0) {
+		tim = time(NULL);
+		printf("ccsd_pt: %s", ctime(&tim));
+	}
+	e_pt = ccsd_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
+	    &it_oovv, &it_ovvv, ovx, vvx);
+	if (rank == 0) {
+		tim = time(NULL);
+		printf("ccsd_pt: %s", ctime(&tim));
+	}
+
 	if (rank == 0)
 		printf("ccsd(t) energy: % .8lf\n", e_pt);
 	if (testpath) {
