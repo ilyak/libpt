@@ -58,10 +58,17 @@ struct st4 {
  * References:
  *   J. Chem. Phys. 98, 8718 (1993); http://dx.doi.org/10.1063/1.464480
  */
-double ccsd_pt(size_t o, size_t v, size_t x, const double *d_ov,
+double ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
+    const double *t1, const struct st4 *t2, const struct st4 *i_ooov,
+    const struct st4 *i_oovv, const struct st4 *i_ovvv);
+
+/*
+ *
+ */
+double ccsd_ri_pt(size_t o, size_t v, size_t x, const double *d_ov,
     const double *f_ov, const double *t1, const struct st4 *t2,
     const struct st4 *i_ooov, const struct st4 *i_oovv,
-    const struct st4 *i_ovvv, const double *ovx, const double *vvx);
+    const double *ovx, const double *vvx);
 
 #ifdef __cplusplus
 } /* extern "C" */
