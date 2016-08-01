@@ -449,8 +449,8 @@ main(int argc, char **argv)
 {
 	size_t o = 4, v = 20, x = 100;
 	double *d_ov, *f_ov;
-	double *i_ooov, *i_oovv, *i_ovvv;
-	double *t1, *t2, *ovx, *vvx;
+	//double *t2, *i_ooov, *i_oovv, *i_ovvv;
+	double *t1, *ovx, *vvx;
 	double e_pt, e_ref = 0.0;
 	struct st4 tt2, it_ooov, it_oovv, it_ovvv;
 	time_t tim;
@@ -489,10 +489,10 @@ main(int argc, char **argv)
 	d_ov = xmalloc(o*v * sizeof(double));
 	f_ov = xmalloc(o*v * sizeof(double));
 	t1 = xmalloc(o*v * sizeof(double));
-	t2 = xmalloc(o*o*v*v * sizeof(double));
-	i_ooov = xmalloc(o*o*o*v * sizeof(double));
-	i_oovv = xmalloc(o*o*v*v * sizeof(double));
-	i_ovvv = xmalloc(o*v*v*v * sizeof(double));
+	//t2 = xmalloc(o*o*v*v * sizeof(double));
+	//i_ooov = xmalloc(o*o*o*v * sizeof(double));
+	//i_oovv = xmalloc(o*o*v*v * sizeof(double));
+	//i_ovvv = xmalloc(o*v*v*v * sizeof(double));
 	ovx = xmalloc(o*v*x * sizeof(double));
 	vvx = xmalloc(v*v*x * sizeof(double));
 
@@ -501,8 +501,9 @@ main(int argc, char **argv)
 			load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
 			    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
 		} else {
-			load_random_data(o, v, d_ov, f_ov, i_ooov,
-			    i_oovv, i_ovvv, t1, t2);
+			errx(1, "unsupported");
+//			load_random_data(o, v, d_ov, f_ov, i_ooov,
+//			    i_oovv, i_ovvv, t1, t2);
 		}
 	}
 
@@ -554,11 +555,13 @@ main(int argc, char **argv)
 
 	free(d_ov);
 	free(f_ov);
-	free(i_ooov);
-	free(i_oovv);
-	free(i_ovvv);
+	//free(i_ooov);
+	//free(i_oovv);
+	//free(i_ovvv);
 	free(t1);
-	free(t2);
+	//free(t2);
+	free(ovx);
+	free(vvx);
 	MPI_Finalize();
 	return (fabs(e_pt - e_ref) < EPSILON ? 0 : 1);
 }
