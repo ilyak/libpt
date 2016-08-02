@@ -80,11 +80,20 @@ load_test_header(const char *testpath, size_t *o, size_t *v, size_t *x,
     double *e_ref)
 {
 	FILE *fp;
+	char buf[16];
 
 	if ((fp = fopen(testpath, "r")) == NULL)
 		err(1, "unable to open %s", testpath);
-	if (fscanf(fp, "%zu %zu %zu %lf", o, v, x, e_ref) != 4)
+	if (fscanf(fp, "%4s", buf) != 1)
 		errx(1, "error parsing test file header");
+	if (strcmp(buf, "ri") == 0) {
+		if (fscanf(fp, "%zu %zu %zu %lf", o, v, x, e_ref) != 4)
+			errx(1, "error parsing test file header");
+	} else if (strcmp(buf, "full") == 0) {
+		if (fscanf(fp, "%zu %zu %lf", o, v, e_ref) != 3)
+			errx(1, "error parsing test file header");
+	} else
+		errx(1, "unknown test type %s", buf);
 	fclose(fp);
 }
 
@@ -219,40 +228,24 @@ load_test_data(const char *testpath, size_t o, size_t v, size_t x, double *d_ov,
 		errx(1, "bad file format");
 	for (i = 0; i < len; i++)
 		scan_next_line_st4(fp, i_ooov);
-//	for (i = 0; i < o*o*o*v; i++) {
-//		i_ooov[i] = read_next_double(fp);
-//	}
-//	skip_line(fp);
 	skip_line(fp);
 	if (fscanf(fp, "%zu\n", &len) != 1)
 		errx(1, "bad file format");
 	for (i = 0; i < len; i++)
 		scan_next_line_st4(fp, i_oovv);
-//	for (i = 0; i < o*o*v*v; i++) {
-//		i_oovv[i] = read_next_double(fp);
-//	}
-//	skip_line(fp);
-
-//	skip_line(fp);
-//	if (fscanf(fp, "%zu\n", &len) != 1)
-//		errx(1, "bad file format");
-//	for (i = 0; i < len; i++)
-//		scan_next_line_st4(fp, i_ovvv);
-
-//	for (i = 0; i < o*v*v*v; i++) {
-//		i_ovvv[i] = read_next_double(fp);
-//	}
-//	for (i = 0; i < o*o*v*v; i++) {
-//		t2[i] = read_next_double(fp);
-//	}
 	skip_line(fp);
-	for (i = 0; i < o*v*x; i++) {
-		ovx[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < v*v*x; i++) {
-		vvx[i] = read_next_double(fp);
+	if (x == 0) { /* full */
+		if (fscanf(fp, "%zu\n", &len) != 1)
+			errx(1, "bad file format");
+		for (i = 0; i < len; i++)
+			scan_next_line_st4(fp, i_ovvv);
+	} else { /* ri */
+		for (i = 0; i < o*v*x; i++)
+			ovx[i] = read_next_double(fp);
+		skip_line(fp);
+		skip_line(fp);
+		for (i = 0; i < v*v*x; i++)
+			vvx[i] = read_next_double(fp);
 	}
 	fclose(fp);
 }
@@ -447,7 +440,7 @@ setup_offsets(size_t ldim, struct st4 *st)
 int
 main(int argc, char **argv)
 {
-	size_t o = 4, v = 20, x = 100;
+	size_t o = 0, v = 0, x = 0;
 	double *d_ov, *f_ov;
 	//double *t2, *i_ooov, *i_oovv, *i_ovvv;
 	double *t1, *ovx, *vvx;
@@ -484,6 +477,9 @@ main(int argc, char **argv)
 	argv += optind;
 	argc -= optind;
 
+	if (testpath == NULL)
+		errx(1, "specify test data file");
+
 	if (testpath)
 		load_test_header(testpath, &o, &v, &x, &e_ref);
 	d_ov = xmalloc(o*v * sizeof(double));
@@ -496,16 +492,16 @@ main(int argc, char **argv)
 	ovx = xmalloc(o*v*x * sizeof(double));
 	vvx = xmalloc(v*v*x * sizeof(double));
 
-	if (rank == 0) {
-		if (testpath) {
-			load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
-			    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
-		} else {
-			errx(1, "unsupported");
+//	if (rank == 0) {
+//		if (testpath) {
+	load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
+	    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
+//		} else {
+//			errx(1, "unsupported");
 //			load_random_data(o, v, d_ov, f_ov, i_ooov,
 //			    i_oovv, i_ovvv, t1, t2);
-		}
-	}
+//		}
+//	}
 
 	setup_offsets(v, &tt2);
 	setup_offsets(v, &it_ooov);
@@ -538,8 +534,12 @@ main(int argc, char **argv)
 		tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
 	}
-	e_pt = ccsd_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
-	    &it_oovv, &it_ovvv, ovx, vvx);
+	if (x == 0)
+		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, &tt2, &it_ooov,
+		    &it_oovv, &it_ovvv);
+	else
+		e_pt = ccsd_ri_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
+		    &it_oovv, ovx, vvx);
 	if (rank == 0) {
 		tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
