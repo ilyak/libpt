@@ -4,9 +4,9 @@ LDFLAGS=
 LIBS= -lblas -lg2c -lm
 
 #CC= mpicc
-#CFLAGS= -Wall -Wextra -g -O3 -fopenmp
+#CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp
 #LDFLAGS=
-#LIBS= -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lm
+#LIBS=
 
 ALL_O= pt.o ptcmd.o strtonum.o reallocarray.o
 RM= rm -f
@@ -17,15 +17,16 @@ pt: $(ALL_O)
 	$(CC) -o $@ $(CFLAGS) $(ALL_O) $(LDFLAGS) $(LIBS)
 
 check: pt
-	@./pt -t tests/pt01new.dat && echo success
-	@./pt -t tests/pt02new.dat && echo success
-	@./pt -t tests/pt03new.dat && echo success
-	@./pt -t tests/pt04new.dat && echo success
-	@./pt -t tests/pt05new.dat && echo success
-	@./pt -t tests/pt06new.dat && echo success
-	@./pt -t tests/pt07new.dat && echo success
-	@./pt -t tests/pt08new.dat && echo success
-	@./pt -t tests/pt09new.dat && echo success
+	@echo pt01 && ./pt -t tests/pt01.dat && echo success
+	@echo pt02 && ./pt -t tests/pt02.dat && echo success
+	@echo pt03 && ./pt -t tests/pt03.dat && echo success
+	@echo pt04 && ./pt -t tests/pt04.dat && echo success
+	@echo pt05 && ./pt -t tests/pt05.dat && echo success
+	@echo pt06 && ./pt -t tests/pt06.dat && echo success
+	@echo pt07 && ./pt -t tests/pt07.dat && echo success
+	@echo pt08 && ./pt -t tests/pt08.dat && echo success
+	@echo pt09 && ./pt -t tests/pt09.dat && echo success
+	@echo ri01 && ./pt -t tests/ri01.dat && echo success
 
 clean:
 	$(RM) $(ALL_O) pt gmon.out *.core *.log
