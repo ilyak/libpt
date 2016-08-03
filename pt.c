@@ -108,10 +108,9 @@ void dgemm_(char *, char *, int *, int *, int *, double *, double *,
     int *, double *, int *, double *, double *, int *);
 
 static void
-gemm(int m, int n, int k, const double *a, const double *b, double *c)
+gemm(int m, int n, int k, double alpha, const double *a, const double *b,
+    double beta, double *c)
 {
-	double alpha = 1.0;
-	double beta = 0.0;
 	int lda = m;
 	int ldb = k;
 	int ldc = m;
@@ -128,7 +127,7 @@ ccsd_t3a(size_t o, size_t v, size_t x, size_t a, size_t b, size_t c,
     const struct st4 *i_ovvv, const double *ovx, const double *vvx,
     double *work)
 {
-	double *moo1, *mov, *mooo, *mvoo;
+	double *moo1, *mov, *mooo, *mvoo, *mox, *mvx;
 	size_t i, j, k, l, d;
 
 	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
@@ -152,7 +151,7 @@ ccsd_t3a(size_t o, size_t v, size_t x, size_t a, size_t b, size_t c,
 		d = i_ooov->idx[l].c;
 		MOOO(j, k, d) = i_ooov->data[l];
 	}
-	gemm(o, o*o, o, moo1, mooo, &(T3AABC(0,0,0)));
+	gemm(o, o*o, o, 1.0, moo1, mooo, 0.0, &(T3AABC(0,0,0)));
 
 	memset(moo1, 0, o*o*sizeof(double));
 	for (l = t2->offset[b]; l < t2->offset[b+1]; l++) {
@@ -169,7 +168,7 @@ ccsd_t3a(size_t o, size_t v, size_t x, size_t a, size_t b, size_t c,
 		d = i_ooov->idx[l].c;
 		MOOO(i, k, d) = i_ooov->data[l];
 	}
-	gemm(o, o*o, o, moo1, mooo, &(T3ACBA(0,0,0)));
+	gemm(o, o*o, o, 1.0, moo1, mooo, 0.0, &(T3ACBA(0,0,0)));
 
 	memset(moo1, 0, o*o*sizeof(double));
 	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
@@ -186,10 +185,12 @@ ccsd_t3a(size_t o, size_t v, size_t x, size_t a, size_t b, size_t c,
 		d = i_ooov->idx[l].c;
 		MOOO(j, i, d) = i_ooov->data[l];
 	}
-	gemm(o, o*o, o, moo1, mooo, &(T3AACB(0,0,0)));
+	gemm(o, o*o, o, 1.0, moo1, mooo, 0.0, &(T3AACB(0,0,0)));
 
 	mov = work;
 	mvoo = mov + o*v;
+	mox = mvoo + v*o*o;
+	mvx = mox + o*x;
 
 	memset(mvoo, 0, v*o*o*sizeof(double));
 	for (l = t2->offset[a]; l < t2->offset[a+1]; l++) {
@@ -214,8 +215,27 @@ ccsd_t3a(size_t o, size_t v, size_t x, size_t a, size_t b, size_t c,
 			MOV(k, d) += OVX(k, b, l) * VVX(d, c, l) -
 				     OVX(k, c, l) * VVX(d, b, l);
 		}}}
+
+//		for (k = 0; k < o; k++) {
+//		for (l = 0; l < x; l++) {
+//			MOX(k, l) = OVX(k, b, l);
+//		}}
+//		for (d = 0; d < v; d++) {
+//		for (l = 0; l < x; l++) {
+//			MVX(d, l) = VVX(d, c, l);
+//		}}
+//		gemm(o, v, x, mox, mvx, mov);
+//		for (k = 0; k < o; k++) {
+//		for (l = 0; l < x; l++) {
+//			MOX(k, l) = OVX(k, c, l);
+//		}}
+//		for (d = 0; d < v; d++) {
+//		for (l = 0; l < x; l++) {
+//			MVX(d, l) = VVX(d, b, l);
+//		}}
+//		gemm(o, v, x, mox, mvx, mov);
 	}
-	gemm(o*o, o, v, mvoo, mov, &(T3BABC(0,0,0)));
+	gemm(o*o, o, v, 1.0, mvoo, mov, 0.0, &(T3BABC(0,0,0)));
 
 	memset(mvoo, 0, v*o*o*sizeof(double));
 	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
@@ -241,7 +261,7 @@ ccsd_t3a(size_t o, size_t v, size_t x, size_t a, size_t b, size_t c,
 				     OVX(k, a, l) * VVX(d, b, l);
 		}}}
 	}
-	gemm(o*o, o, v, mvoo, mov, &(T3BCBA(0,0,0)));
+	gemm(o*o, o, v, 1.0, mvoo, mov, 0.0, &(T3BCBA(0,0,0)));
 
 	memset(mvoo, 0, v*o*o*sizeof(double));
 	for (l = t2->offset[b]; l < t2->offset[b+1]; l++) {
@@ -267,7 +287,7 @@ ccsd_t3a(size_t o, size_t v, size_t x, size_t a, size_t b, size_t c,
 				     OVX(k, c, l) * VVX(d, a, l);
 		}}}
 	}
-	gemm(o*o, o, v, mvoo, mov, &(T3BBAC(0,0,0)));
+	gemm(o*o, o, v, 1.0, mvoo, mov, 0.0, &(T3BBAC(0,0,0)));
 }
 
 static void
