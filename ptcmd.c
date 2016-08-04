@@ -52,16 +52,6 @@ xmalloc(size_t size)
 }
 
 static void *
-xcalloc(size_t nmemb, size_t size)
-{
-	void *p;
-
-	if ((p = calloc(nmemb, size)) == NULL)
-		err(1, "calloc");
-	return (p);
-}
-
-static void *
 xreallocarray(void *ptr, size_t nmemb, size_t size)
 {
 	void *new_ptr;
@@ -250,6 +240,7 @@ load_test_data(const char *testpath, size_t o, size_t v, size_t x, double *d_ov,
 	fclose(fp);
 }
 
+#if 0
 static double
 random_double(void)
 {
@@ -410,6 +401,7 @@ print_st(const struct st4 *st)
 		    st->idx[i].c, st->idx[i].d, st->data[i]);
 	}
 }
+#endif
 
 static void
 setup_offsets(size_t ldim, struct st4 *st)
