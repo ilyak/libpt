@@ -1,10 +1,10 @@
 CC= mpicc
-CFLAGS= -Wall -Wextra -g -O3
+CFLAGS= -std=c99 -Wall -Wextra -g -O3
 LDFLAGS=
 LIBS= -lblas -lg2c -lm
 
 #CC= mpicc
-#CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp
+#CFLAGS= -std=c99 -Wall -Wextra -g -O3 -mkl=sequential -fopenmp
 #LDFLAGS=
 #LIBS=
 
