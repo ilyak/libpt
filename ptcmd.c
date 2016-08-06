@@ -127,67 +127,13 @@ scan_next_line_st4(FILE *fp, struct st4 *st)
 	st->data[st->len-1] = val;
 }
 
-//static void
-//load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
-//    double *f_ov, double *i_ooov, double *i_oovv, double *i_ovvv,
-//    double *t1, double *t2)
-//{
-//	FILE *fp;
-//	size_t i;
-//
-//	if ((fp = fopen(testpath, "r")) == NULL)
-//		err(1, "unable to open %s", testpath);
-//
-//	skip_line(fp);
-//	skip_line(fp);
-//	for (i = 0; i < o*v; i++) {
-//		d_ov[i] = read_next_double(fp);
-//	}
-//	skip_line(fp);
-//	skip_line(fp);
-//	for (i = 0; i < o*v; i++) {
-//		f_ov[i] = read_next_double(fp);
-//	}
-//	skip_line(fp);
-//	skip_line(fp);
-//	for (i = 0; i < o*o*o*v; i++) {
-//		i_ooov[i] = read_next_double(fp);
-//	}
-//	skip_line(fp);
-//	skip_line(fp);
-//	for (i = 0; i < o*o*v*v; i++) {
-//		i_oovv[i] = read_next_double(fp);
-//	}
-//	skip_line(fp);
-//	skip_line(fp);
-//	for (i = 0; i < o*v*v*v; i++) {
-//		i_ovvv[i] = read_next_double(fp);
-//	}
-//	skip_line(fp);
-//	skip_line(fp);
-//	for (i = 0; i < o*v; i++) {
-//		t1[i] = read_next_double(fp);
-//	}
-//	skip_line(fp);
-//	skip_line(fp);
-//	for (i = 0; i < o*o*v*v; i++) {
-//		t2[i] = read_next_double(fp);
-//	}
-//	fclose(fp);
-//}
-
 static void
-load_test_data(const char *testpath, size_t o, size_t v, size_t x, double *d_ov,
-    double *f_ov, struct st4 *i_ooov, struct st4 *i_oovv, struct st4 *i_ovvv,
-    double *t1, struct st4 *t2, double *ovx, double *vvx)
+load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
+    double *f_ov, double *i_ooov, double *i_oovv, double *i_ovvv,
+    double *t1, double *t2)
 {
 	FILE *fp;
-	size_t i, len;
-
-	memset(t2, 0, sizeof(*t2));
-	memset(i_ooov, 0, sizeof(*i_ooov));
-	memset(i_oovv, 0, sizeof(*i_oovv));
-	memset(i_ovvv, 0, sizeof(*i_ovvv));
+	size_t i;
 
 	if ((fp = fopen(testpath, "r")) == NULL)
 		err(1, "unable to open %s", testpath);
@@ -209,36 +155,90 @@ load_test_data(const char *testpath, size_t o, size_t v, size_t x, double *d_ov,
 	}
 	skip_line(fp);
 	skip_line(fp);
-	if (fscanf(fp, "%zu\n", &len) != 1)
-		errx(1, "bad file format");
-	for (i = 0; i < len; i++)
-		scan_next_line_st4(fp, t2);
+	for (i = 0; i < o*o*v*v; i++) {
+		t2[i] = read_next_double(fp);
+	}
 	skip_line(fp);
-	if (fscanf(fp, "%zu\n", &len) != 1)
-		errx(1, "bad file format");
-	for (i = 0; i < len; i++)
-		scan_next_line_st4(fp, i_ooov);
 	skip_line(fp);
-	if (fscanf(fp, "%zu\n", &len) != 1)
-		errx(1, "bad file format");
-	for (i = 0; i < len; i++)
-		scan_next_line_st4(fp, i_oovv);
+	for (i = 0; i < o*o*o*v; i++) {
+		i_ooov[i] = read_next_double(fp);
+	}
 	skip_line(fp);
-	if (x == 0) { /* full */
-		if (fscanf(fp, "%zu\n", &len) != 1)
-			errx(1, "bad file format");
-		for (i = 0; i < len; i++)
-			scan_next_line_st4(fp, i_ovvv);
-	} else { /* ri */
-		for (i = 0; i < o*v*x; i++)
-			ovx[i] = read_next_double(fp);
-		skip_line(fp);
-		skip_line(fp);
-		for (i = 0; i < v*v*x; i++)
-			vvx[i] = read_next_double(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		i_oovv[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*v*v*v; i++) {
+		i_ovvv[i] = read_next_double(fp);
 	}
 	fclose(fp);
 }
+
+//static void
+//load_test_data(const char *testpath, size_t o, size_t v, size_t x, double *d_ov,
+//    double *f_ov, struct st4 *i_ooov, struct st4 *i_oovv, struct st4 *i_ovvv,
+//    double *t1, struct st4 *t2, double *ovx, double *vvx)
+//{
+//	FILE *fp;
+//	size_t i, len;
+//
+//	memset(t2, 0, sizeof(*t2));
+//	memset(i_ooov, 0, sizeof(*i_ooov));
+//	memset(i_oovv, 0, sizeof(*i_oovv));
+//	memset(i_ovvv, 0, sizeof(*i_ovvv));
+//
+//	if ((fp = fopen(testpath, "r")) == NULL)
+//		err(1, "unable to open %s", testpath);
+//
+//	skip_line(fp);
+//	skip_line(fp);
+//	for (i = 0; i < o*v; i++) {
+//		d_ov[i] = read_next_double(fp);
+//	}
+//	skip_line(fp);
+//	skip_line(fp);
+//	for (i = 0; i < o*v; i++) {
+//		f_ov[i] = read_next_double(fp);
+//	}
+//	skip_line(fp);
+//	skip_line(fp);
+//	for (i = 0; i < o*v; i++) {
+//		t1[i] = read_next_double(fp);
+//	}
+//	skip_line(fp);
+//	skip_line(fp);
+//	if (fscanf(fp, "%zu\n", &len) != 1)
+//		errx(1, "bad file format");
+//	for (i = 0; i < len; i++)
+//		scan_next_line_st4(fp, t2);
+//	skip_line(fp);
+//	if (fscanf(fp, "%zu\n", &len) != 1)
+//		errx(1, "bad file format");
+//	for (i = 0; i < len; i++)
+//		scan_next_line_st4(fp, i_ooov);
+//	skip_line(fp);
+//	if (fscanf(fp, "%zu\n", &len) != 1)
+//		errx(1, "bad file format");
+//	for (i = 0; i < len; i++)
+//		scan_next_line_st4(fp, i_oovv);
+//	skip_line(fp);
+//	if (x == 0) { /* full */
+//		if (fscanf(fp, "%zu\n", &len) != 1)
+//			errx(1, "bad file format");
+//		for (i = 0; i < len; i++)
+//			scan_next_line_st4(fp, i_ovvv);
+//	} else { /* ri */
+//		for (i = 0; i < o*v*x; i++)
+//			ovx[i] = read_next_double(fp);
+//		skip_line(fp);
+//		skip_line(fp);
+//		for (i = 0; i < v*v*x; i++)
+//			vvx[i] = read_next_double(fp);
+//	}
+//	fclose(fp);
+//}
 
 #if 0
 static double
@@ -429,12 +429,20 @@ setup_offsets(size_t ldim, struct st4 *st)
 		st->offset[++cur] = st->len;
 }
 
+#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
+#define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
+#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
+#define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
+#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
+#define T2T(a, b, i, j) t2t[a*v*o*o+b*o*o+i*o+j]
+
 int
 main(int argc, char **argv)
 {
 	size_t o = 0, v = 0, x = 0;
+	size_t i,j,k,a,b,c;
 	double *d_ov, *f_ov;
-	//double *t2, *i_ooov, *i_oovv, *i_ovvv;
+	double *t2, *t2t, *i_ooov, *i_oovv, *i_ovvv, *i_oovo, *i_vvov;
 	double *t1, *ovx, *vvx;
 	double e_pt, e_ref = 0.0;
 	struct st4 tt2, it_ooov, it_oovv, it_ovvv;
@@ -477,17 +485,22 @@ main(int argc, char **argv)
 	d_ov = xmalloc(o*v * sizeof(double));
 	f_ov = xmalloc(o*v * sizeof(double));
 	t1 = xmalloc(o*v * sizeof(double));
-	//t2 = xmalloc(o*o*v*v * sizeof(double));
-	//i_ooov = xmalloc(o*o*o*v * sizeof(double));
-	//i_oovv = xmalloc(o*o*v*v * sizeof(double));
-	//i_ovvv = xmalloc(o*v*v*v * sizeof(double));
+	t2 = xmalloc(o*o*v*v * sizeof(double));
+	t2t = xmalloc(o*o*v*v * sizeof(double));
+	i_ooov = xmalloc(o*o*o*v * sizeof(double));
+	i_oovo = xmalloc(o*o*o*v * sizeof(double));
+	i_oovv = xmalloc(o*o*v*v * sizeof(double));
+	i_ovvv = xmalloc(o*v*v*v * sizeof(double));
+	i_vvov = xmalloc(o*v*v*v * sizeof(double));
 	ovx = xmalloc(o*v*x * sizeof(double));
 	vvx = xmalloc(v*v*x * sizeof(double));
 
 //	if (rank == 0) {
 //		if (testpath) {
-	load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
-	    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
+	//load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
+	//    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
+	load_test_data(testpath, o, v, d_ov, f_ov, i_ooov,
+	    i_oovv, i_ovvv, t1, t2);
 //		} else {
 //			errx(1, "unsupported");
 //			load_random_data(o, v, d_ov, f_ov, i_ooov,
@@ -495,10 +508,29 @@ main(int argc, char **argv)
 //		}
 //	}
 
-	setup_offsets(v, &tt2);
-	setup_offsets(v, &it_ooov);
-	setup_offsets(v, &it_oovv);
-	setup_offsets(v, &it_ovvv);
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+		T2T(a,b,i,j) = T2(i,j,a,b);
+	}}}}
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+	for (a = 0; a < v; a++) {
+		I_OOVO(i,j,a,k) = I_OOOV(i,j,k,a);
+	}}}}
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+		I_VVOV(b,c,i,a) = I_OVVV(i,a,b,c);
+	}}}}
+
+	//setup_offsets(v, &tt2);
+	//setup_offsets(v, &it_ooov);
+	//setup_offsets(v, &it_oovv);
+	//setup_offsets(v, &it_ovvv);
 
 	//XXX
 //	MPI_Bcast(d_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -526,12 +558,15 @@ main(int argc, char **argv)
 		tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
 	}
-	if (x == 0)
-		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, &tt2, &it_ooov,
-		    &it_oovv, &it_ovvv);
-	else
-		e_pt = ccsd_ri_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
-		    &it_oovv, ovx, vvx);
+	if (x == 0) {
+		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2, t2t, i_oovo,
+		    i_oovv, i_vvov);
+		//e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, &tt2, &it_ooov,
+		//    &it_oovv, &it_ovvv);
+	}
+	//} else
+	//	e_pt = ccsd_ri_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
+	//	    &it_oovv, ovx, vvx);
 	if (rank == 0) {
 		tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
@@ -547,11 +582,11 @@ main(int argc, char **argv)
 
 	free(d_ov);
 	free(f_ov);
-	//free(i_ooov);
-	//free(i_oovv);
-	//free(i_ovvv);
+	free(i_ooov);
+	free(i_oovv);
+	free(i_ovvv);
 	free(t1);
-	//free(t2);
+	free(t2);
 	free(ovx);
 	free(vvx);
 	MPI_Finalize();
