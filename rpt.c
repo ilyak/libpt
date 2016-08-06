@@ -17,6 +17,7 @@
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h> /*XXX*/
 
 #include <mpi.h>
 #ifdef _OPENMP
@@ -27,11 +28,14 @@
 
 #define D_OV(i, a) d_ov[i*v+a]
 #define F_OV(i, a) f_ov[i*v+a]
-//#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
-//#define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
-//#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
+#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
+#define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
+#define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
+#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
+#define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
 #define T1(i, a) t1[i*v+a]
-//#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
+#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
+#define T2T(a, b, i, j) t2t[a*v*o*o+b*o*o+i*o+j]
 #define T3AABC(i, j, k) t3a[0*o*o*o+i*o*o+j*o+k]
 #define T3ACBA(i, j, k) t3a[1*o*o*o+i*o*o+j*o+k]
 #define T3AACB(i, j, k) t3a[2*o*o*o+i*o*o+j*o+k]
@@ -48,453 +52,247 @@
 #define MOX(i, j) mox[i*x+j]
 #define MXV(i, j) mxv[i*v+j]
 
-static void
-ccsd_asymm_t3a(size_t o, double *t3a)
+static double
+comp_t3a_ijkabc_11(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
 {
-	size_t i, j, k;
+	double s = 0.0;
+	const double *t2_p = &T2(i,j,a,0);
+	const double *i_vvov_p = &I_VVOV(b,c,k,0);
+	size_t l;
 
-//	for (i = 0; i < o; i++) {
-//	for (j = 0; j < o; j++) {
-//	for (k = 0; k < o; k++) {
-//		double x;
-//		x = T3AABC(i, j, k) -
-//		    T3ACBA(i, j, k) -
-//		    T3AACB(i, j, k);
-//		T3AABC(i, j, k) = x;
-//	}}}
-
-	for (i = 0; i < o/2; i++) {
-	for (j = i+1; j < o/2; j++) {
-	for (k = j+1; k < o; k++) {
-		double abcijk, abckji, abcikj;
-		abcijk = T3AABC(i, j, k) -
-			 T3ACBA(i, j, k) -
-			 T3AACB(i, j, k);
-		abckji = T3AABC(k, j, i) -
-			 T3ACBA(k, j, i) -
-			 T3AACB(k, j, i);
-		abcikj = T3AABC(i, k, j) -
-			 T3ACBA(i, k, j) -
-			 T3AACB(i, k, j);
-		T3AABC(i, j, k) = abcijk - abckji - abcikj;
-//		x = T3AABC(i, j, k) -
-//		    T3AABC(k, j, i) -
-//		    T3AABC(i, k, j);
-//		T3AABC(i, j, k) = x;
-	}}}
-}
-
-static void
-ccsd_asymm_t3b(size_t o, double *t3b)
-{
-	size_t i, j, k;
-
-//	for (i = 0; i < o; i++) {
-//	for (j = 0; j < o; j++) {
-//	for (k = 0; k < o; k++) {
-//		double x;
-//		x = T3BABC(i, j, k) -
-//		    T3BBAC(i, j, k) -
-//		    T3BCBA(i, j, k);
-//		T3BABC(i, j, k) = x;
-//	}}}
-
-	for (i = 0; i < o/2; i++) {
-	for (j = i+1; j < o/2; j++) {
-	for (k = j+1; k < o; k++) {
-		double abcijk, abcjik, abckji;
-		abcijk = T3BABC(i, j, k) -
-			 T3BBAC(i, j, k) -
-			 T3BCBA(i, j, k);
-		abcjik = T3BABC(j, i, k) -
-			 T3BBAC(j, i, k) -
-			 T3BCBA(j, i, k);
-		abckji = T3BABC(k, j, i) -
-			 T3BBAC(k, j, i) -
-			 T3BCBA(k, j, i);
-		T3BABC(i, j, k) = abcijk - abcjik - abckji;
-//		x = T3BABC(i, j, k) -
-//		    T3BABC(j, i, k) -
-//		    T3BABC(k, j, i);
-//		T3BABC(i, j, k) = x;
-	}}}
-}
-
-void dgemm_(char *, char *, int *, int *, int *, double *, double *,
-    int *, double *, int *, double *, double *, int *);
-
-static void
-gemm(int m, int n, int k, double alpha, const double *a, const double *b,
-    double beta, double *c)
-{
-	int lda = m;
-	int ldb = k;
-	int ldc = m;
-	char transa = 'N';
-	char transb = 'N';
-
-	dgemm_(&transa, &transb, &m, &n, &k, &alpha, (double *)a, &lda,
-	    (double *)b, &ldb, &beta, c, &ldc);
-}
-
-static void
-ccsd_t3a(size_t o, size_t v, size_t x, size_t a, size_t b, size_t c,
-    double *t3a, double *t3b, const struct st4 *t2, const struct st4 *i_ooov,
-    const struct st4 *i_ovvv, const double *ovx, const double *vvx,
-    double *work)
-{
-	double *moo1, *mov, *mooo, *mvoo, *mox, *mxv;
-	size_t i, j, k, l, d;
-
-	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
 	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
 
-	moo1 = work;
-	mooo = moo1 + o*o;
+	for (l = 0; l < v/2; l++)
+		s += t2_p[l] * i_vvov_p[l];
 
-	memset(moo1, 0, o*o*sizeof(double));
-	for (l = t2->offset[b]; l < t2->offset[b+1]; l++) {
-		if (t2->idx[l].c == a) {
-			i = t2->idx[l].a;
-			d = t2->idx[l].b;
-			MOO1(d, i) = t2->data[l];
-		}
-	}
-	memset(mooo, 0, o*o*o*sizeof(double));
-	for (l = i_ooov->offset[c]; l < i_ooov->offset[c+1]; l++) {
-		j = i_ooov->idx[l].a;
-		k = i_ooov->idx[l].b;
-		d = i_ooov->idx[l].c;
-		MOOO(j, k, d) = i_ooov->data[l];
-	}
-	gemm(o, o*o, o, 1.0, moo1, mooo, 0.0, &(T3AABC(0,0,0)));
-
-	memset(moo1, 0, o*o*sizeof(double));
-	for (l = t2->offset[b]; l < t2->offset[b+1]; l++) {
-		if (t2->idx[l].c == c) {
-			j = t2->idx[l].a;
-			d = t2->idx[l].b;
-			MOO1(d, j) = t2->data[l];
-		}
-	}
-	memset(mooo, 0, o*o*o*sizeof(double));
-	for (l = i_ooov->offset[a]; l < i_ooov->offset[a+1]; l++) {
-		i = i_ooov->idx[l].a;
-		k = i_ooov->idx[l].b;
-		d = i_ooov->idx[l].c;
-		MOOO(i, k, d) = i_ooov->data[l];
-	}
-	gemm(o, o*o, o, 1.0, moo1, mooo, 0.0, &(T3ACBA(0,0,0)));
-
-	memset(moo1, 0, o*o*sizeof(double));
-	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
-		if (t2->idx[l].c == a) {
-			k = t2->idx[l].a;
-			d = t2->idx[l].b;
-			MOO1(d, k) = t2->data[l];
-		}
-	}
-	memset(mooo, 0, o*o*o*sizeof(double));
-	for (l = i_ooov->offset[b]; l < i_ooov->offset[b+1]; l++) {
-		j = i_ooov->idx[l].a;
-		i = i_ooov->idx[l].b;
-		d = i_ooov->idx[l].c;
-		MOOO(j, i, d) = i_ooov->data[l];
-	}
-	gemm(o, o*o, o, 1.0, moo1, mooo, 0.0, &(T3AACB(0,0,0)));
-
-	mov = work;
-	mvoo = mov + o*v;
-	mox = mvoo + v*o*o;
-	mxv = mox + o*x;
-
-	memset(mvoo, 0, v*o*o*sizeof(double));
-	for (l = t2->offset[a]; l < t2->offset[a+1]; l++) {
-		i = t2->idx[l].a;
-		j = t2->idx[l].b;
-		d = t2->idx[l].c;
-		MVOO(d, i, j) = t2->data[l];
-	}
-	if (x == 0) {
-		memset(mov, 0, o*v*sizeof(double));
-		for (l = i_ovvv->offset[c]; l < i_ovvv->offset[c+1]; l++) {
-			if (i_ovvv->idx[l].c == b) {
-				k = i_ovvv->idx[l].a;
-				d = i_ovvv->idx[l].b;
-				MOV(k, d) = i_ovvv->data[l];
-			}
-		}
-	} else {
-//		for (k = 0; k < o; k++) {
-//		for (d = 0; d < v; d++) {
-//		for (l = 0; l < x; l++) {
-//			MOV(k, d) += OVX(k, b, l) * VVX(d, c, l) -
-//				     OVX(k, c, l) * VVX(d, b, l);
-//		}}}
-
-		for (k = 0; k < o; k++) {
-		for (l = 0; l < x; l++) {
-			MOX(k, l) = OVX(k, b, l);
-		}}
-		for (l = 0; l < x; l++) {
-		for (d = 0; d < v; d++) {
-			MXV(l, d) = VVX(d, c, l);
-		}}
-		gemm(v, o, x, 1.0, mxv, mox, 0.0, mov);
-		for (k = 0; k < o; k++) {
-		for (l = 0; l < x; l++) {
-			MOX(k, l) = OVX(k, c, l);
-		}}
-		for (l = 0; l < x; l++) {
-		for (d = 0; d < v; d++) {
-			MXV(l, d) = VVX(d, b, l);
-		}}
-		gemm(v, o, x, -1.0, mxv, mox, 1.0, mov);
-	}
-	gemm(o*o, o, v, 1.0, mvoo, mov, 0.0, &(T3BABC(0,0,0)));
-
-	memset(mvoo, 0, v*o*o*sizeof(double));
-	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
-		k = t2->idx[l].a;
-		j = t2->idx[l].b;
-		d = t2->idx[l].c;
-		MVOO(d, k, j) = t2->data[l];
-	}
-	if (x == 0) {
-		memset(mov, 0, o*v*sizeof(double));
-		for (l = i_ovvv->offset[a]; l < i_ovvv->offset[a+1]; l++) {
-			if (i_ovvv->idx[l].c == b) {
-				i = i_ovvv->idx[l].a;
-				d = i_ovvv->idx[l].b;
-				MOV(i, d) = i_ovvv->data[l];
-			}
-		}
-	} else {
-//		for (k = 0; k < o; k++) {
-//		for (d = 0; d < v; d++) {
-//		for (l = 0; l < x; l++) {
-//			MOV(k, d) += OVX(k, b, l) * VVX(d, a, l) -
-//				     OVX(k, a, l) * VVX(d, b, l);
-//		}}}
-
-		for (k = 0; k < o; k++) {
-		for (l = 0; l < x; l++) {
-			MOX(k, l) = OVX(k, b, l);
-		}}
-		for (l = 0; l < x; l++) {
-		for (d = 0; d < v; d++) {
-			MXV(l, d) = VVX(d, a, l);
-		}}
-		gemm(v, o, x, 1.0, mxv, mox, 0.0, mov);
-		for (k = 0; k < o; k++) {
-		for (l = 0; l < x; l++) {
-			MOX(k, l) = OVX(k, a, l);
-		}}
-		for (l = 0; l < x; l++) {
-		for (d = 0; d < v; d++) {
-			MXV(l, d) = VVX(d, b, l);
-		}}
-		gemm(v, o, x, -1.0, mxv, mox, 1.0, mov);
-	}
-	gemm(o*o, o, v, 1.0, mvoo, mov, 0.0, &(T3BCBA(0,0,0)));
-
-	memset(mvoo, 0, v*o*o*sizeof(double));
-	for (l = t2->offset[b]; l < t2->offset[b+1]; l++) {
-		i = t2->idx[l].a;
-		k = t2->idx[l].b;
-		d = t2->idx[l].c;
-		MVOO(d, i, k) = t2->data[l];
-	}
-	if (x == 0) {
-		memset(mov, 0, o*v*sizeof(double));
-		for (l = i_ovvv->offset[c]; l < i_ovvv->offset[c+1]; l++) {
-			if (i_ovvv->idx[l].c == a) {
-				j = i_ovvv->idx[l].a;
-				d = i_ovvv->idx[l].b;
-				MOV(j, d) = i_ovvv->data[l];
-			}
-		}
-	} else {
-//		for (k = 0; k < o; k++) {
-//		for (d = 0; d < v; d++) {
-//		for (l = 0; l < x; l++) {
-//			MOV(k, d) += OVX(k, a, l) * VVX(d, c, l) -
-//				     OVX(k, c, l) * VVX(d, a, l);
-//		}}}
-
-		for (k = 0; k < o; k++) {
-		for (l = 0; l < x; l++) {
-			MOX(k, l) = OVX(k, a, l);
-		}}
-		for (l = 0; l < x; l++) {
-		for (d = 0; d < v; d++) {
-			MXV(l, d) = VVX(d, c, l);
-		}}
-		gemm(v, o, x, 1.0, mxv, mox, 0.0, mov);
-		for (k = 0; k < o; k++) {
-		for (l = 0; l < x; l++) {
-			MOX(k, l) = OVX(k, c, l);
-		}}
-		for (l = 0; l < x; l++) {
-		for (d = 0; d < v; d++) {
-			MXV(l, d) = VVX(d, a, l);
-		}}
-		gemm(v, o, x, -1.0, mxv, mox, 1.0, mov);
-	}
-	gemm(o*o, o, v, 1.0, mvoo, mov, 0.0, &(T3BBAC(0,0,0)));
-}
-
-static void
-ccsd_t3b(size_t o, size_t v, size_t a, size_t b, size_t c,
-    double *t3b, const double *f_ov, const double *t1,
-    const struct st4 *t2, const struct st4 *i_oovv, double *work)
-{
-	double *moo1, *moo2;
-	size_t i, j, k, l;
-
-	/* t3b(i,j,k,a,b,c) = t1(i,a)*i_oovv(j,k,b,c)+f_ov(i,a)*t2(j,k,b,c) */
-
-	moo1 = work;
-	moo2 = moo1 + o*o;
-
-	memset(moo1, 0, o*o*sizeof(double));
-	for (l = i_oovv->offset[c]; l < i_oovv->offset[c+1]; l++) {
-		if (i_oovv->idx[l].c == b) {
-			j = i_oovv->idx[l].a;
-			k = i_oovv->idx[l].b;
-			MOO1(j, k) = i_oovv->data[l];
-		}
-	}
-	memset(moo2, 0, o*o*sizeof(double));
-	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
-		if (t2->idx[l].c == b) {
-			j = t2->idx[l].a;
-			k = t2->idx[l].b;
-			MOO2(j, k) = t2->data[l];
-		}
-	}
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-		T3BABC(i, j, k) = T1(i, a) * MOO1(j, k) +
-		    F_OV(i, a) * MOO2(j, k);
-	}}}
-
-	memset(moo1, 0, o*o*sizeof(double));
-	for (l = i_oovv->offset[c]; l < i_oovv->offset[c+1]; l++) {
-		if (i_oovv->idx[l].c == a) {
-			j = i_oovv->idx[l].a;
-			k = i_oovv->idx[l].b;
-			MOO1(j, k) = i_oovv->data[l];
-		}
-	}
-	memset(moo2, 0, o*o*sizeof(double));
-	for (l = t2->offset[c]; l < t2->offset[c+1]; l++) {
-		if (t2->idx[l].c == a) {
-			j = t2->idx[l].a;
-			k = t2->idx[l].b;
-			MOO2(j, k) = t2->data[l];
-		}
-	}
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-		T3BBAC(i, j, k) = T1(i, b) * MOO1(j, k) +
-		    F_OV(i, b) * MOO2(j, k);
-	}}}
-
-	memset(moo1, 0, o*o*sizeof(double));
-	for (l = i_oovv->offset[a]; l < i_oovv->offset[a+1]; l++) {
-		if (i_oovv->idx[l].c == b) {
-			j = i_oovv->idx[l].a;
-			k = i_oovv->idx[l].b;
-			MOO1(j, k) = i_oovv->data[l];
-		}
-	}
-	memset(moo2, 0, o*o*sizeof(double));
-	for (l = t2->offset[a]; l < t2->offset[a+1]; l++) {
-		if (t2->idx[l].c == b) {
-			j = t2->idx[l].a;
-			k = t2->idx[l].b;
-			MOO2(j, k) = t2->data[l];
-		}
-	}
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-		T3BCBA(i, j, k) = T1(i, c) * MOO1(j, k) +
-		    F_OV(i, c) * MOO2(j, k);
-	}}}
+	return (s);
 }
 
 static double
-ccsd_pt_energy(size_t o, size_t v, size_t a, size_t b, size_t c,
-    const double *t3a, const double *t3b, const double *d_ov)
+comp_t3a_ijkabc_12(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
 {
-	double dn, e_pt = 0.0;
-	size_t i, j, k;
+	double s = 0.0;
+	const double *t2_p = &T2(i,j,a,0);
+	const double *i_vvov_p = &I_VVOV(b,c,k,0);
+	size_t l;
 
-	for (i = 0; i < o/2; i++) {
-	for (j = i+1; j < o/2; j++) {
-	for (k = j+1; k < o; k++) {
+	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
+
+	for (l = v/2; l < v; l++)
+		s += t2_p[l] * i_vvov_p[l];
+
+	return (s);
+}
+
+static double
+comp_t3a_ijkabc_21(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
+{
+	double s = 0.0;
+	const double *t2t_p = &T2T(a,b,i,0);
+	const double *i_oovo_p = &I_OOVO(j,k,c,0);
+	size_t l;
+
+	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
+
+	for (l = 0; l < o/2; l++)
+		s += t2t_p[l] * i_oovo_p[l];
+
+	return (s);
+}
+
+static double
+comp_t3a_ijkabc_22(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
+{
+	double s = 0.0;
+	const double *t2t_p = &T2T(a,b,i,0);
+	const double *i_oovo_p = &I_OOVO(j,k,c,0);
+	size_t l;
+
+	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
+
+	for (l = o/2; l < o; l++)
+		s += t2t_p[l] * i_oovo_p[l];
+
+	return (s);
+}
+
+static double
+comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t c, const double *t1, const double *i_oovv,
+    const double *f_ov, const double *t2)
+{
+	return T1(i,a)*I_OOVV(j,k,b,c) + F_OV(i,a)*T2(j,k,b,c);
+}
+
+static double
+ccsd_pt_energy(size_t o, size_t v,
+    const double *d_ov, const double *f_ov, const double *t1,
+    const double *t2, const double *t2t, const double *i_oovo,
+    const double *i_oovv, const double *i_vvov)
+{
+	double e_pt1 = 0.0, e_pt2 = 0.0;
+
+#pragma omp parallel for reduction(+:e_pt1) schedule(dynamic)
+	for (size_t a = 0; a < v/2; a++) {
+	for (size_t b = a+1; b < v/2; b++) {
+	for (size_t c = b+1; c < v/2; c++) {
+	for (size_t i = 0; i < o/2; i++) {
+	for (size_t j = i+1; j < o/2; j++) {
+	for (size_t k = j+1; k < o/2; k++) {
+		double t3ax1, t3ax2, t3bx, dn;
+		double ijkabc, jikabc, kjiabc, ikjabc;
+		ijkabc = comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2,i_vvov);
+		kjiabc = comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2,i_vvov);
+		ikjabc = comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2,i_vvov);
+		t3ax1 = ijkabc - kjiabc - ikjabc;
+
+		ijkabc = comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t,i_oovo) -
+			 comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t,i_oovo) -
+			 comp_t3a_ijkabc_21(o,v,i,j,k,a,c,b,t2t,i_oovo);
+		jikabc = comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t,i_oovo) -
+			 comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t,i_oovo) -
+			 comp_t3a_ijkabc_21(o,v,j,i,k,a,c,b,t2t,i_oovo);
+		kjiabc = comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t,i_oovo) -
+			 comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t,i_oovo) -
+			 comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t,i_oovo);
+		t3ax2 = ijkabc - jikabc - kjiabc;
+
+		ijkabc = comp_t3b_ijkabc(o,v,i,j,k,a,b,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,i,j,k,b,a,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,i,j,k,c,b,a,t1,i_oovv,f_ov,t2);
+		jikabc = comp_t3b_ijkabc(o,v,j,i,k,a,b,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,j,i,k,b,a,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,j,i,k,c,b,a,t1,i_oovv,f_ov,t2);
+		kjiabc = comp_t3b_ijkabc(o,v,k,j,i,a,b,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,k,j,i,b,a,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv,f_ov,t2);
+		t3bx = ijkabc - jikabc - kjiabc;
+
 		dn = D_OV(i, a) + D_OV(j, b) + D_OV(k, c);
-		e_pt += T3AABC(i, j, k) * T3BABC(i, j, k) / dn;
-	}}}
+		e_pt1 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
+	}}}}}}
 
-	return (e_pt);
+	e_pt1 *= 2.0;
+	printf("aaaaaa %g\n", e_pt1);
+
+#pragma omp parallel for reduction(+:e_pt2) schedule(dynamic)
+	for (size_t a = 0; a < v/2; a++) {
+	for (size_t b = a+1; b < v/2; b++) {
+	for (size_t c = v/2; c < v; c++) {
+	for (size_t i = 0; i < o/2; i++) {
+	for (size_t j = i+1; j < o/2; j++) {
+	for (size_t k = o/2; k < o; k++) {
+		double t3ax1, t3ax2, t3bx, dn;
+		double ijkabc, jikabc, kjiabc, ikjabc;
+		ijkabc = comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2,i_vvov);
+		kjiabc = comp_t3a_ijkabc_12(o,v,k,j,i,a,b,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_12(o,v,k,j,i,b,a,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2,i_vvov);
+		ikjabc = comp_t3a_ijkabc_12(o,v,i,k,j,a,b,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_12(o,v,i,k,j,b,a,c,t2,i_vvov) -
+			 comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2,i_vvov);
+		t3ax1 = ijkabc - kjiabc - ikjabc;
+
+		ijkabc = comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t,i_oovo) -
+			 comp_t3a_ijkabc_22(o,v,i,j,k,c,b,a,t2t,i_oovo) -
+			 comp_t3a_ijkabc_22(o,v,i,j,k,a,c,b,t2t,i_oovo);
+		jikabc = comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t,i_oovo) -
+			 comp_t3a_ijkabc_22(o,v,j,i,k,c,b,a,t2t,i_oovo) -
+			 comp_t3a_ijkabc_22(o,v,j,i,k,a,c,b,t2t,i_oovo);
+		kjiabc = comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t,i_oovo) -
+			 comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t,i_oovo) -
+			 comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t,i_oovo);
+		t3ax2 = ijkabc - jikabc - kjiabc;
+
+		ijkabc = comp_t3b_ijkabc(o,v,i,j,k,a,b,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,i,j,k,b,a,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,i,j,k,c,b,a,t1,i_oovv,f_ov,t2);
+		jikabc = comp_t3b_ijkabc(o,v,j,i,k,a,b,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,j,i,k,b,a,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,j,i,k,c,b,a,t1,i_oovv,f_ov,t2);
+		kjiabc = comp_t3b_ijkabc(o,v,k,j,i,a,b,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,k,j,i,b,a,c,t1,i_oovv,f_ov,t2) -
+			 comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv,f_ov,t2);
+		t3bx = ijkabc - jikabc - kjiabc;
+
+		dn = D_OV(i, a) + D_OV(j, b) + D_OV(k, c);
+		e_pt2 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
+	}}}}}}
+
+	e_pt2 *= 2.0;
+	printf("aabaab %g\n", e_pt2);
+
+	return (e_pt1+e_pt2);
 }
 
 static double
 ccsd_pt_worker(int id, int nid, size_t o, size_t v, size_t x,
     const double *d_ov, const double *f_ov, const double *t1,
-    const struct st4 *t2, const struct st4 *i_ooov, const struct st4 *i_oovv,
-    const struct st4 *i_ovvv, const double *ovx, const double *vvx)
+    const double *t2, const double *t2t, const double *i_oovo,
+    const double *i_oovv, const double *i_vvov, const double *ovx,
+    const double *vvx)
 {
-	double e_pt = 0.0, *t3a, *t3b, *work;
-	size_t a, b, c, n, iter;
+//	double e_pt = 0.0, *t3a, *t3b, *work;
+//	size_t a, b, c, iter;
 
-	t3a = malloc(3*o*o*o*sizeof(double));
-	if (t3a == NULL)
-		err(1, "malloc");
-	t3b = malloc(3*o*o*o*sizeof(double));
-	if (t3b == NULL)
-		err(1, "malloc");
-	n = o > v ? o : v;
-	work = malloc((o*n + o*o*n + o*x + v*x) * sizeof(double));
-	if (work == NULL)
-		err(1, "malloc");
+//	t3a = malloc(3*o*o*o*sizeof(double));
+//	if (t3a == NULL)
+//		err(1, "malloc");
+//	t3b = malloc(3*o*o*o*sizeof(double));
+//	if (t3b == NULL)
+//		err(1, "malloc");
+//	n = o > v ? o : v;
+//	work = malloc((o*n + o*o*n + o*x + v*x) * sizeof(double));
+//	if (work == NULL)
+//		err(1, "malloc");
 
-	for (a = 0, iter = 0; a < v/2; a++) {
-	for (b = a+1; b < v/2; b++) {
-	for (c = b+1; c < v; c++, iter++) {
-		if (iter % nid != id)
-			continue;
-		ccsd_t3a(o, v, x, a, b, c, t3a, t3b, t2, i_ooov, i_ovvv,
-		    ovx, vvx, work);
-		ccsd_asymm_t3a(o, t3a);
-		ccsd_asymm_t3b(o, t3b);
+//	for (a = 0, iter = 0; a < v/2; a++) {
+//	for (b = a+1; b < v/2; b++) {
+//	for (c = b+1; c < v; c++, iter++) {
+//		if (iter % nid != id)
+//			continue;
+//		ccsd_t3a(o, v, x, a, b, c, t3a, t3b, t2, i_ooov, i_ovvv,
+//		    ovx, vvx, work);
+//		ccsd_asymm_t3a(o, t3a);
+//		ccsd_asymm_t3b(o, t3b);
+//
+//		for (n = 0; n < o*o*o; n++) t3a[n] = t3b[n]-t3a[n];
+//
+//		ccsd_t3b(o, v, a, b, c, t3b, f_ov, t1, t2, i_oovv, work);
+//		ccsd_asymm_t3b(o, t3b);
 
-		for (n = 0; n < o*o*o; n++) t3a[n] = t3b[n]-t3a[n];
+//		comp_t3a_asymm(o,v,a,b,c,t2,i_ooov,i_ovvv,t3a,t3b);
+//		for (n = 0; n < o*o*o; n++) t3a[n] = t3b[n]-t3a[n];
+//		comp_t3b_asymm(o,v,a,b,c,t1,i_oovv,f_ov,t2,t3b);
 
-		ccsd_t3b(o, v, a, b, c, t3b, f_ov, t1, t2, i_oovv, work);
-		ccsd_asymm_t3b(o, t3b);
+///		e_pt += ccsd_pt_energy(o, v, a, b, c, d_ov, f_ov, t1,
+///		    t2, i_ooov, i_oovv, i_ovvv);
+///	}}}
+///	e_pt *= 2.0;
 
-		for (n = 0; n < o*o*o; n++) t3b[n] += t3a[n];
-
-		e_pt += ccsd_pt_energy(o, v, a, b, c, t3a, t3b, d_ov);
-	}}}
-	e_pt *= 2.0;
-
-	free(t3a);
-	free(t3b);
-	free(work);
-	return (e_pt);
+//	free(t3a);
+//	free(t3b);
+//	free(work);
+	return (ccsd_pt_energy(o, v, d_ov, f_ov, t1,
+	    t2, t2t, i_oovo, i_oovv, i_vvov));
 }
 
 static double
 do_ccsd_pt(size_t o, size_t v, size_t x, const double *d_ov, const double *f_ov,
-    const double *t1, const struct st4 *t2, const struct st4 *i_ooov,
-    const struct st4 *i_oovv, const struct st4 *i_ovvv,
+    const double *t1, const double *t2, const double *t2t, const double *i_oovo,
+    const double *i_oovv, const double *i_vvov,
     const double *ovx, const double *vvx)
 {
 	double e_pt = 0.0;
@@ -505,20 +303,20 @@ do_ccsd_pt(size_t o, size_t v, size_t x, const double *d_ov, const double *f_ov,
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &npid);
 
-#ifdef _OPENMP
-#pragma omp parallel reduction(+:e_pt)
-#endif
+//#ifdef _OPENMP
+//#pragma omp parallel reduction(+:e_pt)
+//#endif
 	{
 		int id, nid, tid = 0, ntid = 1;
 #ifdef _OPENMP
-		tid = omp_get_thread_num();
-		ntid = omp_get_num_threads();
+//		tid = omp_get_thread_num();
+//		ntid = omp_get_num_threads();
 #endif
 		id = pid * ntid + tid;
 		nid = npid * ntid;
 
-		e_pt = ccsd_pt_worker(id, nid, o, v, x, d_ov, f_ov, t1, t2,
-		    i_ooov, i_oovv, i_ovvv, ovx, vvx);
+		e_pt = ccsd_pt_worker(id, nid, o, v, x, d_ov, f_ov, t1, t2, t2t,
+		    i_oovo, i_oovv, i_vvov, ovx, vvx);
 	}
 
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE, MPI_SUM,
@@ -528,19 +326,19 @@ do_ccsd_pt(size_t o, size_t v, size_t x, const double *d_ov, const double *f_ov,
 
 double
 ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
-    const double *t1, const struct st4 *t2, const struct st4 *i_ooov,
-    const struct st4 *i_oovv, const struct st4 *i_ovvv)
+    const double *t1, const double *t2, const double *t2t, const double *i_oovo,
+    const double *i_oovv, const double *i_vvov)
 {
-	return (do_ccsd_pt(o, v, 0, d_ov, f_ov, t1, t2,
-	    i_ooov, i_oovv, i_ovvv, NULL, NULL));
+	return (do_ccsd_pt(o, v, 0, d_ov, f_ov, t1, t2, t2t,
+	    i_oovo, i_oovv, i_vvov, NULL, NULL));
 }
 
-double
-ccsd_ri_pt(size_t o, size_t v, size_t x, const double *d_ov,
-    const double *f_ov, const double *t1, const struct st4 *t2,
-    const struct st4 *i_ooov, const struct st4 *i_oovv,
-    const double *ovx, const double *vvx)
-{
-	return (do_ccsd_pt(o, v, x, d_ov, f_ov, t1, t2,
-	    i_ooov, i_oovv, NULL, ovx, vvx));
-}
+//double
+//ccsd_ri_pt(size_t o, size_t v, size_t x, const double *d_ov,
+//    const double *f_ov, const double *t1, const double *t2,
+//    const double *i_ooov, const double *i_oovv,
+//    const double *ovx, const double *vvx)
+//{
+//	return (do_ccsd_pt(o, v, x, d_ov, f_ov, t1, t2,
+//	    i_ooov, i_oovv, NULL, ovx, vvx));
+//}
