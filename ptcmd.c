@@ -240,11 +240,10 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
 //	fclose(fp);
 //}
 
-#if 0
 static double
 random_double(void)
 {
-	return (drand48() / 100.0);
+	return (drand48() / 1000.0);
 }
 
 static void
@@ -260,6 +259,12 @@ load_random_data(size_t o, size_t v, double *d_ov,
 	for (i = 0; i < o*v; i++) {
 		f_ov[i] = random_double();
 	}
+	for (i = 0; i < o*v; i++) {
+		t1[i] = random_double();
+	}
+	for (i = 0; i < o*o*v*v; i++) {
+		t2[i] = random_double();
+	}
 	for (i = 0; i < o*o*o*v; i++) {
 		i_ooov[i] = random_double();
 	}
@@ -269,14 +274,9 @@ load_random_data(size_t o, size_t v, double *d_ov,
 	for (i = 0; i < o*v*v*v; i++) {
 		i_ovvv[i] = random_double();
 	}
-	for (i = 0; i < o*v; i++) {
-		t1[i] = random_double();
-	}
-	for (i = 0; i < o*o*v*v; i++) {
-		t2[i] = random_double();
-	}
 }
 
+#if 0
 #define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
 #define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
 #define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
@@ -401,7 +401,6 @@ print_st(const struct st4 *st)
 		    st->idx[i].c, st->idx[i].d, st->data[i]);
 	}
 }
-#endif
 
 static void
 setup_offsets(size_t ldim, struct st4 *st)
@@ -428,6 +427,7 @@ setup_offsets(size_t ldim, struct st4 *st)
 	while (cur < ldim)
 		st->offset[++cur] = st->len;
 }
+#endif
 
 #define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
 #define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
@@ -477,8 +477,8 @@ main(int argc, char **argv)
 	argv += optind;
 	argc -= optind;
 
-	if (testpath == NULL)
-		errx(1, "specify test data file");
+//	if (testpath == NULL)
+//		errx(1, "specify test data file");
 
 	if (testpath)
 		load_test_header(testpath, &o, &v, &x, &e_ref);
@@ -492,20 +492,19 @@ main(int argc, char **argv)
 	i_oovv = xmalloc(o*o*v*v * sizeof(double));
 	i_ovvv = xmalloc(o*v*v*v * sizeof(double));
 	i_vvov = xmalloc(o*v*v*v * sizeof(double));
-	ovx = xmalloc(o*v*x * sizeof(double));
-	vvx = xmalloc(v*v*x * sizeof(double));
+//	ovx = xmalloc(o*v*x * sizeof(double));
+//	vvx = xmalloc(v*v*x * sizeof(double));
 
 //	if (rank == 0) {
-//		if (testpath) {
+		if (testpath) {
 	//load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
 	//    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
-	load_test_data(testpath, o, v, d_ov, f_ov, i_ooov,
-	    i_oovv, i_ovvv, t1, t2);
-//		} else {
-//			errx(1, "unsupported");
-//			load_random_data(o, v, d_ov, f_ov, i_ooov,
-//			    i_oovv, i_ovvv, t1, t2);
-//		}
+			load_test_data(testpath, o, v, d_ov, f_ov, i_ooov,
+			    i_oovv, i_ovvv, t1, t2);
+		} else {
+			load_random_data(o, v, d_ov, f_ov, i_ooov,
+			    i_oovv, i_ovvv, t1, t2);
+		}
 //	}
 
 	for (i = 0; i < o; i++) {
@@ -587,8 +586,8 @@ main(int argc, char **argv)
 	free(i_ovvv);
 	free(t1);
 	free(t2);
-	free(ovx);
-	free(vvx);
+//	free(ovx);
+//	free(vvx);
 	MPI_Finalize();
 	return (fabs(e_pt - e_ref) < EPSILON ? 0 : 1);
 }
