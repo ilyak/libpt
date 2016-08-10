@@ -70,6 +70,23 @@ comp_t3a_ijkabc_11(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static double
+comp_t3a_ijkabc_11h(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
+{
+	double s = 0.0;
+	const double *t2_p = &T2(i,j,a,0);
+	const double *i_vvov_p = &I_VVOV(b,c,k,0);
+	size_t l;
+
+	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
+
+	for (l = 0; l < v; l++)
+		s += t2_p[l] * i_vvov_p[l];
+
+	return (s);
+}
+
+static double
 comp_t3a_ijkabc_12(size_t o, size_t v, size_t i, size_t j, size_t k,
     size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
 {
@@ -98,6 +115,23 @@ comp_t3a_ijkabc_21(size_t o, size_t v, size_t i, size_t j, size_t k,
 	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
 
 	for (l = 0; l < o/2; l++)
+		s += t2t_p[l] * i_oovo_p[l];
+
+	return (s);
+}
+
+static double
+comp_t3a_ijkabc_21h(size_t o, size_t v, size_t i, size_t j, size_t k,
+    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
+{
+	double s = 0.0;
+	const double *t2t_p = &T2T(a,b,i,0);
+	const double *i_oovo_p = &I_OOVO(j,k,c,0);
+	size_t l;
+
+	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
+
+	for (l = 0; l < o; l++)
 		s += t2t_p[l] * i_oovo_p[l];
 
 	return (s);
@@ -185,49 +219,106 @@ ccsd_pt_energy(size_t o, size_t v,
 	e_pt1 *= 2.0;
 	printf("aaaaaa %g\n", e_pt1);
 
+	double *t2_aaaa, *t2_abab;//, *t2_abba;
+	double *t2t_aaaa, *t2t_abab;//, *t2t_abba;
+	double *i_vvov_aaaa, *i_vvov_abab;//, *i_vvov_abba;
+	double *i_oovo_aaaa, *i_oovo_abab;//, *i_oovo_abba;
+
+	t2_aaaa = malloc(o/2*o/2*v/2*v/2*sizeof(double));
+	t2_abab = malloc(o/2*o/2*v/2*v/2*sizeof(double));
+//	t2_abba = malloc(o/2*o/2*v/2*v/2*sizeof(double));
+	t2t_aaaa = malloc(o/2*o/2*v/2*v/2*sizeof(double));
+	t2t_abab = malloc(o/2*o/2*v/2*v/2*sizeof(double));
+//	t2t_abba = malloc(o/2*o/2*v/2*v/2*sizeof(double));
+	i_vvov_aaaa = malloc(v/2*v/2*o/2*v/2*sizeof(double));
+	i_vvov_abab = malloc(v/2*v/2*o/2*v/2*sizeof(double));
+//	i_vvov_abba = malloc(v/2*v/2*o/2*v/2*sizeof(double));
+	i_oovo_aaaa = malloc(o/2*o/2*v/2*o/2*sizeof(double));
+	i_oovo_abab = malloc(o/2*o/2*v/2*o/2*sizeof(double));
+//	i_oovo_abba = malloc(o/2*o/2*v/2*o/2*sizeof(double));
+
+	for (size_t i = 0; i < o/2; i++) {
+	for (size_t j = 0; j < o/2; j++) {
+	for (size_t a = 0; a < v/2; a++) {
+	for (size_t b = 0; b < v/2; b++) {
+		t2_aaaa[i*o/2*v/2*v/2+j*v/2*v/2+a*v/2+b] =
+		    T2(i,j,a,b);
+		t2_abab[i*o/2*v/2*v/2+j*v/2*v/2+a*v/2+b] =
+		    T2(i,(j+o/2),a,(b+v/2));
+//		t2_abba[i*o/2*v/2*v/2+j*v/2*v/2+a*v/2+b] =
+//		    T2(i,(j+o/2),(a+v/2),b);
+		t2t_aaaa[a*v/2*o/2*o/2+b*o/2*o/2+i*o/2+j] =
+		    T2T(a,b,i,j);
+		t2t_abab[a*v/2*o/2*o/2+b*o/2*o/2+i*o/2+j] =
+		    T2T(a,(b+v/2),i,(j+o/2));
+//		t2t_abba[a*v/2*o/2*o/2+b*o/2*o/2+i*o/2+j] =
+//		    T2T(a,(b+v/2),(i+o/2),j);
+	}}}}
+	for (size_t i = 0; i < o/2; i++) {
+	for (size_t a = 0; a < v/2; a++) {
+	for (size_t b = 0; b < v/2; b++) {
+	for (size_t c = 0; c < v/2; c++) {
+		i_vvov_aaaa[b*v/2*o/2*v/2+c*o/2*v/2+i*v/2+a] =
+		    I_VVOV(b,c,i,a);
+		i_vvov_abab[b*v/2*o/2*v/2+c*o/2*v/2+i*v/2+a] =
+		    I_VVOV(b,(c+v/2),i,(a+v/2));
+//		i_vvov_abba[b*v/2*o/2*v/2+c*o/2*v/2+i*v/2+a] =
+//		    I_VVOV(b,(c+v/2),(i+o/2),a);
+	}}}}
+	for (size_t i = 0; i < o/2; i++) {
+	for (size_t j = 0; j < o/2; j++) {
+	for (size_t k = 0; k < o/2; k++) {
+	for (size_t a = 0; a < v/2; a++) {
+		i_oovo_aaaa[i*o/2*o/2*v/2+j*o/2*v/2+a*o/2+k] =
+		    I_OOVO(i,j,a,k);
+		i_oovo_abab[i*o/2*o/2*v/2+j*o/2*v/2+a*o/2+k] =
+		    I_OOVO(i,(j+o/2),a,(k+o/2));
+//		i_oovo_abba[i*o/2*o/2*v/2+j*o/2*v/2+a*o/2+k] =
+//		    I_OOVO(i,(j+o/2),(a+v/2),k);
+	}}}}
+
 #pragma omp parallel for reduction(+:e_pt2) schedule(dynamic)
 	for (size_t a = 0; a < v/2; a++) {
 	for (size_t b = a+1; b < v/2; b++) {
-	for (size_t c = v/2; c < v; c++) {
+	for (size_t c = 0; c < v/2; c++) {
 	for (size_t i = 0; i < o/2; i++) {
 	for (size_t j = i+1; j < o/2; j++) {
-	for (size_t k = o/2; k < o; k++) {
+	for (size_t k = 0; k < o/2; k++) {
 		double t3ax1, t3ax2, t3bx, dn;
 		double ijkabc, jikabc, kjiabc, ikjabc;
-		ijkabc = comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2,i_vvov) -
-			 comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2,i_vvov) -
-			 comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2,i_vvov);
-		kjiabc = comp_t3a_ijkabc_12(o,v,k,j,i,a,b,c,t2,i_vvov) -
-			 comp_t3a_ijkabc_12(o,v,k,j,i,b,a,c,t2,i_vvov) -
-			 comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2,i_vvov);
-		ikjabc = comp_t3a_ijkabc_12(o,v,i,k,j,a,b,c,t2,i_vvov) -
-			 comp_t3a_ijkabc_12(o,v,i,k,j,b,a,c,t2,i_vvov) -
-			 comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2,i_vvov);
-		t3ax1 = ijkabc - kjiabc - ikjabc;
 
-		ijkabc = comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t,i_oovo) -
-			 comp_t3a_ijkabc_22(o,v,i,j,k,c,b,a,t2t,i_oovo) -
-			 comp_t3a_ijkabc_22(o,v,i,j,k,a,c,b,t2t,i_oovo);
-		jikabc = comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t,i_oovo) -
-			 comp_t3a_ijkabc_22(o,v,j,i,k,c,b,a,t2t,i_oovo) -
-			 comp_t3a_ijkabc_22(o,v,j,i,k,a,c,b,t2t,i_oovo);
-		kjiabc = comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t,i_oovo) -
-			 comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t,i_oovo) -
-			 comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t,i_oovo);
-		t3ax2 = ijkabc - jikabc - kjiabc;
+		t3ax1 =
+      - comp_t3a_ijkabc_11h(o/2,v/2,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
+      + comp_t3a_ijkabc_11h(o/2,v/2,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
+      - comp_t3a_ijkabc_11h(o/2,v/2,i,k,j,a,b,c,t2_abab,i_vvov_abab)
+      + comp_t3a_ijkabc_11h(o/2,v/2,j,k,i,a,b,c,t2_abab,i_vvov_abab)
+      - comp_t3a_ijkabc_11h(o/2,v/2,j,k,i,b,a,c,t2_abab,i_vvov_abab)
+      + comp_t3a_ijkabc_11h(o/2,v/2,i,k,j,b,a,c,t2_abab,i_vvov_abab)
+      - comp_t3a_ijkabc_11h(o/2,v/2,k,j,i,c,a,b,t2_abab,i_vvov_aaaa)
+      + comp_t3a_ijkabc_11h(o/2,v/2,k,i,j,c,a,b,t2_abab,i_vvov_aaaa);
 
-		ijkabc = comp_t3b_ijkabc(o,v,i,j,k,a,b,c,t1,i_oovv,f_ov,t2) -
-			 comp_t3b_ijkabc(o,v,i,j,k,b,a,c,t1,i_oovv,f_ov,t2) -
-			 comp_t3b_ijkabc(o,v,i,j,k,c,b,a,t1,i_oovv,f_ov,t2);
-		jikabc = comp_t3b_ijkabc(o,v,j,i,k,a,b,c,t1,i_oovv,f_ov,t2) -
-			 comp_t3b_ijkabc(o,v,j,i,k,b,a,c,t1,i_oovv,f_ov,t2) -
-			 comp_t3b_ijkabc(o,v,j,i,k,c,b,a,t1,i_oovv,f_ov,t2);
-		kjiabc = comp_t3b_ijkabc(o,v,k,j,i,a,b,c,t1,i_oovv,f_ov,t2) -
-			 comp_t3b_ijkabc(o,v,k,j,i,b,a,c,t1,i_oovv,f_ov,t2) -
-			 comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv,f_ov,t2);
-		t3bx = ijkabc - jikabc - kjiabc;
+		t3ax2 =
+      - comp_t3a_ijkabc_21h(o/2,v/2,i,k,j,a,b,c,t2t_aaaa,i_oovo_abab)
+      + comp_t3a_ijkabc_21h(o/2,v/2,j,k,i,a,b,c,t2t_aaaa,i_oovo_abab)
+      - comp_t3a_ijkabc_21h(o/2,v/2,i,j,k,a,c,b,t2t_abab,i_oovo_abab)
+      + comp_t3a_ijkabc_21h(o/2,v/2,i,j,k,b,c,a,t2t_abab,i_oovo_abab)
+      - comp_t3a_ijkabc_21h(o/2,v/2,j,i,k,b,c,a,t2t_abab,i_oovo_abab)
+      + comp_t3a_ijkabc_21h(o/2,v/2,j,i,k,a,c,b,t2t_abab,i_oovo_abab)
+      - comp_t3a_ijkabc_21h(o/2,v/2,k,j,i,c,a,b,t2t_abab,i_oovo_aaaa)
+      + comp_t3a_ijkabc_21h(o/2,v/2,k,j,i,c,b,a,t2t_abab,i_oovo_aaaa);
 
-		dn = D_OV(i, a) + D_OV(j, b) + D_OV(k, c);
+	ijkabc = comp_t3b_ijkabc(o,v,i,j,k+o/2,a,b,c+v/2,t1,i_oovv,f_ov,t2) -
+		 comp_t3b_ijkabc(o,v,i,j,k+o/2,b,a,c+v/2,t1,i_oovv,f_ov,t2) -
+		 comp_t3b_ijkabc(o,v,i,j,k+o/2,c+v/2,b,a,t1,i_oovv,f_ov,t2);
+	jikabc = comp_t3b_ijkabc(o,v,j,i,k+o/2,a,b,c+v/2,t1,i_oovv,f_ov,t2) -
+		 comp_t3b_ijkabc(o,v,j,i,k+o/2,b,a,c+v/2,t1,i_oovv,f_ov,t2) -
+		 comp_t3b_ijkabc(o,v,j,i,k+o/2,c+v/2,b,a,t1,i_oovv,f_ov,t2);
+	kjiabc = comp_t3b_ijkabc(o,v,k+o/2,j,i,a,b,c+v/2,t1,i_oovv,f_ov,t2) -
+		 comp_t3b_ijkabc(o,v,k+o/2,j,i,b,a,c+v/2,t1,i_oovv,f_ov,t2) -
+		 comp_t3b_ijkabc(o,v,k+o/2,j,i,c+v/2,b,a,t1,i_oovv,f_ov,t2);
+	t3bx = ijkabc - jikabc - kjiabc;
+
+		dn = D_OV(i, a) + D_OV(j, b) + D_OV((k+o/2), (c+v/2));
 		e_pt2 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
 	}}}}}}
 
