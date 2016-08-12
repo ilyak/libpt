@@ -331,7 +331,8 @@ ccsd_pt_energy(size_t o, size_t v,
 //		    I_OOVO(i,(j+o/2),(a+v/2),k);
 	}}}}
 
-	//XXX per thread
+#pragma omp parallel
+	{
 	double *ijk11 = malloc(o/2*o/2*o/2*sizeof(double));
 	double *ijk12 = malloc(o/2*o/2*o/2*sizeof(double));
 	double *ijk13 = malloc(o/2*o/2*o/2*sizeof(double));
@@ -349,7 +350,7 @@ ccsd_pt_energy(size_t o, size_t v,
 	double *ijk27 = malloc(o/2*o/2*o/2*sizeof(double));
 	double *ijk28 = malloc(o/2*o/2*o/2*sizeof(double));
 
-#pragma omp parallel for reduction(+:e_pt2) schedule(dynamic)
+#pragma omp for reduction(+:e_pt2) schedule(dynamic)
 	for (size_t a = 0; a < v/2; a++) {
 	for (size_t b = a+1; b < v/2; b++) {
 	for (size_t c = 0; c < v/2; c++) {
@@ -412,6 +413,7 @@ ccsd_pt_energy(size_t o, size_t v,
 		dn = D_OV(i, a) + D_OV(j, b) + D_OV(k, c);
 		e_pt2 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
 	}}}}}}
+	}
 
 	e_pt2 *= 2.0;
 	printf("aabaab %g\n", e_pt2);
