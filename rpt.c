@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h> /*XXX*/
+#include <time.h>
 
 #include <mpi.h>
 #ifdef _OPENMP
@@ -258,6 +259,9 @@ ccsd_pt_energy(size_t o, size_t v,
 
 	e_pt1 *= 2.0;
 	printf("aaaaaa %g\n", e_pt1);
+
+	time_t tim = time(NULL);
+	printf("ccsd_pt: %s", ctime(&tim));
 
 	double *t2_aaaa, *t2_abab;//, *t2_abba;
 	double *t2t_aaaa, *t2t_abab;//, *t2t_abba;
