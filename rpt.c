@@ -102,42 +102,28 @@ static void
 comp_t3a_ijk_1(size_t o, size_t v, size_t a, size_t b, size_t c,
     double *ijk, const double *t2, const double *i_vvov)
 {
-	double s = 0.0;
 	const double *t2_p = &T2(0,0,a,0);
 	const double *i_vvov_p = &I_VVOV(b,c,0,0);
-//	size_t l;
-
-	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
-
 	int lda = v*v;
 	int ldb = v;
+
+	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_vvov(b,c,k,d)) */
+
 	gemm('T', 'N', o*o, o, v, 1.0, t2_p, lda, i_vvov_p, ldb, 0.0, ijk, o*o);
-
-//	for (l = 0; l < v; l++)
-//		s += t2_p[l] * i_vvov_p[l];
-
-//	return (s);
 }
 
 static void
 comp_t3a_ijk_2(size_t o, size_t v, size_t a, size_t b, size_t c,
     double *ijk, const double *t2t, const double *i_oovo)
 {
-	double s = 0.0;
 	const double *t2t_p = &T2T(a,b,0,0);
 	const double *i_oovo_p = &I_OOVO(0,0,c,0);
-//	size_t l;
-
-	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
-
 	int lda = o;
 	int ldb = o*v;
+
+	/* t3a2(i,j,k,a,b,c) = contract(l, t2t(a,b,i,l), i_oovo(j,k,c,l)) */
+
 	gemm('T', 'N', o, o*o, o, 1.0, t2t_p, lda, i_oovo_p, ldb, 0.0, ijk, o);
-
-//	for (l = 0; l < o; l++)
-//		s += t2t_p[l] * i_oovo_p[l];
-
-//	return (s);
 }
 
 static double
