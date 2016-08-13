@@ -24,16 +24,16 @@
 extern "C" {
 #endif
 
-struct i4 {
-	uint16_t a, b, c, d;
-};
-
-struct st4 {
-	size_t len;     /* number of elements in idx and data arrays */
-	struct i4 *idx; /* indices of nonzero elements, sorted by last index */
-	double *data;   /* values of nonzero elements */
-	size_t *offset; /* last index offset */
-};
+//struct i4 {
+//	uint16_t a, b, c, d;
+//};
+//
+//struct st4 {
+//	size_t len;     /* number of elements in idx and data arrays */
+//	struct i4 *idx; /* indices of nonzero elements, sorted by last index */
+//	double *data;   /* values of nonzero elements */
+//	size_t *offset; /* last index offset */
+//};
 
 /* Compute CCSD(T) energy correction in parallel.
  *
@@ -68,10 +68,10 @@ double ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 /*
  *
  */
-double ccsd_ri_pt(size_t o, size_t v, size_t x, const double *d_ov,
-    const double *f_ov, const double *t1, const struct st4 *t2,
-    const struct st4 *i_ooov, const struct st4 *i_oovv,
-    const double *ovx, const double *vvx);
+//double ccsd_ri_pt(size_t o, size_t v, size_t x, const double *d_ov,
+//    const double *f_ov, const double *t1, const struct st4 *t2,
+//    const struct st4 *i_ooov, const struct st4 *i_oovv,
+//    const double *ovx, const double *vvx);
 
 #ifdef __cplusplus
 } /* extern "C" */

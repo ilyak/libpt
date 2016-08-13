@@ -52,19 +52,19 @@ xmalloc(size_t size)
 	return (p);
 }
 
-static void *
-xreallocarray(void *ptr, size_t nmemb, size_t size)
-{
-	void *new_ptr;
-
-	if (nmemb == 0 || size == 0)
-		errx(1, "xreallocarray: zero size");
-	new_ptr = reallocarray(ptr, nmemb, size);
-	if (new_ptr == NULL)
-		err(1, "xreallocarray: allocating %zu * %zu bytes",
-		    nmemb, size);
-	return new_ptr;
-}
+//static void *
+//xreallocarray(void *ptr, size_t nmemb, size_t size)
+//{
+//	void *new_ptr;
+//
+//	if (nmemb == 0 || size == 0)
+//		errx(1, "xreallocarray: zero size");
+//	new_ptr = reallocarray(ptr, nmemb, size);
+//	if (new_ptr == NULL)
+//		err(1, "xreallocarray: allocating %zu * %zu bytes",
+//		    nmemb, size);
+//	return new_ptr;
+//}
 
 static void
 load_test_header(const char *testpath, size_t *o, size_t *v, size_t *x,
@@ -108,25 +108,25 @@ read_next_double(FILE *fp)
 	return (el);
 }
 
-static void
-scan_next_line_st4(FILE *fp, struct st4 *st)
-{
-	double val;
-	unsigned a, b, c, d;
-	int rv;
-
-	rv = fscanf(fp, "%u %u %u %u %lf\n", &a, &b, &c, &d, &val);
-	if (rv != 5)
-		errx(1, "bad file format");
-	st->len++;
-	st->idx = xreallocarray(st->idx, st->len, sizeof(*st->idx));
-	st->data = xreallocarray(st->data, st->len, sizeof(*st->data));
-	st->idx[st->len-1].a = a;
-	st->idx[st->len-1].b = b;
-	st->idx[st->len-1].c = c;
-	st->idx[st->len-1].d = d;
-	st->data[st->len-1] = val;
-}
+//static void
+//scan_next_line_st4(FILE *fp, struct st4 *st)
+//{
+//	double val;
+//	unsigned a, b, c, d;
+//	int rv;
+//
+//	rv = fscanf(fp, "%u %u %u %u %lf\n", &a, &b, &c, &d, &val);
+//	if (rv != 5)
+//		errx(1, "bad file format");
+//	st->len++;
+//	st->idx = xreallocarray(st->idx, st->len, sizeof(*st->idx));
+//	st->data = xreallocarray(st->data, st->len, sizeof(*st->data));
+//	st->idx[st->len-1].a = a;
+//	st->idx[st->len-1].b = b;
+//	st->idx[st->len-1].c = c;
+//	st->idx[st->len-1].d = d;
+//	st->data[st->len-1] = val;
+//}
 
 static void
 load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
@@ -446,7 +446,7 @@ main(int argc, char **argv)
 	double *t2, *t2t, *i_ooov, *i_oovv, *i_ovvv, *i_oovo, *i_vvov;
 	double *t1, *ovx, *vvx;
 	double e_pt, e_ref = 0.0;
-	struct st4 tt2, it_ooov, it_oovv, it_ovvv;
+	//struct st4 tt2, it_ooov, it_oovv, it_ovvv;
 	time_t tim;
 	int rank;
 	const char *errstr, *testpath = NULL;
