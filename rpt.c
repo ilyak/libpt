@@ -352,17 +352,11 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	double *ijk11 = malloc(o*o*o*sizeof(double));
 	double *ijk12 = malloc(o*o*o*sizeof(double));
 	double *ijk13 = malloc(o*o*o*sizeof(double));
-//	double *ijk14 = malloc(o*o*o*sizeof(double));
 	double *ijk15 = malloc(o*o*o*sizeof(double));
-//	double *ijk16 = malloc(o*o*o*sizeof(double));
 	double *ijk17 = malloc(o*o*o*sizeof(double));
-//	double *ijk18 = malloc(o*o*o*sizeof(double));
 	double *ijk21 = malloc(o*o*o*sizeof(double));
-//	double *ijk22 = malloc(o*o*o*sizeof(double));
 	double *ijk23 = malloc(o*o*o*sizeof(double));
 	double *ijk24 = malloc(o*o*o*sizeof(double));
-//	double *ijk25 = malloc(o*o*o*sizeof(double));
-//	double *ijk26 = malloc(o*o*o*sizeof(double));
 	double *ijk27 = malloc(o*o*o*sizeof(double));
 	double *ijk28 = malloc(o*o*o*sizeof(double));
 
