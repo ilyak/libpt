@@ -215,9 +215,8 @@ comp_t3b_ijkabc1(size_t o, size_t v, size_t i, size_t j, size_t k,
 //}
 
 static double
-ccsd_pt_energy(size_t o, size_t v,
-    const double *d_ov, const double *f_ov, const double *t1,
-    const double *t2, const double *t2t, const double *i_oovo,
+ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
+    const double *t1, const double *t2, const double *t2t, const double *i_oovo,
     const double *i_oovv, const double *i_vvov)
 {
 	double e_pt1 = 0.0, e_pt2 = 0.0;
