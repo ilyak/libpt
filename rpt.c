@@ -65,39 +65,39 @@ gemm(char transa, char transb, int m, int n, int k, double alpha,
 	    (double *)b, &ldb, &beta, c, &ldc);
 }
 
-static double
-comp_t3a_ijkabc_11(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
-{
-	double s = 0.0;
-	const double *t2_p = &T2(i,j,a,0);
-	const double *i_vvov_p = &I_VVOV(b,c,k,0);
-	size_t l;
+//static double
+//comp_t3a_ijkabc_11(size_t o, size_t v, size_t i, size_t j, size_t k,
+//    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
+//{
+//	double s = 0.0;
+//	const double *t2_p = &T2(i,j,a,0);
+//	const double *i_vvov_p = &I_VVOV(b,c,k,0);
+//	size_t l;
+//
+//	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
+//
+//	for (l = 0; l < v; l++)
+//		s += t2_p[l] * i_vvov_p[l];
+//
+//	return (s);
+//}
 
-	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
-
-	for (l = 0; l < v; l++)
-		s += t2_p[l] * i_vvov_p[l];
-
-	return (s);
-}
-
-static double
-comp_t3a_ijkabc_11h(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
-{
-	double s = 0.0;
-	const double *t2_p = &T2(i,j,a,0);
-	const double *i_vvov_p = &I_VVOV(b,c,k,0);
-	size_t l;
-
-	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
-
-	for (l = 0; l < v; l++)
-		s += t2_p[l] * i_vvov_p[l];
-
-	return (s);
-}
+//static double
+//comp_t3a_ijkabc_11h(size_t o, size_t v, size_t i, size_t j, size_t k,
+//    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
+//{
+//	double s = 0.0;
+//	const double *t2_p = &T2(i,j,a,0);
+//	const double *i_vvov_p = &I_VVOV(b,c,k,0);
+//	size_t l;
+//
+//	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
+//
+//	for (l = 0; l < v; l++)
+//		s += t2_p[l] * i_vvov_p[l];
+//
+//	return (s);
+//}
 
 static void
 comp_t3a_ijk_1(size_t o, size_t v, size_t a, size_t b, size_t c,
@@ -127,73 +127,73 @@ comp_t3a_ijk_2(size_t o, size_t v, size_t a, size_t b, size_t c,
 	gemm('T', 'N', o, o*o, o, 1.0, t2t_p, lda, i_oovo_p, ldb, 0.0, ijk, o);
 }
 
-static double
-comp_t3a_ijkabc_12(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
-{
-	double s = 0.0;
-	const double *t2_p = &T2(i,j,a,0);
-	const double *i_vvov_p = &I_VVOV(b,c,k,0);
-	size_t l;
+//static double
+//comp_t3a_ijkabc_12(size_t o, size_t v, size_t i, size_t j, size_t k,
+//    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
+//{
+//	double s = 0.0;
+//	const double *t2_p = &T2(i,j,a,0);
+//	const double *i_vvov_p = &I_VVOV(b,c,k,0);
+//	size_t l;
+//
+//	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
+//
+//	for (l = v/2; l < v; l++)
+//		s += t2_p[l] * i_vvov_p[l];
+//
+//	return (s);
+//}
 
-	/* t3b(i,j,k,a,b,c) = contract(d, t2(i,j,d,a), i_ovvv(k,d,b,c)) */
+//static double
+//comp_t3a_ijkabc_21(size_t o, size_t v, size_t i, size_t j, size_t k,
+//    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
+//{
+//	double s = 0.0;
+//	const double *t2t_p = &T2T(a,b,i,0);
+//	const double *i_oovo_p = &I_OOVO(j,k,c,0);
+//	size_t l;
+//
+//	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
+//
+//	for (l = 0; l < o; l++)
+//		s += t2t_p[l] * i_oovo_p[l];
+//
+//	return (s);
+//}
 
-	for (l = v/2; l < v; l++)
-		s += t2_p[l] * i_vvov_p[l];
+//static double
+//comp_t3a_ijkabc_21h(size_t o, size_t v, size_t i, size_t j, size_t k,
+//    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
+//{
+//	double s = 0.0;
+//	const double *t2t_p = &T2T(a,b,i,0);
+//	const double *i_oovo_p = &I_OOVO(j,k,c,0);
+//	size_t l;
+//
+//	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
+//
+//	for (l = 0; l < o; l++)
+//		s += t2t_p[l] * i_oovo_p[l];
+//
+//	return (s);
+//}
 
-	return (s);
-}
-
-static double
-comp_t3a_ijkabc_21(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
-{
-	double s = 0.0;
-	const double *t2t_p = &T2T(a,b,i,0);
-	const double *i_oovo_p = &I_OOVO(j,k,c,0);
-	size_t l;
-
-	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
-
-	for (l = 0; l < o; l++)
-		s += t2t_p[l] * i_oovo_p[l];
-
-	return (s);
-}
-
-static double
-comp_t3a_ijkabc_21h(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
-{
-	double s = 0.0;
-	const double *t2t_p = &T2T(a,b,i,0);
-	const double *i_oovo_p = &I_OOVO(j,k,c,0);
-	size_t l;
-
-	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
-
-	for (l = 0; l < o; l++)
-		s += t2t_p[l] * i_oovo_p[l];
-
-	return (s);
-}
-
-static double
-comp_t3a_ijkabc_22(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
-{
-	double s = 0.0;
-	const double *t2t_p = &T2T(a,b,i,0);
-	const double *i_oovo_p = &I_OOVO(j,k,c,0);
-	size_t l;
-
-	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
-
-	for (l = o/2; l < o; l++)
-		s += t2t_p[l] * i_oovo_p[l];
-
-	return (s);
-}
+//static double
+//comp_t3a_ijkabc_22(size_t o, size_t v, size_t i, size_t j, size_t k,
+//    size_t a, size_t b, size_t c, const double *t2t, const double *i_oovo)
+//{
+//	double s = 0.0;
+//	const double *t2t_p = &T2T(a,b,i,0);
+//	const double *i_oovo_p = &I_OOVO(j,k,c,0);
+//	size_t l;
+//
+//	/* t3a(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_ooov(j,k,l,c)) */
+//
+//	for (l = o/2; l < o; l++)
+//		s += t2t_p[l] * i_oovo_p[l];
+//
+//	return (s);
+//}
 
 static double
 comp_t3b_ijkabc1(size_t o, size_t v, size_t i, size_t j, size_t k,
