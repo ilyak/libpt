@@ -247,14 +247,11 @@ ccsd_pt_energy(size_t o, size_t v,
 		    T2(i,j,a,b);
 		t2_abab[i*o/2*v/2*v/2+j*v/2*v/2+a*v/2+b] =
 		    T2(i,(j+o/2),a,(b+v/2));
-//		t2_abba[i*o/2*v/2*v/2+j*v/2*v/2+a*v/2+b] =
-//		    T2(i,(j+o/2),(a+v/2),b);
+
 		t2t_aaaa[a*v/2*o/2*o/2+b*o/2*o/2+i*o/2+j] =
 		    T2T(a,b,i,j);
 		t2t_abab[a*v/2*o/2*o/2+b*o/2*o/2+i*o/2+j] =
 		    T2T(a,(b+v/2),i,(j+o/2));
-//		t2t_abba[a*v/2*o/2*o/2+b*o/2*o/2+i*o/2+j] =
-//		    T2T(a,(b+v/2),(i+o/2),j);
 
 		i_oovv_aaaa[i*o/2*v/2*v/2+j*v/2*v/2+a*v/2+b] =
 		    I_OOVV(i,j,a,b);
@@ -269,8 +266,6 @@ ccsd_pt_energy(size_t o, size_t v,
 		    I_VVOV(b,c,i,a);
 		i_vvov_abab[b*v/2*o/2*v/2+c*o/2*v/2+i*v/2+a] =
 		    I_VVOV(b,(c+v/2),i,(a+v/2));
-//		i_vvov_abba[b*v/2*o/2*v/2+c*o/2*v/2+i*v/2+a] =
-//		    I_VVOV(b,(c+v/2),(i+o/2),a);
 	}}}}
 	for (size_t i = 0; i < o/2; i++) {
 	for (size_t j = 0; j < o/2; j++) {
@@ -280,8 +275,6 @@ ccsd_pt_energy(size_t o, size_t v,
 		    I_OOVO(i,j,a,k);
 		i_oovo_abab[i*o/2*o/2*v/2+j*o/2*v/2+a*o/2+k] =
 		    I_OOVO(i,(j+o/2),a,(k+o/2));
-//		i_oovo_abba[i*o/2*o/2*v/2+j*o/2*v/2+a*o/2+k] =
-//		    I_OOVO(i,(j+o/2),(a+v/2),k);
 	}}}}
 
 #pragma omp parallel
