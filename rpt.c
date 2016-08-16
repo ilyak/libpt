@@ -307,15 +307,14 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		e_pt1 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
 	}}}}}}
 
-	e_pt1 *= 2.0;
 #pragma omp master
+{
+	e_pt1 *= 2.0;
 	printf("aaaaaa %g\n", e_pt1);
 
-#pragma omp master
-	{
 	time_t tim = time(NULL);
 	printf("ccsd_pt: %s", ctime(&tim));
-	}
+}
 
 #pragma omp for reduction(+:e_pt2) schedule(dynamic)
 	for (size_t a = 0; a < v; a++) {
@@ -380,9 +379,11 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		e_pt2 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
 	}}}}}}
 
-	e_pt2 *= 2.0;
 #pragma omp master
+{
+	e_pt2 *= 2.0;
 	printf("aabaab %g\n", e_pt2);
+}
 
 	free(ijk11);
 	free(ijk12);
