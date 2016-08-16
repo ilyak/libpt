@@ -62,7 +62,7 @@ extern "C" {
 //    const double *t1, const struct st4 *t2, const struct st4 *i_ooov,
 //    const struct st4 *i_oovv, const struct st4 *i_ovvv);
 double ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
-    const double *t1, const double *t2, const double *t2t, const double *i_oovo,
+    const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_vvov);
 
 /*

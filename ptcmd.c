@@ -130,7 +130,7 @@ read_next_double(FILE *fp)
 
 static void
 load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
-    double *f_ov, double *i_ooov, double *i_oovv, double *i_ovvv,
+    double *f_ov, double *i_oovo, double *i_oovv, double *i_vvov,
     double *t1, double *t2)
 {
 	FILE *fp;
@@ -167,12 +167,12 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*o*o*v; i++) {
-		i_ooov[i] = read_next_double(fp);
+		i_oovo[i] = read_next_double(fp);
 	}
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*o*o*v; i++) {
-		i_ooov[o*o*o*v+i] = read_next_double(fp);
+		i_oovo[o*o*o*v+i] = read_next_double(fp);
 	}
 	skip_line(fp);
 	skip_line(fp);
@@ -187,12 +187,12 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*v*v*v; i++) {
-		i_ovvv[i] = read_next_double(fp);
+		i_vvov[i] = read_next_double(fp);
 	}
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*v*v*v; i++) {
-		i_ovvv[o*v*v*v+i] = read_next_double(fp);
+		i_vvov[o*v*v*v+i] = read_next_double(fp);
 	}
 	fclose(fp);
 }
@@ -269,7 +269,7 @@ random_double(void)
 
 static void
 load_random_data(size_t o, size_t v, double *d_ov,
-    double *f_ov, double *i_ooov, double *i_oovv, double *i_ovvv,
+    double *f_ov, double *i_oovo, double *i_oovv, double *i_vvov,
     double *t1, double *t2)
 {
 	size_t i;
@@ -287,13 +287,13 @@ load_random_data(size_t o, size_t v, double *d_ov,
 		t2[i] = random_double();
 	}
 	for (i = 0; i < 2*o*o*o*v; i++) {
-		i_ooov[i] = random_double();
+		i_oovo[i] = random_double();
 	}
 	for (i = 0; i < 2*o*o*v*v; i++) {
 		i_oovv[i] = random_double();
 	}
 	for (i = 0; i < 2*o*v*v*v; i++) {
-		i_ovvv[i] = random_double();
+		i_vvov[i] = random_double();
 	}
 }
 
@@ -463,7 +463,7 @@ main(int argc, char **argv)
 	size_t o = 0, v = 0, x = 0;
 	size_t i,j,k,a,b,c;
 	double *d_ov, *f_ov;
-	double *t2, *t2t, *i_ooov, *i_oovv, *i_ovvv, *i_oovo, *i_vvov;
+	double *t2, *t2t, /* *i_ooov,*/ *i_oovv, /* *i_ovvv,*/ *i_oovo, *i_vvov;
 	double *t1, *ovx, *vvx;
 	double e_pt, e_ref = 0.0;
 	//struct st4 tt2, it_ooov, it_oovv, it_ovvv;
@@ -508,10 +508,10 @@ main(int argc, char **argv)
 	t1 = xmalloc(o*v * sizeof(double));
 	t2 = xmalloc(2*o*o*v*v * sizeof(double));
 	t2t = xmalloc(2*o*o*v*v * sizeof(double));
-	i_ooov = xmalloc(2*o*o*o*v * sizeof(double));
+	//i_ooov = xmalloc(2*o*o*o*v * sizeof(double));
 	i_oovo = xmalloc(2*o*o*o*v * sizeof(double));
 	i_oovv = xmalloc(2*o*o*v*v * sizeof(double));
-	i_ovvv = xmalloc(2*o*v*v*v * sizeof(double));
+	//i_ovvv = xmalloc(2*o*v*v*v * sizeof(double));
 	i_vvov = xmalloc(2*o*v*v*v * sizeof(double));
 //	ovx = xmalloc(o*v*x * sizeof(double));
 //	vvx = xmalloc(v*v*x * sizeof(double));
@@ -520,62 +520,62 @@ main(int argc, char **argv)
 		if (testpath) {
 	//load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
 	//    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
-			load_test_data(testpath, o, v, d_ov, f_ov, i_ooov,
-			    i_oovv, i_ovvv, t1, t2);
+			load_test_data(testpath, o, v, d_ov, f_ov, i_oovo,
+			    i_oovv, i_vvov, t1, t2);
 		} else {
-			load_random_data(o, v, d_ov, f_ov, i_ooov,
-			    i_oovv, i_ovvv, t1, t2);
+			load_random_data(o, v, d_ov, f_ov, i_oovo,
+			    i_oovv, i_vvov, t1, t2);
 		}
 //	}
 
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-		T2T(a,b,i,j) = T2(i,j,a,b);
-	}}}}
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-	for (a = 0; a < v; a++) {
-		I_OOVO(i,j,a,k) = I_OOOV(i,j,k,a);
-	}}}}
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-		I_VVOV(b,c,i,a) = I_OVVV(i,a,b,c);
-	}}}}
-	t2 += o*o*v*v;
-	t2t += o*o*v*v;
-	i_ooov += o*o*o*v;
-	i_oovo += o*o*o*v;
-	i_ovvv += o*v*v*v;
-	i_vvov += o*v*v*v;
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-		T2T(a,b,i,j) = T2(i,j,a,b);
-	}}}}
-	for (i = 0; i < o; i++) {
-	for (j = 0; j < o; j++) {
-	for (k = 0; k < o; k++) {
-	for (a = 0; a < v; a++) {
-		I_OOVO(i,j,a,k) = I_OOOV(i,j,k,a);
-	}}}}
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
-	for (c = 0; c < v; c++) {
-		I_VVOV(b,c,i,a) = I_OVVV(i,a,b,c);
-	}}}}
-	t2 -= o*o*v*v;
-	t2t -= o*o*v*v;
-	i_ooov -= o*o*o*v;
-	i_oovo -= o*o*o*v;
-	i_ovvv -= o*v*v*v;
-	i_vvov -= o*v*v*v;
+//	for (i = 0; i < o; i++) {
+//	for (j = 0; j < o; j++) {
+//	for (a = 0; a < v; a++) {
+//	for (b = 0; b < v; b++) {
+//		T2T(a,b,i,j) = T2(i,j,a,b);
+//	}}}}
+//	for (i = 0; i < o; i++) {
+//	for (j = 0; j < o; j++) {
+//	for (k = 0; k < o; k++) {
+//	for (a = 0; a < v; a++) {
+//		I_OOVO(i,j,a,k) = I_OOOV(i,j,k,a);
+//	}}}}
+//	for (i = 0; i < o; i++) {
+//	for (a = 0; a < v; a++) {
+//	for (b = 0; b < v; b++) {
+//	for (c = 0; c < v; c++) {
+//		I_VVOV(b,c,i,a) = I_OVVV(i,a,b,c);
+//	}}}}
+//	t2 += o*o*v*v;
+//	t2t += o*o*v*v;
+//	i_ooov += o*o*o*v;
+//	i_oovo += o*o*o*v;
+//	i_ovvv += o*v*v*v;
+//	i_vvov += o*v*v*v;
+//	for (i = 0; i < o; i++) {
+//	for (j = 0; j < o; j++) {
+//	for (a = 0; a < v; a++) {
+//	for (b = 0; b < v; b++) {
+//		T2T(a,b,i,j) = T2(i,j,a,b);
+//	}}}}
+//	for (i = 0; i < o; i++) {
+//	for (j = 0; j < o; j++) {
+//	for (k = 0; k < o; k++) {
+//	for (a = 0; a < v; a++) {
+//		I_OOVO(i,j,a,k) = I_OOOV(i,j,k,a);
+//	}}}}
+//	for (i = 0; i < o; i++) {
+//	for (a = 0; a < v; a++) {
+//	for (b = 0; b < v; b++) {
+//	for (c = 0; c < v; c++) {
+//		I_VVOV(b,c,i,a) = I_OVVV(i,a,b,c);
+//	}}}}
+//	t2 -= o*o*v*v;
+//	t2t -= o*o*v*v;
+//	i_ooov -= o*o*o*v;
+//	i_oovo -= o*o*o*v;
+//	i_ovvv -= o*v*v*v;
+//	i_vvov -= o*v*v*v;
 
 	//setup_offsets(v, &tt2);
 	//setup_offsets(v, &it_ooov);
@@ -609,7 +609,7 @@ main(int argc, char **argv)
 		printf("ccsd_pt: %s", ctime(&tim));
 	}
 	if (x == 0) {
-		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2, t2t, i_oovo,
+		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2, i_oovo,
 		    i_oovv, i_vvov);
 		//e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, &tt2, &it_ooov,
 		//    &it_oovv, &it_ovvv);
@@ -632,9 +632,9 @@ main(int argc, char **argv)
 
 	free(d_ov);
 	free(f_ov);
-	free(i_ooov);
+	//free(i_ooov);
 	free(i_oovv);
-	free(i_ovvv);
+	//free(i_ovvv);
 	free(t1);
 	free(t2);
 //	free(ovx);
