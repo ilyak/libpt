@@ -130,8 +130,8 @@ read_next_double(FILE *fp)
 
 static void
 load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
-    double *f_ov, double *i_oovo, double *i_oovv, double *i_vvov,
-    double *t1, double *t2)
+    double *f_ov, double *t1, double *t2, double *i_oovo, double *i_oovv,
+    double *i_vvov)
 {
 	FILE *fp;
 	size_t i;
@@ -269,8 +269,8 @@ random_double(void)
 
 static void
 load_random_data(size_t o, size_t v, double *d_ov,
-    double *f_ov, double *i_oovo, double *i_oovv, double *i_vvov,
-    double *t1, double *t2)
+    double *f_ov, double *t1, double *t2, double *i_oovo,
+    double *i_oovv, double *i_vvov)
 {
 	size_t i;
 
@@ -515,13 +515,11 @@ main(int argc, char **argv)
 
 //	if (rank == 0) {
 		if (testpath) {
-	//load_test_data(testpath, o, v, x, d_ov, f_ov, &it_ooov,
-	//    &it_oovv, &it_ovvv, t1, &tt2, ovx, vvx);
-			load_test_data(testpath, o, v, d_ov, f_ov, i_oovo,
-			    i_oovv, i_vvov, t1, t2);
+			load_test_data(testpath, o, v, d_ov, f_ov, t1, t2,
+			    i_oovo, i_oovv, i_vvov);
 		} else {
-			load_random_data(o, v, d_ov, f_ov, i_oovo,
-			    i_oovv, i_vvov, t1, t2);
+			load_random_data(o, v, d_ov, f_ov, t1, t2,
+			    i_oovo, i_oovv, i_vvov);
 		}
 //	}
 
