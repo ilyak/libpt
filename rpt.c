@@ -287,14 +287,17 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 //		    i_oovo[i*2*o*2*o*2*v+(j+o)*2*o*2*v+a*2*o+(k+o)];
 //	}}}}
 
-#pragma omp parallel
-	{
 	double *ijk11 = malloc(o*o*o*sizeof(double));
 	double *ijk12 = malloc(o*o*o*sizeof(double));
 	double *ijk13 = malloc(o*o*o*sizeof(double));
+	double *ijk15 = malloc(o*o*o*sizeof(double));
+	double *ijk17 = malloc(o*o*o*sizeof(double));
 	double *ijk21 = malloc(o*o*o*sizeof(double));
 	double *ijk22 = malloc(o*o*o*sizeof(double));
 	double *ijk23 = malloc(o*o*o*sizeof(double));
+	double *ijk24 = malloc(o*o*o*sizeof(double));
+	double *ijk27 = malloc(o*o*o*sizeof(double));
+	double *ijk28 = malloc(o*o*o*sizeof(double));
 
 #pragma omp for reduction(+:e_pt1) schedule(dynamic)
 	for (size_t a = 0; a < v; a++) {
@@ -350,26 +353,14 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		e_pt1 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
 	}}}}}}
-	}
 
 	e_pt1 *= 2.0;
+#pragma omp master
 	printf("aaaaaa %g\n", e_pt1);
 
 	time_t tim = time(NULL);
+#pragma omp master
 	printf("ccsd_pt: %s", ctime(&tim));
-
-#pragma omp parallel
-	{
-	double *ijk11 = malloc(o*o*o*sizeof(double));
-	double *ijk12 = malloc(o*o*o*sizeof(double));
-	double *ijk13 = malloc(o*o*o*sizeof(double));
-	double *ijk15 = malloc(o*o*o*sizeof(double));
-	double *ijk17 = malloc(o*o*o*sizeof(double));
-	double *ijk21 = malloc(o*o*o*sizeof(double));
-	double *ijk23 = malloc(o*o*o*sizeof(double));
-	double *ijk24 = malloc(o*o*o*sizeof(double));
-	double *ijk27 = malloc(o*o*o*sizeof(double));
-	double *ijk28 = malloc(o*o*o*sizeof(double));
 
 #pragma omp for reduction(+:e_pt2) schedule(dynamic)
 	for (size_t a = 0; a < v; a++) {
@@ -433,11 +424,22 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		e_pt2 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
 	}}}}}}
-	}
 
 	e_pt2 *= 2.0;
+#pragma omp master
 	printf("aabaab %g\n", e_pt2);
 
+	free(ijk11);
+	free(ijk12);
+	free(ijk13);
+	free(ijk15);
+	free(ijk17);
+	free(ijk21);
+	free(ijk22);
+	free(ijk23);
+	free(ijk24);
+	free(ijk27);
+	free(ijk28);
 	return (e_pt1+e_pt2);
 }
 
@@ -549,8 +551,12 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		    t2[o*o*v*v+i*o*v*v+j*v*v+a*v+b];
 	}}}}
 
-	e_pt = ccsd_pt_energy(o, v, d_ov, f_ov, t1,
-	    t2, t2t, i_oovo, i_oovv, i_vvov);
+#pragma omp parallel
+	{
+		e_pt = ccsd_pt_energy(o, v, d_ov, f_ov, t1,
+		    t2, t2t, i_oovo, i_oovv, i_vvov);
+	}
+
 	free(t2t);
 	return (e_pt);
 }
