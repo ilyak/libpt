@@ -221,6 +221,8 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 {
 	double e_pt1 = 0.0, e_pt2 = 0.0;
 
+#pragma omp parallel
+{
 	const double *t2_aaaa, *t2_abab;
 	const double *t2t_aaaa, *t2t_abab;
 	const double *i_vvov_aaaa, *i_vvov_abab;
@@ -237,55 +239,6 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	i_oovo_abab = i_oovo + o*o*o*v;
 	i_oovv_aaaa = i_oovv;
 	i_oovv_abab = i_oovv + o*o*v*v;
-
-//	t2_aaaa = malloc(o*o*v*v*sizeof(double));
-//	t2_abab = malloc(o*o*v*v*sizeof(double));
-//	t2t_aaaa = malloc(o*o*v*v*sizeof(double));
-//	t2t_abab = malloc(o*o*v*v*sizeof(double));
-//	i_vvov_aaaa = malloc(v*v*o*v*sizeof(double));
-//	i_vvov_abab = malloc(v*v*o*v*sizeof(double));
-//	i_oovo_aaaa = malloc(o*o*v*o*sizeof(double));
-//	i_oovo_abab = malloc(o*o*v*o*sizeof(double));
-//	i_oovv_aaaa = malloc(o*o*v*v*sizeof(double));
-//	i_oovv_abab = malloc(o*o*v*v*sizeof(double));
-//
-//	for (size_t i = 0; i < o; i++) {
-//	for (size_t j = 0; j < o; j++) {
-//	for (size_t a = 0; a < v; a++) {
-//	for (size_t b = 0; b < v; b++) {
-//		t2_aaaa[i*o*v*v+j*v*v+a*v+b] =
-//		    t2[i*2*o*2*v*2*v+j*2*v*2*v+a*2*v+b];
-//		t2_abab[i*o*v*v+j*v*v+a*v+b] =
-//		    t2[i*2*o*2*v*2*v+(j+o)*2*v*2*v+a*2*v+(b+v)];
-//
-//		t2t_aaaa[a*v*o*o+b*o*o+i*o+j] =
-//		    t2t[a*2*v*2*o*2*o+b*2*o*2*o+i*2*o+j];
-//		t2t_abab[a*v*o*o+b*o*o+i*o+j] =
-//		    t2t[a*2*v*2*o*2*o+(b+v)*2*o*2*o+i*2*o+(j+o)];
-//
-//		i_oovv_aaaa[i*o*v*v+j*v*v+a*v+b] =
-//		    i_oovv[i*2*o*2*v*2*v+j*2*v*2*v+a*2*v+b];
-//		i_oovv_abab[i*o*v*v+j*v*v+a*v+b] =
-//		    i_oovv[i*2*o*2*v*2*v+(j+o)*2*v*2*v+a*2*v+(b+v)];
-//	}}}}
-//	for (size_t i = 0; i < o; i++) {
-//	for (size_t a = 0; a < v; a++) {
-//	for (size_t b = 0; b < v; b++) {
-//	for (size_t c = 0; c < v; c++) {
-//		i_vvov_aaaa[b*v*o*v+c*o*v+i*v+a] =
-//		    i_vvov[b*2*v*2*o*2*v+c*2*o*2*v+i*2*v+a];
-//		i_vvov_abab[b*v*o*v+c*o*v+i*v+a] =
-//		    i_vvov[b*2*v*2*o*2*v+(c+v)*2*o*2*v+i*2*v+(a+v)];
-//	}}}}
-//	for (size_t i = 0; i < o; i++) {
-//	for (size_t j = 0; j < o; j++) {
-//	for (size_t k = 0; k < o; k++) {
-//	for (size_t a = 0; a < v; a++) {
-//		i_oovo_aaaa[i*o*o*v+j*o*v+a*o+k] =
-//		    i_oovo[i*2*o*2*o*2*v+j*2*o*2*v+a*2*o+k];
-//		i_oovo_abab[i*o*o*v+j*o*v+a*o+k] =
-//		    i_oovo[i*2*o*2*o*2*v+(j+o)*2*o*2*v+a*2*o+(k+o)];
-//	}}}}
 
 	double *ijk11 = malloc(o*o*o*sizeof(double));
 	double *ijk12 = malloc(o*o*o*sizeof(double));
@@ -358,9 +311,11 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 #pragma omp master
 	printf("aaaaaa %g\n", e_pt1);
 
-	time_t tim = time(NULL);
 #pragma omp master
+	{
+	time_t tim = time(NULL);
 	printf("ccsd_pt: %s", ctime(&tim));
+	}
 
 #pragma omp for reduction(+:e_pt2) schedule(dynamic)
 	for (size_t a = 0; a < v; a++) {
@@ -440,6 +395,7 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	free(ijk24);
 	free(ijk27);
 	free(ijk28);
+}
 	return (e_pt1+e_pt2);
 }
 
@@ -551,11 +507,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		    t2[o*o*v*v+i*o*v*v+j*v*v+a*v+b];
 	}}}}
 
-#pragma omp parallel
-	{
-		e_pt = ccsd_pt_energy(o, v, d_ov, f_ov, t1,
-		    t2, t2t, i_oovo, i_oovv, i_vvov);
-	}
+	e_pt = ccsd_pt_energy(o, v, d_ov, f_ov, t1, t2, t2t,
+	    i_oovo, i_oovv, i_vvov);
 
 	free(t2t);
 	return (e_pt);
