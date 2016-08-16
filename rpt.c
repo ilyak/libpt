@@ -27,31 +27,31 @@
 
 #include "pt.h"
 
-#define D_OV(i, a) d_ov[i*v+a]
-#define F_OV(i, a) f_ov[i*v+a]
-#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
+//#define D_OV(i, a) d_ov[i*v+a]
+//#define F_OV(i, a) f_ov[i*v+a]
+//#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
 #define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
 #define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
-#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
+//#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
 #define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
-#define T1(i, a) t1[i*v+a]
+//#define T1(i, a) t1[i*v+a]
 #define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
 #define T2T(a, b, i, j) t2t[a*v*o*o+b*o*o+i*o+j]
-#define T3AABC(i, j, k) t3a[0*o*o*o+i*o*o+j*o+k]
-#define T3ACBA(i, j, k) t3a[1*o*o*o+i*o*o+j*o+k]
-#define T3AACB(i, j, k) t3a[2*o*o*o+i*o*o+j*o+k]
-#define T3BABC(i, j, k) t3b[0*o*o*o+i*o*o+j*o+k]
-#define T3BBAC(i, j, k) t3b[1*o*o*o+i*o*o+j*o+k]
-#define T3BCBA(i, j, k) t3b[2*o*o*o+i*o*o+j*o+k]
-#define OVX(i, j, k) ovx[i*v*x+j*x+k]
-#define VVX(i, j, k) vvx[i*v*x+j*x+k]
-#define MOV(i, a) mov[i*v+a]
-#define MOO1(i, j) moo1[i*o+j]
-#define MOO2(i, j) moo2[i*o+j]
-#define MOOO(i, j, k) mooo[i*o*o+j*o+k]
-#define MVOO(a, i, j) mvoo[a*o*o+i*o+j]
-#define MOX(i, j) mox[i*x+j]
-#define MXV(i, j) mxv[i*v+j]
+//#define T3AABC(i, j, k) t3a[0*o*o*o+i*o*o+j*o+k]
+//#define T3ACBA(i, j, k) t3a[1*o*o*o+i*o*o+j*o+k]
+//#define T3AACB(i, j, k) t3a[2*o*o*o+i*o*o+j*o+k]
+//#define T3BABC(i, j, k) t3b[0*o*o*o+i*o*o+j*o+k]
+//#define T3BBAC(i, j, k) t3b[1*o*o*o+i*o*o+j*o+k]
+//#define T3BCBA(i, j, k) t3b[2*o*o*o+i*o*o+j*o+k]
+//#define OVX(i, j, k) ovx[i*v*x+j*x+k]
+//#define VVX(i, j, k) vvx[i*v*x+j*x+k]
+//#define MOV(i, a) mov[i*v+a]
+//#define MOO1(i, j) moo1[i*o+j]
+//#define MOO2(i, j) moo2[i*o+j]
+//#define MOOO(i, j, k) mooo[i*o*o+j*o+k]
+//#define MVOO(a, i, j) mvoo[a*o*o+i*o+j]
+//#define MOX(i, j) mox[i*x+j]
+//#define MXV(i, j) mxv[i*v+j]
 
 void dgemm_(char *, char *, int *, int *, int *, double *, double *,
     int *, double *, int *, double *, double *, int *);
@@ -200,8 +200,8 @@ comp_t3b_ijkabc1(size_t o, size_t v, size_t i, size_t j, size_t k,
     size_t a, size_t b, size_t c, const double *t1, const double *i_oovv,
     const double *f_ov, const double *t2)
 {
-	double t1_ia = t1[i*2*v+a];
-	double f_ov_ia = f_ov[i*2*v+a];
+	double t1_ia = t1[i*v+a];
+	double f_ov_ia = f_ov[i*v+a];
 
 	return t1_ia*I_OOVV(j,k,b,c) + f_ov_ia*T2(j,k,b,c);
 }
@@ -221,60 +221,71 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 {
 	double e_pt1 = 0.0, e_pt2 = 0.0;
 
-	double *t2_aaaa, *t2_abab;
-	double *t2t_aaaa, *t2t_abab;
-	double *i_vvov_aaaa, *i_vvov_abab;
-	double *i_oovo_aaaa, *i_oovo_abab;
-	double *i_oovv_aaaa, *i_oovv_abab;
+	const double *t2_aaaa, *t2_abab;
+	const double *t2t_aaaa, *t2t_abab;
+	const double *i_vvov_aaaa, *i_vvov_abab;
+	const double *i_oovo_aaaa, *i_oovo_abab;
+	const double *i_oovv_aaaa, *i_oovv_abab;
 
-	t2_aaaa = malloc(o*o*v*v*sizeof(double));
-	t2_abab = malloc(o*o*v*v*sizeof(double));
-	t2t_aaaa = malloc(o*o*v*v*sizeof(double));
-	t2t_abab = malloc(o*o*v*v*sizeof(double));
-	i_vvov_aaaa = malloc(v*v*o*v*sizeof(double));
-	i_vvov_abab = malloc(v*v*o*v*sizeof(double));
-	i_oovo_aaaa = malloc(o*o*v*o*sizeof(double));
-	i_oovo_abab = malloc(o*o*v*o*sizeof(double));
-	i_oovv_aaaa = malloc(o*o*v*v*sizeof(double));
-	i_oovv_abab = malloc(o*o*v*v*sizeof(double));
+	t2_aaaa = t2;
+	t2_abab = t2 + o*o*v*v;
+	t2t_aaaa = t2t;
+	t2t_abab = t2t + o*o*v*v;
+	i_vvov_aaaa = i_vvov;
+	i_vvov_abab = i_vvov + o*v*v*v;
+	i_oovo_aaaa = i_oovo;
+	i_oovo_abab = i_oovo + o*o*o*v;
+	i_oovv_aaaa = i_oovv;
+	i_oovv_abab = i_oovv + o*o*v*v;
 
-	for (size_t i = 0; i < o; i++) {
-	for (size_t j = 0; j < o; j++) {
-	for (size_t a = 0; a < v; a++) {
-	for (size_t b = 0; b < v; b++) {
-		t2_aaaa[i*o*v*v+j*v*v+a*v+b] =
-		    t2[i*2*o*2*v*2*v+j*2*v*2*v+a*2*v+b];
-		t2_abab[i*o*v*v+j*v*v+a*v+b] =
-		    t2[i*2*o*2*v*2*v+(j+o)*2*v*2*v+a*2*v+(b+v)];
-
-		t2t_aaaa[a*v*o*o+b*o*o+i*o+j] =
-		    t2t[a*2*v*2*o*2*o+b*2*o*2*o+i*2*o+j];
-		t2t_abab[a*v*o*o+b*o*o+i*o+j] =
-		    t2t[a*2*v*2*o*2*o+(b+v)*2*o*2*o+i*2*o+(j+o)];
-
-		i_oovv_aaaa[i*o*v*v+j*v*v+a*v+b] =
-		    i_oovv[i*2*o*2*v*2*v+j*2*v*2*v+a*2*v+b];
-		i_oovv_abab[i*o*v*v+j*v*v+a*v+b] =
-		    i_oovv[i*2*o*2*v*2*v+(j+o)*2*v*2*v+a*2*v+(b+v)];
-	}}}}
-	for (size_t i = 0; i < o; i++) {
-	for (size_t a = 0; a < v; a++) {
-	for (size_t b = 0; b < v; b++) {
-	for (size_t c = 0; c < v; c++) {
-		i_vvov_aaaa[b*v*o*v+c*o*v+i*v+a] =
-		    i_vvov[b*2*v*2*o*2*v+c*2*o*2*v+i*2*v+a];
-		i_vvov_abab[b*v*o*v+c*o*v+i*v+a] =
-		    i_vvov[b*2*v*2*o*2*v+(c+v)*2*o*2*v+i*2*v+(a+v)];
-	}}}}
-	for (size_t i = 0; i < o; i++) {
-	for (size_t j = 0; j < o; j++) {
-	for (size_t k = 0; k < o; k++) {
-	for (size_t a = 0; a < v; a++) {
-		i_oovo_aaaa[i*o*o*v+j*o*v+a*o+k] =
-		    i_oovo[i*2*o*2*o*2*v+j*2*o*2*v+a*2*o+k];
-		i_oovo_abab[i*o*o*v+j*o*v+a*o+k] =
-		    i_oovo[i*2*o*2*o*2*v+(j+o)*2*o*2*v+a*2*o+(k+o)];
-	}}}}
+//	t2_aaaa = malloc(o*o*v*v*sizeof(double));
+//	t2_abab = malloc(o*o*v*v*sizeof(double));
+//	t2t_aaaa = malloc(o*o*v*v*sizeof(double));
+//	t2t_abab = malloc(o*o*v*v*sizeof(double));
+//	i_vvov_aaaa = malloc(v*v*o*v*sizeof(double));
+//	i_vvov_abab = malloc(v*v*o*v*sizeof(double));
+//	i_oovo_aaaa = malloc(o*o*v*o*sizeof(double));
+//	i_oovo_abab = malloc(o*o*v*o*sizeof(double));
+//	i_oovv_aaaa = malloc(o*o*v*v*sizeof(double));
+//	i_oovv_abab = malloc(o*o*v*v*sizeof(double));
+//
+//	for (size_t i = 0; i < o; i++) {
+//	for (size_t j = 0; j < o; j++) {
+//	for (size_t a = 0; a < v; a++) {
+//	for (size_t b = 0; b < v; b++) {
+//		t2_aaaa[i*o*v*v+j*v*v+a*v+b] =
+//		    t2[i*2*o*2*v*2*v+j*2*v*2*v+a*2*v+b];
+//		t2_abab[i*o*v*v+j*v*v+a*v+b] =
+//		    t2[i*2*o*2*v*2*v+(j+o)*2*v*2*v+a*2*v+(b+v)];
+//
+//		t2t_aaaa[a*v*o*o+b*o*o+i*o+j] =
+//		    t2t[a*2*v*2*o*2*o+b*2*o*2*o+i*2*o+j];
+//		t2t_abab[a*v*o*o+b*o*o+i*o+j] =
+//		    t2t[a*2*v*2*o*2*o+(b+v)*2*o*2*o+i*2*o+(j+o)];
+//
+//		i_oovv_aaaa[i*o*v*v+j*v*v+a*v+b] =
+//		    i_oovv[i*2*o*2*v*2*v+j*2*v*2*v+a*2*v+b];
+//		i_oovv_abab[i*o*v*v+j*v*v+a*v+b] =
+//		    i_oovv[i*2*o*2*v*2*v+(j+o)*2*v*2*v+a*2*v+(b+v)];
+//	}}}}
+//	for (size_t i = 0; i < o; i++) {
+//	for (size_t a = 0; a < v; a++) {
+//	for (size_t b = 0; b < v; b++) {
+//	for (size_t c = 0; c < v; c++) {
+//		i_vvov_aaaa[b*v*o*v+c*o*v+i*v+a] =
+//		    i_vvov[b*2*v*2*o*2*v+c*2*o*2*v+i*2*v+a];
+//		i_vvov_abab[b*v*o*v+c*o*v+i*v+a] =
+//		    i_vvov[b*2*v*2*o*2*v+(c+v)*2*o*2*v+i*2*v+(a+v)];
+//	}}}}
+//	for (size_t i = 0; i < o; i++) {
+//	for (size_t j = 0; j < o; j++) {
+//	for (size_t k = 0; k < o; k++) {
+//	for (size_t a = 0; a < v; a++) {
+//		i_oovo_aaaa[i*o*o*v+j*o*v+a*o+k] =
+//		    i_oovo[i*2*o*2*o*2*v+j*2*o*2*v+a*2*o+k];
+//		i_oovo_abab[i*o*o*v+j*o*v+a*o+k] =
+//		    i_oovo[i*2*o*2*o*2*v+(j+o)*2*o*2*v+a*2*o+(k+o)];
+//	}}}}
 
 #pragma omp parallel
 	{
@@ -336,7 +347,7 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 +comp_t3b_ijkabc1(o,v,j,i,k,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa)
 +comp_t3b_ijkabc1(o,v,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
 
-		dn = d_ov[i*2*v+a] + d_ov[j*2*v+b] + d_ov[k*2*v+c];
+		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		e_pt1 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
 	}}}}}}
 	}
@@ -419,7 +430,7 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 //	+comp_t3b_ijkabc(o,v,k+o,j,i,b,a,c+v,t1,i_oovv,f_ov,t2)
 	+comp_t3b_ijkabc1(o,v,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
 
-		dn = d_ov[i*2*v+a] + d_ov[j*2*v+b] + d_ov[k*2*v+c];
+		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		e_pt2 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
 	}}}}}}
 	}
@@ -478,7 +489,7 @@ ccsd_pt_worker(int id, int nid, size_t o, size_t v, size_t x,
 //	free(t3a);
 //	free(t3b);
 //	free(work);
-	return (ccsd_pt_energy(o/2, v/2, d_ov, f_ov, t1,
+	return (ccsd_pt_energy(o, v, d_ov, f_ov, t1,
 	    t2, t2t, i_oovo, i_oovv, i_vvov));
 }
 

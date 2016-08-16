@@ -161,8 +161,18 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
 	}
 	skip_line(fp);
 	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		t2[o*o*v*v+i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
 	for (i = 0; i < o*o*o*v; i++) {
 		i_ooov[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*o*v; i++) {
+		i_ooov[o*o*o*v+i] = read_next_double(fp);
 	}
 	skip_line(fp);
 	skip_line(fp);
@@ -171,8 +181,18 @@ load_test_data(const char *testpath, size_t o, size_t v, double *d_ov,
 	}
 	skip_line(fp);
 	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		i_oovv[o*o*v*v+i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
 	for (i = 0; i < o*v*v*v; i++) {
 		i_ovvv[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*v*v*v; i++) {
+		i_ovvv[o*v*v*v+i] = read_next_double(fp);
 	}
 	fclose(fp);
 }
@@ -263,16 +283,16 @@ load_random_data(size_t o, size_t v, double *d_ov,
 	for (i = 0; i < o*v; i++) {
 		t1[i] = random_double();
 	}
-	for (i = 0; i < o*o*v*v; i++) {
+	for (i = 0; i < 2*o*o*v*v; i++) {
 		t2[i] = random_double();
 	}
-	for (i = 0; i < o*o*o*v; i++) {
+	for (i = 0; i < 2*o*o*o*v; i++) {
 		i_ooov[i] = random_double();
 	}
-	for (i = 0; i < o*o*v*v; i++) {
+	for (i = 0; i < 2*o*o*v*v; i++) {
 		i_oovv[i] = random_double();
 	}
-	for (i = 0; i < o*v*v*v; i++) {
+	for (i = 0; i < 2*o*v*v*v; i++) {
 		i_ovvv[i] = random_double();
 	}
 }
@@ -486,13 +506,13 @@ main(int argc, char **argv)
 	d_ov = xmalloc(o*v * sizeof(double));
 	f_ov = xmalloc(o*v * sizeof(double));
 	t1 = xmalloc(o*v * sizeof(double));
-	t2 = xmalloc(o*o*v*v * sizeof(double));
-	t2t = xmalloc(o*o*v*v * sizeof(double));
-	i_ooov = xmalloc(o*o*o*v * sizeof(double));
-	i_oovo = xmalloc(o*o*o*v * sizeof(double));
-	i_oovv = xmalloc(o*o*v*v * sizeof(double));
-	i_ovvv = xmalloc(o*v*v*v * sizeof(double));
-	i_vvov = xmalloc(o*v*v*v * sizeof(double));
+	t2 = xmalloc(2*o*o*v*v * sizeof(double));
+	t2t = xmalloc(2*o*o*v*v * sizeof(double));
+	i_ooov = xmalloc(2*o*o*o*v * sizeof(double));
+	i_oovo = xmalloc(2*o*o*o*v * sizeof(double));
+	i_oovv = xmalloc(2*o*o*v*v * sizeof(double));
+	i_ovvv = xmalloc(2*o*v*v*v * sizeof(double));
+	i_vvov = xmalloc(2*o*v*v*v * sizeof(double));
 //	ovx = xmalloc(o*v*x * sizeof(double));
 //	vvx = xmalloc(v*v*x * sizeof(double));
 
@@ -526,6 +546,36 @@ main(int argc, char **argv)
 	for (c = 0; c < v; c++) {
 		I_VVOV(b,c,i,a) = I_OVVV(i,a,b,c);
 	}}}}
+	t2 += o*o*v*v;
+	t2t += o*o*v*v;
+	i_ooov += o*o*o*v;
+	i_oovo += o*o*o*v;
+	i_ovvv += o*v*v*v;
+	i_vvov += o*v*v*v;
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+		T2T(a,b,i,j) = T2(i,j,a,b);
+	}}}}
+	for (i = 0; i < o; i++) {
+	for (j = 0; j < o; j++) {
+	for (k = 0; k < o; k++) {
+	for (a = 0; a < v; a++) {
+		I_OOVO(i,j,a,k) = I_OOOV(i,j,k,a);
+	}}}}
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < v; c++) {
+		I_VVOV(b,c,i,a) = I_OVVV(i,a,b,c);
+	}}}}
+	t2 -= o*o*v*v;
+	t2t -= o*o*v*v;
+	i_ooov -= o*o*o*v;
+	i_oovo -= o*o*o*v;
+	i_ovvv -= o*v*v*v;
+	i_vvov -= o*v*v*v;
 
 	//setup_offsets(v, &tt2);
 	//setup_offsets(v, &it_ooov);
