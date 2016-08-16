@@ -441,92 +441,92 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	return (e_pt1+e_pt2);
 }
 
-static double
-ccsd_pt_worker(int id, int nid, size_t o, size_t v, size_t x,
-    const double *d_ov, const double *f_ov, const double *t1,
-    const double *t2, const double *t2t, const double *i_oovo,
-    const double *i_oovv, const double *i_vvov, const double *ovx,
-    const double *vvx)
-{
-//	double e_pt = 0.0, *t3a, *t3b, *work;
-//	size_t a, b, c, iter;
-
-//	t3a = malloc(3*o*o*o*sizeof(double));
-//	if (t3a == NULL)
-//		err(1, "malloc");
-//	t3b = malloc(3*o*o*o*sizeof(double));
-//	if (t3b == NULL)
-//		err(1, "malloc");
-//	n = o > v ? o : v;
-//	work = malloc((o*n + o*o*n + o*x + v*x) * sizeof(double));
-//	if (work == NULL)
-//		err(1, "malloc");
-
-//	for (a = 0, iter = 0; a < v/2; a++) {
-//	for (b = a+1; b < v/2; b++) {
-//	for (c = b+1; c < v; c++, iter++) {
-//		if (iter % nid != id)
-//			continue;
-//		ccsd_t3a(o, v, x, a, b, c, t3a, t3b, t2, i_ooov, i_ovvv,
-//		    ovx, vvx, work);
-//		ccsd_asymm_t3a(o, t3a);
-//		ccsd_asymm_t3b(o, t3b);
+//static double
+//ccsd_pt_worker(int id, int nid, size_t o, size_t v, size_t x,
+//    const double *d_ov, const double *f_ov, const double *t1,
+//    const double *t2, const double *t2t, const double *i_oovo,
+//    const double *i_oovv, const double *i_vvov, const double *ovx,
+//    const double *vvx)
+//{
+////	double e_pt = 0.0, *t3a, *t3b, *work;
+////	size_t a, b, c, iter;
 //
-//		for (n = 0; n < o*o*o; n++) t3a[n] = t3b[n]-t3a[n];
+////	t3a = malloc(3*o*o*o*sizeof(double));
+////	if (t3a == NULL)
+////		err(1, "malloc");
+////	t3b = malloc(3*o*o*o*sizeof(double));
+////	if (t3b == NULL)
+////		err(1, "malloc");
+////	n = o > v ? o : v;
+////	work = malloc((o*n + o*o*n + o*x + v*x) * sizeof(double));
+////	if (work == NULL)
+////		err(1, "malloc");
 //
-//		ccsd_t3b(o, v, a, b, c, t3b, f_ov, t1, t2, i_oovv, work);
-//		ccsd_asymm_t3b(o, t3b);
+////	for (a = 0, iter = 0; a < v/2; a++) {
+////	for (b = a+1; b < v/2; b++) {
+////	for (c = b+1; c < v; c++, iter++) {
+////		if (iter % nid != id)
+////			continue;
+////		ccsd_t3a(o, v, x, a, b, c, t3a, t3b, t2, i_ooov, i_ovvv,
+////		    ovx, vvx, work);
+////		ccsd_asymm_t3a(o, t3a);
+////		ccsd_asymm_t3b(o, t3b);
+////
+////		for (n = 0; n < o*o*o; n++) t3a[n] = t3b[n]-t3a[n];
+////
+////		ccsd_t3b(o, v, a, b, c, t3b, f_ov, t1, t2, i_oovv, work);
+////		ccsd_asymm_t3b(o, t3b);
+//
+////		comp_t3a_asymm(o,v,a,b,c,t2,i_ooov,i_ovvv,t3a,t3b);
+////		for (n = 0; n < o*o*o; n++) t3a[n] = t3b[n]-t3a[n];
+////		comp_t3b_asymm(o,v,a,b,c,t1,i_oovv,f_ov,t2,t3b);
+//
+/////		e_pt += ccsd_pt_energy(o, v, a, b, c, d_ov, f_ov, t1,
+/////		    t2, i_ooov, i_oovv, i_ovvv);
+/////	}}}
+/////	e_pt *= 2.0;
+//
+////	free(t3a);
+////	free(t3b);
+////	free(work);
+//	return (ccsd_pt_energy(o, v, d_ov, f_ov, t1,
+//	    t2, t2t, i_oovo, i_oovv, i_vvov));
+//}
 
-//		comp_t3a_asymm(o,v,a,b,c,t2,i_ooov,i_ovvv,t3a,t3b);
-//		for (n = 0; n < o*o*o; n++) t3a[n] = t3b[n]-t3a[n];
-//		comp_t3b_asymm(o,v,a,b,c,t1,i_oovv,f_ov,t2,t3b);
-
-///		e_pt += ccsd_pt_energy(o, v, a, b, c, d_ov, f_ov, t1,
-///		    t2, i_ooov, i_oovv, i_ovvv);
-///	}}}
-///	e_pt *= 2.0;
-
-//	free(t3a);
-//	free(t3b);
-//	free(work);
-	return (ccsd_pt_energy(o, v, d_ov, f_ov, t1,
-	    t2, t2t, i_oovo, i_oovv, i_vvov));
-}
-
-static double
-do_ccsd_pt(size_t o, size_t v, size_t x, const double *d_ov, const double *f_ov,
-    const double *t1, const double *t2, const double *t2t, const double *i_oovo,
-    const double *i_oovv, const double *i_vvov,
-    const double *ovx, const double *vvx)
-{
-	double e_pt = 0.0;
-	int pid, npid;
-
-	if (o == 0 || v == 0)
-		return (0.0);
-	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
-	MPI_Comm_size(MPI_COMM_WORLD, &npid);
-
+//static double
+//do_ccsd_pt(size_t o, size_t v, size_t x, const double *d_ov, const double *f_ov,
+//    const double *t1, const double *t2, const double *t2t, const double *i_oovo,
+//    const double *i_oovv, const double *i_vvov,
+//    const double *ovx, const double *vvx)
+//{
+//	double e_pt = 0.0;
+//	int pid, npid;
+//
+//	if (o == 0 || v == 0)
+//		return (0.0);
+//	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+//	MPI_Comm_size(MPI_COMM_WORLD, &npid);
+//
+////#ifdef _OPENMP
+////#pragma omp parallel reduction(+:e_pt)
+////#endif
+//	{
+//		int id, nid, tid = 0, ntid = 1;
 //#ifdef _OPENMP
-//#pragma omp parallel reduction(+:e_pt)
+////		tid = omp_get_thread_num();
+////		ntid = omp_get_num_threads();
 //#endif
-	{
-		int id, nid, tid = 0, ntid = 1;
-#ifdef _OPENMP
-//		tid = omp_get_thread_num();
-//		ntid = omp_get_num_threads();
-#endif
-		id = pid * ntid + tid;
-		nid = npid * ntid;
-
-		e_pt = ccsd_pt_worker(id, nid, o, v, x, d_ov, f_ov, t1, t2, t2t,
-		    i_oovo, i_oovv, i_vvov, ovx, vvx);
-	}
-
-	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE, MPI_SUM,
-	    MPI_COMM_WORLD);
-	return (e_pt);
-}
+//		id = pid * ntid + tid;
+//		nid = npid * ntid;
+//
+//		e_pt = ccsd_pt_worker(id, nid, o, v, x, d_ov, f_ov, t1, t2, t2t,
+//		    i_oovo, i_oovv, i_vvov, ovx, vvx);
+//	}
+//
+//	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE, MPI_SUM,
+//	    MPI_COMM_WORLD);
+//	return (e_pt);
+//}
 
 double
 ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
@@ -549,8 +549,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		    t2[o*o*v*v+i*o*v*v+j*v*v+a*v+b];
 	}}}}
 
-	e_pt = do_ccsd_pt(o, v, 0, d_ov, f_ov, t1, t2, t2t,
-	    i_oovo, i_oovv, i_vvov, NULL, NULL);
+	e_pt = ccsd_pt_energy(o, v, d_ov, f_ov, t1,
+	    t2, t2t, i_oovo, i_oovv, i_vvov);
 	free(t2t);
 	return (e_pt);
 }

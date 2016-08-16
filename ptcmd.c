@@ -450,23 +450,20 @@ setup_offsets(size_t ldim, struct st4 *st)
 }
 #endif
 
-#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
-#define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
-#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
-#define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
-#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
-#define T2T(a, b, i, j) t2t[a*v*o*o+b*o*o+i*o+j]
+//#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
+//#define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
+//#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
+//#define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
+//#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
+//#define T2T(a, b, i, j) t2t[a*v*o*o+b*o*o+i*o+j]
 
 int
 main(int argc, char **argv)
 {
 	size_t o = 0, v = 0, x = 0;
-	size_t i,j,k,a,b,c;
 	double *d_ov, *f_ov;
-	double *t2, *t2t, /* *i_ooov,*/ *i_oovv, /* *i_ovvv,*/ *i_oovo, *i_vvov;
-	double *t1, *ovx, *vvx;
-	double e_pt, e_ref = 0.0;
-	//struct st4 tt2, it_ooov, it_oovv, it_ovvv;
+	double *t1, *t2, *i_oovv, *i_oovo, *i_vvov;
+	double e_pt = 0.0, e_ref = 0.0;
 	time_t tim;
 	int rank;
 	const char *errstr, *testpath = NULL;
@@ -507,7 +504,7 @@ main(int argc, char **argv)
 	f_ov = xmalloc(o*v * sizeof(double));
 	t1 = xmalloc(o*v * sizeof(double));
 	t2 = xmalloc(2*o*o*v*v * sizeof(double));
-	t2t = xmalloc(2*o*o*v*v * sizeof(double));
+	//t2t = xmalloc(2*o*o*v*v * sizeof(double));
 	//i_ooov = xmalloc(2*o*o*o*v * sizeof(double));
 	i_oovo = xmalloc(2*o*o*o*v * sizeof(double));
 	i_oovv = xmalloc(2*o*o*v*v * sizeof(double));
