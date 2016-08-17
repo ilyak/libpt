@@ -23,10 +23,9 @@ check: pt
 	@echo pt04 && ./pt -t tests/pt04.dat && echo success
 	@echo pt05 && ./pt -t tests/pt05.dat && echo success
 	@echo pt06 && ./pt -t tests/pt06.dat && echo success
-#	@echo pt07 && ./pt -t tests/pt07.dat && echo success
-#	@echo pt08 && ./pt -t tests/pt08.dat && echo success
-#	@echo pt09 && ./pt -t tests/pt09.dat && echo success
-	@echo ri01 && ./pt -t tests/ri01.dat && echo success
+	@echo pt07 && ./pt -t tests/pt07.dat && echo success
+	@echo pt08 && ./pt -t tests/pt08.dat && echo success
+	@echo pt09 && ./pt -t tests/pt09.dat && echo success
 
 clean:
 	$(RM) $(ALL_O) pt gmon.out *.core *.log
