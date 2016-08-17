@@ -127,6 +127,34 @@ comp_t3a_ijk_2(size_t o, size_t v, size_t a, size_t b, size_t c,
 	gemm('T', 'N', o, o*o, o, 1.0, t2t_p, lda, i_oovo_p, ldb, 0.0, ijk, o);
 }
 
+static void
+comp_t3a_abc_1(size_t o, size_t v, size_t i, size_t j, size_t k,
+    double *abc, const double *t2, const double *i_vvov)
+{
+	const double *t2_p = &T2(i,j,0,0);
+	const double *i_vvov_p = &I_VVOV(0,0,k,0);
+	int lda = v;
+	int ldb = o*v;
+
+	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_vvov(b,c,k,d)) */
+
+	gemm('T', 'N', v, v*v, v, 1.0, t2_p, lda, i_vvov_p, ldb, 0, abc, v);
+}
+
+static void
+comp_t3a_abc_2(size_t o, size_t v, size_t i, size_t j, size_t k,
+    double *abc, const double *t2t, const double *i_oovo)
+{
+	const double *t2t_p = &T2T(0,0,i,0);
+	const double *i_oovo_p = &I_OOVO(j,k,0,0);
+	int lda = o*o;
+	int ldb = o;
+
+	/* t3a2(i,j,k,a,b,c) = contract(l, t2t(a,b,i,l), i_oovo(j,k,c,l)) */
+
+	gemm('T', 'N', v*v, v, o, 1.0, t2t_p, lda, i_oovo_p, ldb, 0, abc, v*v);
+}
+
 //static double
 //comp_t3a_ijkabc_12(size_t o, size_t v, size_t i, size_t j, size_t k,
 //    size_t a, size_t b, size_t c, const double *t2, const double *i_vvov)
@@ -221,6 +249,15 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 {
 	double e_pt1 = 0.0, e_pt2 = 0.0;
 
+	size_t nij = 0;
+	size_t ij[o*o][2];
+	for (size_t i = 0; i < o; i++)
+	for (size_t j = i+1; j < o; j++) {
+		ij[nij][0] = i;
+		ij[nij][1] = j;
+		nij++;
+	}
+
 #pragma omp parallel
 {
 	const double *t2_aaaa, *t2_abab;
@@ -252,24 +289,43 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	double *ijk27 = malloc(o*o*o*sizeof(double));
 	double *ijk28 = malloc(o*o*o*sizeof(double));
 
+	double *abc11 = malloc(v*v*v*sizeof(double));
+	double *abc12 = malloc(v*v*v*sizeof(double));
+	double *abc13 = malloc(v*v*v*sizeof(double));
+	double *abc21 = malloc(v*v*v*sizeof(double));
+	double *abc22 = malloc(v*v*v*sizeof(double));
+	double *abc23 = malloc(v*v*v*sizeof(double));
+
 #pragma omp for reduction(+:e_pt1) schedule(dynamic)
+	for (size_t it = 0; it < nij; it++) {
+		size_t i = ij[it][0];
+		size_t j = ij[it][1];
+
+//	for (size_t j = i+1; j < o; j++) {
+	for (size_t k = j+1; k < o; k++) {
+
+//	comp_t3a_ijk_1(o,v,a,b,c,ijk11,t2_aaaa,i_vvov_aaaa);
+//	comp_t3a_ijk_1(o,v,b,a,c,ijk12,t2_aaaa,i_vvov_aaaa);
+//	comp_t3a_ijk_1(o,v,c,b,a,ijk13,t2_aaaa,i_vvov_aaaa);
+//
+//	comp_t3a_ijk_2(o,v,a,b,c,ijk21,t2t_aaaa,i_oovo_aaaa);
+//	comp_t3a_ijk_2(o,v,a,c,b,ijk22,t2t_aaaa,i_oovo_aaaa);
+//	comp_t3a_ijk_2(o,v,c,b,a,ijk23,t2t_aaaa,i_oovo_aaaa);
+
+	comp_t3a_abc_1(o,v,i,j,k,abc11,t2_aaaa,i_vvov_aaaa);
+	comp_t3a_abc_1(o,v,i,k,j,abc12,t2_aaaa,i_vvov_aaaa);
+	comp_t3a_abc_1(o,v,k,j,i,abc13,t2_aaaa,i_vvov_aaaa);
+
+	comp_t3a_abc_2(o,v,i,j,k,abc21,t2t_aaaa,i_oovo_aaaa);
+	comp_t3a_abc_2(o,v,j,i,k,abc22,t2t_aaaa,i_oovo_aaaa);
+	comp_t3a_abc_2(o,v,k,j,i,abc23,t2t_aaaa,i_oovo_aaaa);
+
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = a+1; b < v; b++) {
 	for (size_t c = b+1; c < v; c++) {
-
-	comp_t3a_ijk_1(o,v,a,b,c,ijk11,t2_aaaa,i_vvov_aaaa);
-	comp_t3a_ijk_1(o,v,b,a,c,ijk12,t2_aaaa,i_vvov_aaaa);
-	comp_t3a_ijk_1(o,v,c,b,a,ijk13,t2_aaaa,i_vvov_aaaa);
-
-	comp_t3a_ijk_2(o,v,a,b,c,ijk21,t2t_aaaa,i_oovo_aaaa);
-	comp_t3a_ijk_2(o,v,a,c,b,ijk22,t2t_aaaa,i_oovo_aaaa);
-	comp_t3a_ijk_2(o,v,c,b,a,ijk23,t2t_aaaa,i_oovo_aaaa);
-
-	for (size_t i = 0; i < o; i++) {
-	for (size_t j = i+1; j < o; j++) {
-	for (size_t k = j+1; k < o; k++) {
 		double t3ax1, t3ax2, t3bx, dn;
 
+#if 0
 		t3ax1 =
 +ijk11[j+i*o+k*o*o] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
 -ijk11[j+k*o+i*o*o] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
@@ -291,6 +347,29 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 -ijk23[i+k*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
 +ijk23[j+k*o+i*o*o] //+comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
 +ijk23[k+i*o+j*o*o];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
+#endif
+
+		t3ax1 =
++abc11[a+c*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc11[b+c*v+a*v*v] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc11[c+a*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc12[a+c*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
++abc12[b+c*v+a*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
++abc12[c+a*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
+-abc13[a+c*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
++abc13[b+c*v+a*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
++abc13[c+a*v+b*v*v];//+comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
+
+		t3ax2 =
++abc21[b+a*v+c*v*v] //+comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-abc21[c+a*v+b*v*v] //-comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-abc21[b+c*v+a*v*v] //-comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-abc22[b+a*v+c*v*v] //-comp_t3a_ijkabc_21(o,v,i,j,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
++abc22[c+a*v+b*v*v] //+comp_t3a_ijkabc_21(o,v,j,i,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
++abc22[b+c*v+a*v*v] //+comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t_aaaa,i_oovo_aaaa)
+-abc23[b+a*v+c*v*v] //-comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
++abc23[c+a*v+b*v*v] //+comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
++abc23[b+c*v+a*v*v];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
 
 		t3bx =
 +comp_t3b_ijkabc1(o,v,i,j,k,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
@@ -305,7 +384,8 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		e_pt1 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
-	}}}}}}
+	}}}
+	}}
 
 #pragma omp master
 {
