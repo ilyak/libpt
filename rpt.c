@@ -277,24 +277,34 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	i_oovv_aaaa = i_oovv;
 	i_oovv_abab = i_oovv + o*o*v*v;
 
-	double *ijk11 = malloc(o*o*o*sizeof(double));
-	double *ijk12 = malloc(o*o*o*sizeof(double));
-	double *ijk13 = malloc(o*o*o*sizeof(double));
-	double *ijk15 = malloc(o*o*o*sizeof(double));
-	double *ijk17 = malloc(o*o*o*sizeof(double));
-	double *ijk21 = malloc(o*o*o*sizeof(double));
-	double *ijk22 = malloc(o*o*o*sizeof(double));
-	double *ijk23 = malloc(o*o*o*sizeof(double));
-	double *ijk24 = malloc(o*o*o*sizeof(double));
-	double *ijk27 = malloc(o*o*o*sizeof(double));
-	double *ijk28 = malloc(o*o*o*sizeof(double));
+//	double *ijk11 = malloc(o*o*o*sizeof(double));
+//	double *ijk12 = malloc(o*o*o*sizeof(double));
+//	double *ijk13 = malloc(o*o*o*sizeof(double));
+//	double *ijk15 = malloc(o*o*o*sizeof(double));
+//	double *ijk17 = malloc(o*o*o*sizeof(double));
+//	double *ijk21 = malloc(o*o*o*sizeof(double));
+//	double *ijk22 = malloc(o*o*o*sizeof(double));
+//	double *ijk23 = malloc(o*o*o*sizeof(double));
+//	double *ijk24 = malloc(o*o*o*sizeof(double));
+//	double *ijk27 = malloc(o*o*o*sizeof(double));
+//	double *ijk28 = malloc(o*o*o*sizeof(double));
 
 	double *abc11 = malloc(v*v*v*sizeof(double));
 	double *abc12 = malloc(v*v*v*sizeof(double));
 	double *abc13 = malloc(v*v*v*sizeof(double));
+	double *abc14 = malloc(v*v*v*sizeof(double));
+//	double *abc15 = malloc(v*v*v*sizeof(double));
+//	double *abc16 = malloc(v*v*v*sizeof(double));
+	double *abc17 = malloc(v*v*v*sizeof(double));
+	double *abc18 = malloc(v*v*v*sizeof(double));
 	double *abc21 = malloc(v*v*v*sizeof(double));
 	double *abc22 = malloc(v*v*v*sizeof(double));
 	double *abc23 = malloc(v*v*v*sizeof(double));
+//	double *abc24 = malloc(v*v*v*sizeof(double));
+	double *abc25 = malloc(v*v*v*sizeof(double));
+//	double *abc26 = malloc(v*v*v*sizeof(double));
+	double *abc27 = malloc(v*v*v*sizeof(double));
+//	double *abc28 = malloc(v*v*v*sizeof(double));
 
 #pragma omp for reduction(+:e_pt1) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
@@ -397,33 +407,55 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 }
 
 #pragma omp for reduction(+:e_pt2) schedule(dynamic)
+	for (size_t it = 0; it < nij; it++) {
+		size_t i = ij[it][0];
+		size_t j = ij[it][1];
+
+//	for (size_t j = i+1; j < o; j++) {
+	for (size_t k = 0; k < o; k++) {
+
+//	comp_t3a_ijk_1(o,v,a,c,b,ijk11,t2_aaaa,i_vvov_abab);
+//	comp_t3a_ijk_1(o,v,b,c,a,ijk12,t2_aaaa,i_vvov_abab);
+//	comp_t3a_ijk_1(o,v,a,b,c,ijk13,t2_abab,i_vvov_abab);
+////	comp_t3a_ijk_1(o,v,a,b,c,ijk14,t2_abab,i_vvov_abab);
+//	comp_t3a_ijk_1(o,v,b,a,c,ijk15,t2_abab,i_vvov_abab);
+////	comp_t3a_ijk_1(o,v,b,a,c,ijk16,t2_abab,i_vvov_abab);
+//	comp_t3a_ijk_1(o,v,c,a,b,ijk17,t2_abab,i_vvov_aaaa);
+////	comp_t3a_ijk_1(o,v,c,a,b,ijk18,t2_abab,i_vvov_aaaa);
+//
+//	comp_t3a_ijk_2(o,v,a,b,c,ijk21,t2t_aaaa,i_oovo_abab);
+////	comp_t3a_ijk_2(o,v,a,b,c,ijk22,t2t_aaaa,i_oovo_abab);
+//	comp_t3a_ijk_2(o,v,a,c,b,ijk23,t2t_abab,i_oovo_abab);
+//	comp_t3a_ijk_2(o,v,b,c,a,ijk24,t2t_abab,i_oovo_abab);
+////	comp_t3a_ijk_2(o,v,b,c,a,ijk25,t2t_abab,i_oovo_abab);
+////	comp_t3a_ijk_2(o,v,a,c,b,ijk26,t2t_abab,i_oovo_abab);
+//	comp_t3a_ijk_2(o,v,c,a,b,ijk27,t2t_abab,i_oovo_aaaa);
+//	comp_t3a_ijk_2(o,v,c,b,a,ijk28,t2t_abab,i_oovo_aaaa);
+
+	comp_t3a_abc_1(o,v,i,j,k,abc11,t2_aaaa,i_vvov_abab);
+//	comp_t3a_abc_1(o,v,i,j,k,abc12,t2_aaaa,i_vvov_abab);
+	comp_t3a_abc_1(o,v,i,k,j,abc13,t2_abab,i_vvov_abab);
+	comp_t3a_abc_1(o,v,j,k,i,abc14,t2_abab,i_vvov_abab);
+//	comp_t3a_abc_1(o,v,i,k,j,abc15,t2_abab,i_vvov_abab);
+//	comp_t3a_abc_1(o,v,j,k,i,abc16,t2_abab,i_vvov_abab);
+	comp_t3a_abc_1(o,v,k,j,i,abc17,t2_abab,i_vvov_aaaa);
+	comp_t3a_abc_1(o,v,k,i,j,abc18,t2_abab,i_vvov_aaaa);
+
+	comp_t3a_abc_2(o,v,i,k,j,abc21,t2t_aaaa,i_oovo_abab);
+	comp_t3a_abc_2(o,v,j,k,i,abc22,t2t_aaaa,i_oovo_abab);
+	comp_t3a_abc_2(o,v,i,j,k,abc23,t2t_abab,i_oovo_abab);
+//	comp_t3a_abc_2(o,v,i,j,k,abc24,t2t_abab,i_oovo_abab);
+	comp_t3a_abc_2(o,v,j,i,k,abc25,t2t_abab,i_oovo_abab);
+//	comp_t3a_abc_2(o,v,j,i,k,abc26,t2t_abab,i_oovo_abab);
+	comp_t3a_abc_2(o,v,k,j,i,abc27,t2t_abab,i_oovo_aaaa);
+//	comp_t3a_abc_2(o,v,k,j,i,abc28,t2t_abab,i_oovo_aaaa);
+
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = a+1; b < v; b++) {
 	for (size_t c = 0; c < v; c++) {
-
-	comp_t3a_ijk_1(o,v,a,c,b,ijk11,t2_aaaa,i_vvov_abab);
-	comp_t3a_ijk_1(o,v,b,c,a,ijk12,t2_aaaa,i_vvov_abab);
-	comp_t3a_ijk_1(o,v,a,b,c,ijk13,t2_abab,i_vvov_abab);
-//	comp_t3a_ijk_1(o,v,a,b,c,ijk14,t2_abab,i_vvov_abab);
-	comp_t3a_ijk_1(o,v,b,a,c,ijk15,t2_abab,i_vvov_abab);
-//	comp_t3a_ijk_1(o,v,b,a,c,ijk16,t2_abab,i_vvov_abab);
-	comp_t3a_ijk_1(o,v,c,a,b,ijk17,t2_abab,i_vvov_aaaa);
-//	comp_t3a_ijk_1(o,v,c,a,b,ijk18,t2_abab,i_vvov_aaaa);
-
-	comp_t3a_ijk_2(o,v,a,b,c,ijk21,t2t_aaaa,i_oovo_abab);
-//	comp_t3a_ijk_2(o,v,a,b,c,ijk22,t2t_aaaa,i_oovo_abab);
-	comp_t3a_ijk_2(o,v,a,c,b,ijk23,t2t_abab,i_oovo_abab);
-	comp_t3a_ijk_2(o,v,b,c,a,ijk24,t2t_abab,i_oovo_abab);
-//	comp_t3a_ijk_2(o,v,b,c,a,ijk25,t2t_abab,i_oovo_abab);
-//	comp_t3a_ijk_2(o,v,a,c,b,ijk26,t2t_abab,i_oovo_abab);
-	comp_t3a_ijk_2(o,v,c,a,b,ijk27,t2t_abab,i_oovo_aaaa);
-	comp_t3a_ijk_2(o,v,c,b,a,ijk28,t2t_abab,i_oovo_aaaa);
-
-	for (size_t i = 0; i < o; i++) {
-	for (size_t j = i+1; j < o; j++) {
-	for (size_t k = 0; k < o; k++) {
 		double t3ax1, t3ax2, t3bx, dn;
 
+#if 0
 		t3ax1 =
 -ijk11[j+i*o+k*o*o] //-comp_t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
 +ijk12[j+i*o+k*o*o] //+comp_t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
@@ -443,6 +475,26 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 +ijk23[j+k*o+i*o*o] //+comp_t3a_ijkabc_21h(o,v,j,i,k,a,c,b,t2t_abab,i_oovo_abab)
 -ijk27[k+i*o+j*o*o] //-comp_t3a_ijkabc_21h(o,v,k,j,i,c,a,b,t2t_abab,i_oovo_aaaa)
 +ijk28[k+i*o+j*o*o];//+comp_t3a_ijkabc_21h(o,v,k,j,i,c,b,a,t2t_abab,i_oovo_aaaa)
+#endif
+		t3ax1 =
+-abc11[a+b*v+c*v*v] //-comp_t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
++abc11[b+a*v+c*v*v] //+comp_t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
+-abc13[a+c*v+b*v*v] //-comp_t3a_ijkabc_11h(o,v,i,k,j,a,b,c,t2_abab,i_vvov_abab)
++abc14[a+c*v+b*v*v] //+comp_t3a_ijkabc_11h(o,v,j,k,i,a,b,c,t2_abab,i_vvov_abab)
++abc13[b+c*v+a*v*v] //+comp_t3a_ijkabc_11h(o,v,i,k,j,b,a,c,t2_abab,i_vvov_abab)
+-abc14[b+c*v+a*v*v] //-comp_t3a_ijkabc_11h(o,v,j,k,i,b,a,c,t2_abab,i_vvov_abab)
+-abc17[c+b*v+a*v*v] //-comp_t3a_ijkabc_11h(o,v,k,j,i,c,a,b,t2_abab,i_vvov_aaaa)
++abc18[c+b*v+a*v*v];//+comp_t3a_ijkabc_11h(o,v,k,i,j,c,a,b,t2_abab,i_vvov_aaaa)
+
+		t3ax2 =
+-abc21[b+a*v+c*v*v] //-comp_t3a_ijkabc_21h(o,v,i,k,j,a,b,c,t2t_aaaa,i_oovo_abab)
++abc22[b+a*v+c*v*v] //+comp_t3a_ijkabc_21h(o,v,j,k,i,a,b,c,t2t_aaaa,i_oovo_abab)
+-abc23[c+a*v+b*v*v] //-comp_t3a_ijkabc_21h(o,v,i,j,k,a,c,b,t2t_abab,i_oovo_abab)
++abc23[c+b*v+a*v*v] //+comp_t3a_ijkabc_21h(o,v,i,j,k,b,c,a,t2t_abab,i_oovo_abab)
+-abc25[c+b*v+a*v*v] //-comp_t3a_ijkabc_21h(o,v,j,i,k,b,c,a,t2t_abab,i_oovo_abab)
++abc25[c+a*v+b*v*v] //+comp_t3a_ijkabc_21h(o,v,j,i,k,a,c,b,t2t_abab,i_oovo_abab)
+-abc27[a+c*v+b*v*v] //-comp_t3a_ijkabc_21h(o,v,k,j,i,c,a,b,t2t_abab,i_oovo_aaaa)
++abc27[b+c*v+a*v*v];//+comp_t3a_ijkabc_21h(o,v,k,j,i,c,b,a,t2t_abab,i_oovo_aaaa)
 
 		t3bx =
 	+comp_t3b_ijkabc1(o,v,i,j,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
@@ -457,7 +509,8 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		e_pt2 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
-	}}}}}}
+	}}}
+	}}
 
 #pragma omp master
 {
@@ -465,17 +518,17 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	printf("aabaab %g\n", e_pt2);
 }
 
-	free(ijk11);
-	free(ijk12);
-	free(ijk13);
-	free(ijk15);
-	free(ijk17);
-	free(ijk21);
-	free(ijk22);
-	free(ijk23);
-	free(ijk24);
-	free(ijk27);
-	free(ijk28);
+//	free(ijk11);
+//	free(ijk12);
+//	free(ijk13);
+//	free(ijk15);
+//	free(ijk17);
+//	free(ijk21);
+//	free(ijk22);
+//	free(ijk23);
+//	free(ijk24);
+//	free(ijk27);
+//	free(ijk28);
 }
 	return (e_pt1+e_pt2);
 }
