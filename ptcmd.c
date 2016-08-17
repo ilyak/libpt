@@ -29,7 +29,7 @@
 
 #include "pt.h"
 
-#define EPSILON 1.0e-8
+#define EPSILON 5.0e-8
 
 double drand48(void);
 long long strtonum(const char *, long long, long long, const char **);
