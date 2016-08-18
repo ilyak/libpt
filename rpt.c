@@ -518,17 +518,17 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	printf("aabaab %g\n", e_pt2);
 }
 
-//	free(ijk11);
-//	free(ijk12);
-//	free(ijk13);
-//	free(ijk15);
-//	free(ijk17);
-//	free(ijk21);
-//	free(ijk22);
-//	free(ijk23);
-//	free(ijk24);
-//	free(ijk27);
-//	free(ijk28);
+	free(abc11);
+	free(abc12);
+	free(abc13);
+	free(abc14);
+	free(abc17);
+	free(abc18);
+	free(abc21);
+	free(abc22);
+	free(abc23);
+	free(abc25);
+	free(abc27);
 }
 	return (e_pt1+e_pt2);
 }
