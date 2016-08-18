@@ -248,13 +248,12 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *i_oovv, const double *i_vvov)
 {
 	double e_pt1 = 0.0, e_pt2 = 0.0;
+	size_t nij = 0, *ij = malloc(2*o*o*sizeof(size_t));
 
-	size_t nij = 0;
-	size_t ij[o*o][2];
 	for (size_t i = 0; i < o; i++)
 	for (size_t j = i+1; j < o; j++) {
-		ij[nij][0] = i;
-		ij[nij][1] = j;
+		ij[2*nij+0] = i;
+		ij[2*nij+1] = j;
 		nij++;
 	}
 
@@ -308,8 +307,8 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 #pragma omp for reduction(+:e_pt1) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
-		size_t i = ij[it][0];
-		size_t j = ij[it][1];
+		size_t i = ij[2*it+0];
+		size_t j = ij[2*it+1];
 
 //	for (size_t j = i+1; j < o; j++) {
 	for (size_t k = j+1; k < o; k++) {
@@ -408,8 +407,8 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 #pragma omp for reduction(+:e_pt2) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
-		size_t i = ij[it][0];
-		size_t j = ij[it][1];
+		size_t i = ij[2*it+0];
+		size_t j = ij[2*it+1];
 
 //	for (size_t j = i+1; j < o; j++) {
 	for (size_t k = 0; k < o; k++) {
