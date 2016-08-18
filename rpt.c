@@ -248,8 +248,10 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *i_oovv, const double *i_vvov)
 {
 	double e_pt1 = 0.0, e_pt2 = 0.0;
-	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
 
+#pragma omp parallel
+{
+	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
 	for (size_t i = 0; i < o; i++)
 	for (size_t j = i+1; j < o; j++) {
 		ij[2*nij+0] = i;
@@ -257,8 +259,6 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		nij++;
 	}
 
-#pragma omp parallel
-{
 	const double *t2_aaaa, *t2_abab;
 	const double *t2t_aaaa, *t2t_abab;
 	const double *i_vvov_aaaa, *i_vvov_abab;
