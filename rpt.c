@@ -627,6 +627,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	double *t2t, e_pt;
 	size_t i, j, a, b;
 
+	if (o == 0 || v == 0)
+		return (0.0);
 	t2t = malloc(2*o*o*v*v * sizeof(double));
 	if (t2t == NULL)
 		err(1, "malloc t2t");
