@@ -626,11 +626,11 @@ main(int argc, char **argv)
 
 	free(d_ov);
 	free(f_ov);
-	//free(i_ooov);
-	free(i_oovv);
-	//free(i_ovvv);
 	free(t1);
 	free(t2);
+	free(i_oovo);
+	free(i_oovv);
+	free(i_vvov);
 //	free(ovx);
 //	free(vvx);
 //	MPI_Finalize();

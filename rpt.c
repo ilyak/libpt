@@ -516,7 +516,7 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	e_pt2 *= 2.0;
 	printf("aabaab %g\n", e_pt2);
 }
-
+	free(ij);
 	free(abc11);
 	free(abc12);
 	free(abc13);
