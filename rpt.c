@@ -288,22 +288,35 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 //	double *ijk27 = malloc(o*o*o*sizeof(double));
 //	double *ijk28 = malloc(o*o*o*sizeof(double));
 
-	double *abc11 = malloc(v*v*v*sizeof(double));
-	double *abc12 = malloc(v*v*v*sizeof(double));
-	double *abc13 = malloc(v*v*v*sizeof(double));
-	double *abc14 = malloc(v*v*v*sizeof(double));
-//	double *abc15 = malloc(v*v*v*sizeof(double));
-//	double *abc16 = malloc(v*v*v*sizeof(double));
-	double *abc17 = malloc(v*v*v*sizeof(double));
-	double *abc18 = malloc(v*v*v*sizeof(double));
-	double *abc21 = malloc(v*v*v*sizeof(double));
-	double *abc22 = malloc(v*v*v*sizeof(double));
-	double *abc23 = malloc(v*v*v*sizeof(double));
-//	double *abc24 = malloc(v*v*v*sizeof(double));
-	double *abc25 = malloc(v*v*v*sizeof(double));
-//	double *abc26 = malloc(v*v*v*sizeof(double));
-	double *abc27 = malloc(v*v*v*sizeof(double));
-//	double *abc28 = malloc(v*v*v*sizeof(double));
+	double *abc11, *abc12, *abc13, *abc14, *abc17, *abc18;
+	double *abc21, *abc22, *abc23, *abc25, *abc27;
+
+	double *work = malloc(10*v*v*v*sizeof(double));
+	if (work == NULL)
+		err(1, "malloc");
+	abc11 = work + 0*v*v*v;
+	abc12 = work + 1*v*v*v;
+	abc13 = work + 2*v*v*v;
+	abc21 = work + 3*v*v*v;
+	abc22 = work + 4*v*v*v;
+	abc23 = work + 5*v*v*v;
+
+//	double *abc11 = malloc(v*v*v*sizeof(double));
+//	double *abc12 = malloc(v*v*v*sizeof(double));
+//	double *abc13 = malloc(v*v*v*sizeof(double));
+//	double *abc14 = malloc(v*v*v*sizeof(double));
+////	double *abc15 = malloc(v*v*v*sizeof(double));
+////	double *abc16 = malloc(v*v*v*sizeof(double));
+//	double *abc17 = malloc(v*v*v*sizeof(double));
+//	double *abc18 = malloc(v*v*v*sizeof(double));
+//	double *abc21 = malloc(v*v*v*sizeof(double));
+//	double *abc22 = malloc(v*v*v*sizeof(double));
+//	double *abc23 = malloc(v*v*v*sizeof(double));
+////	double *abc24 = malloc(v*v*v*sizeof(double));
+//	double *abc25 = malloc(v*v*v*sizeof(double));
+////	double *abc26 = malloc(v*v*v*sizeof(double));
+//	double *abc27 = malloc(v*v*v*sizeof(double));
+////	double *abc28 = malloc(v*v*v*sizeof(double));
 
 #pragma omp for reduction(+:e_pt1) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
@@ -404,6 +417,16 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	time_t tim = time(NULL);
 	printf("ccsd_pt: %s", ctime(&tim));
 }
+	abc11 = work + 0*v*v*v;
+	abc13 = work + 1*v*v*v;
+	abc14 = work + 2*v*v*v;
+	abc17 = work + 3*v*v*v;
+	abc18 = work + 4*v*v*v;
+	abc21 = work + 5*v*v*v;
+	abc22 = work + 6*v*v*v;
+	abc23 = work + 7*v*v*v;
+	abc25 = work + 8*v*v*v;
+	abc27 = work + 9*v*v*v;
 
 #pragma omp for reduction(+:e_pt2) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
@@ -517,17 +540,7 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	printf("aabaab %g\n", e_pt2);
 }
 	free(ij);
-	free(abc11);
-	free(abc12);
-	free(abc13);
-	free(abc14);
-	free(abc17);
-	free(abc18);
-	free(abc21);
-	free(abc22);
-	free(abc23);
-	free(abc25);
-	free(abc27);
+	free(work);
 }
 	return (e_pt1+e_pt2);
 }
