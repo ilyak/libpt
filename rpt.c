@@ -20,7 +20,7 @@
 #include <stdio.h> /*XXX*/
 #include <time.h>
 
-#include <mpi.h>
+//#include <mpi.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif

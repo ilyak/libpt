@@ -1,9 +1,9 @@
-CC= mpicc
+CC= cc
 CFLAGS= -std=c99 -Wall -Wextra -g -O3
-LDFLAGS=
+LDFLAGS= -L/usr/local/lib
 LIBS= -lblas -lg2c -lm
 
-#CC= mpicc
+#CC= icc
 #CFLAGS= -std=c99 -Wall -Wextra -g -O3 -mkl=sequential -fopenmp
 #LDFLAGS=
 #LIBS=

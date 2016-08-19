@@ -25,7 +25,7 @@
 #include <getopt.h>
 #include <unistd.h>
 
-#include <mpi.h>
+//#include <mpi.h>
 
 #include "pt.h"
 
@@ -464,12 +464,12 @@ main(int argc, char **argv)
 	double *t1, *t2, *i_oovv, *i_oovo, *i_vvov;
 	double e_pt = 0.0, e_ref = 0.0;
 	time_t tim;
-	int rank;
+//	int rank;
 	const char *errstr, *testpath = NULL;
 	char ch;
 
-	MPI_Init(&argc, &argv);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//	MPI_Init(&argc, &argv);
+//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	while ((ch = getopt(argc, argv, "o:t:v:")) != -1) {
 		switch (ch) {
@@ -598,10 +598,10 @@ main(int argc, char **argv)
 //	printf("ovvv\n");
 //	print_st(&it_ovvv);
 
-	if (rank == 0) {
+//	if (rank == 0) {
 		tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
-	}
+//	}
 	if (x == 0) {
 		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2, i_oovo,
 		    i_oovv, i_vvov);
@@ -611,15 +611,15 @@ main(int argc, char **argv)
 	//} else
 	//	e_pt = ccsd_ri_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
 	//	    &it_oovv, ovx, vvx);
-	if (rank == 0) {
+//	if (rank == 0) {
 		tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
-	}
+//	}
 
-	if (rank == 0)
+//	if (rank == 0)
 		printf("ccsd(t) energy: % .8lf\n", e_pt);
 	if (testpath) {
-		if (rank == 0)
+//		if (rank == 0)
 			printf("ccsd(t) ref:    % .8lf\n", e_ref);
 	} else
 		e_ref = e_pt;
@@ -633,6 +633,6 @@ main(int argc, char **argv)
 	free(t2);
 //	free(ovx);
 //	free(vvx);
-	MPI_Finalize();
+//	MPI_Finalize();
 	return (fabs(e_pt - e_ref) < EPSILON ? 0 : 1);
 }
