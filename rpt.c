@@ -224,7 +224,7 @@ comp_t3a_abc_2(size_t o, size_t v, size_t i, size_t j, size_t k,
 //}
 
 static double
-comp_t3b_ijkabc1(size_t o, size_t v, size_t i, size_t j, size_t k,
+comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
     size_t a, size_t b, size_t c, const double *t1, const double *i_oovv,
     const double *f_ov, const double *t2)
 {
@@ -233,14 +233,6 @@ comp_t3b_ijkabc1(size_t o, size_t v, size_t i, size_t j, size_t k,
 
 	return t1_ia*I_OOVV(j,k,b,c) + f_ov_ia*T2(j,k,b,c);
 }
-
-//static double
-//comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
-//    size_t a, size_t b, size_t c, const double *t1, const double *i_oovv,
-//    const double *f_ov, const double *t2)
-//{
-//	return T1(i,a)*I_OOVV(j,k,b,c) + F_OV(i,a)*T2(j,k,b,c);
-//}
 
 double
 ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
@@ -393,15 +385,15 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 +abc23[b+c*v+a*v*v];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
 
 		t3bx =
-+comp_t3b_ijkabc1(o,v,i,j,k,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
--comp_t3b_ijkabc1(o,v,j,i,k,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
--comp_t3b_ijkabc1(o,v,k,j,i,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
--comp_t3b_ijkabc1(o,v,i,j,k,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
-+comp_t3b_ijkabc1(o,v,j,i,k,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
-+comp_t3b_ijkabc1(o,v,k,j,i,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
--comp_t3b_ijkabc1(o,v,i,j,k,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa)
-+comp_t3b_ijkabc1(o,v,j,i,k,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa)
-+comp_t3b_ijkabc1(o,v,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
++comp_t3b_ijkabc(o,v,i,j,k,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
+-comp_t3b_ijkabc(o,v,j,i,k,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
+-comp_t3b_ijkabc(o,v,k,j,i,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
+-comp_t3b_ijkabc(o,v,i,j,k,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
++comp_t3b_ijkabc(o,v,j,i,k,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
++comp_t3b_ijkabc(o,v,k,j,i,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
+-comp_t3b_ijkabc(o,v,i,j,k,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa)
++comp_t3b_ijkabc(o,v,j,i,k,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa)
++comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
 
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		e_pt1 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
@@ -518,15 +510,15 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 +abc27[b+c*v+a*v*v];//+comp_t3a_ijkabc_21h(o,v,k,j,i,c,b,a,t2t_abab,i_oovo_aaaa)
 
 		t3bx =
-	+comp_t3b_ijkabc1(o,v,i,j,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
-	-comp_t3b_ijkabc1(o,v,i,j,k,b,a,c,t1,i_oovv_abab,f_ov,t2_abab)
+	+comp_t3b_ijkabc(o,v,i,j,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
+	-comp_t3b_ijkabc(o,v,i,j,k,b,a,c,t1,i_oovv_abab,f_ov,t2_abab)
 //	-comp_t3b_ijkabc(o,v,i,j,k+o,c+v,b,a,t1,i_oovv,f_ov,t2)
-	-comp_t3b_ijkabc1(o,v,j,i,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
-	+comp_t3b_ijkabc1(o,v,j,i,k,b,a,c,t1,i_oovv_abab,f_ov,t2_abab)
+	-comp_t3b_ijkabc(o,v,j,i,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
+	+comp_t3b_ijkabc(o,v,j,i,k,b,a,c,t1,i_oovv_abab,f_ov,t2_abab)
 //	+comp_t3b_ijkabc(o,v,j,i,k+o,c+v,b,a,t1,i_oovv,f_ov,t2)
 //	-comp_t3b_ijkabc(o,v,k+o,j,i,a,b,c+v,t1,i_oovv,f_ov,t2)
 //	+comp_t3b_ijkabc(o,v,k+o,j,i,b,a,c+v,t1,i_oovv,f_ov,t2)
-	+comp_t3b_ijkabc1(o,v,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
+	+comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
 
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		e_pt2 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
