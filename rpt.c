@@ -260,15 +260,12 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	}
 
 	const double *t2_aaaa, *t2_abab;
-//	const double *t2t_aaaa, *t2t_abab;
 	const double *i_vvov_aaaa, *i_vvov_abab;
 	const double *i_oovo_aaaa, *i_oovo_abab;
 	const double *i_oovv_aaaa, *i_oovv_abab;
 
 	t2_aaaa = t2;
 	t2_abab = t2 + o*o*v*v;
-//	t2t_aaaa = t2t;
-//	t2t_abab = t2t + o*o*v*v;
 	i_vvov_aaaa = i_vvov;
 	i_vvov_abab = i_vvov + o*v*v*v;
 	i_oovo_aaaa = i_oovo;
@@ -641,23 +638,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	if (o == 0 || v == 0)
 		return (0.0);
-///	t2t = malloc(2*o*o*v*v * sizeof(double));
-///	if (t2t == NULL)
-///		err(1, "malloc t2t");
-///	for (i = 0; i < o; i++) {
-///	for (j = 0; j < o; j++) {
-///	for (a = 0; a < v; a++) {
-///	for (b = 0; b < v; b++) {
-///		t2t[a*v*o*o+b*o*o+i*o+j] =
-///		    t2[i*o*v*v+j*v*v+a*v+b];
-///		t2t[o*o*v*v+a*v*o*o+b*o*o+i*o+j] =
-///		    t2[o*o*v*v+i*o*v*v+j*v*v+a*v+b];
-///	}}}}
-
 	e_pt = ccsd_pt_energy(o, v, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_vvov);
-
-//	free(t2t);
 	return (e_pt);
 }
 
