@@ -242,13 +242,15 @@ comp_t3b_ijkabc1(size_t o, size_t v, size_t i, size_t j, size_t k,
 //	return T1(i,a)*I_OOVV(j,k,b,c) + F_OV(i,a)*T2(j,k,b,c);
 //}
 
-static double
-ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
+double
+ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_vvov)
 {
 	double e_pt1 = 0.0, e_pt2 = 0.0;
 
+	if (o < 2 || v < 2)
+		return (0.0);
 #pragma omp parallel
 {
 	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
@@ -628,20 +630,6 @@ ccsd_pt_energy(size_t o, size_t v, const double *d_ov, const double *f_ov,
 //	    MPI_COMM_WORLD);
 //	return (e_pt);
 //}
-
-double
-ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
-    const double *t1, const double *t2, const double *i_oovo,
-    const double *i_oovv, const double *i_vvov)
-{
-	double e_pt;
-
-	if (o == 0 || v == 0)
-		return (0.0);
-	e_pt = ccsd_pt_energy(o, v, d_ov, f_ov, t1, t2,
-	    i_oovo, i_oovv, i_vvov);
-	return (e_pt);
-}
 
 //double
 //ccsd_ri_pt(size_t o, size_t v, size_t x, const double *d_ov,
