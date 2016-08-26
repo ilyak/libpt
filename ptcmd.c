@@ -605,8 +605,63 @@ main(int argc, char **argv)
 	if (x == 0) {
 		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2, i_oovo,
 		    i_oovv, i_vvov);
-		//e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, &tt2, &it_ooov,
-		//    &it_oovv, &it_ovvv);
+//		size_t o11 = 0, o12 = o, v11 = 0, v12 = v;
+//		size_t o1 = o12 - o11;
+//		size_t v1 = v12 - v11;
+//		double *d_ov1 = xmalloc(o1*v1*sizeof(double));
+//		double *f_ov1 = xmalloc(o1*v1*sizeof(double));
+//		double *t11 = xmalloc(o1*v1*sizeof(double));
+//		double *t21 = xmalloc(2*o1*o1*v1*v1*sizeof(double));
+//		double *i_oovo1 = xmalloc(2*o1*o1*o1*v1*sizeof(double));
+//		double *i_oovv1 = xmalloc(2*o1*o1*v1*v1*sizeof(double));
+//		double *i_vvov1 = xmalloc(2*o1*v1*v1*v1*sizeof(double));
+//		for (size_t i = 0; i < o1; i++)
+//		for (size_t j = 0; j < v1; j++) {
+//			d_ov1[i*v1+j] = d_ov[(i+o11)*v+(j+v11)];
+//			f_ov1[i*v1+j] = f_ov[(i+o11)*v+(j+v11)];
+//			t11[i*v1+j] = t1[(i+o11)*v+(j+v11)];
+//		}
+//		for (size_t i = 0; i < o1; i++)
+//		for (size_t j = 0; j < o1; j++)
+//		for (size_t k = 0; k < v1; k++)
+//		for (size_t l = 0; l < o1; l++) {
+//			i_oovo1[i*o1*v1*o1+j*o1*v1+k*o1+l] =
+//			    i_oovo[(i+o11)*o*v*o+(j+o11)*o*v+(k+v11)*o+(l+o11)];
+//			i_oovo1[o1*o1*v1*o1+
+//				i*o1*v1*o1+j*o1*v1+k*o1+l] =
+//			    i_oovo[o*o*v*o+
+//				(i+o11)*o*v*o+(j+o11)*o*v+(k+v11)*o+(l+o11)];
+//		}
+//		for (size_t i = 0; i < o1; i++)
+//		for (size_t j = 0; j < o1; j++)
+//		for (size_t k = 0; k < v1; k++)
+//		for (size_t l = 0; l < v1; l++) {
+//			i_oovv1[i*o1*v1*v1+j*v1*v1+k*v1+l] =
+//			    i_oovv[(i+o11)*o*v*v+(j+o11)*v*v+(k+v11)*v+(l+v11)];
+//			t21[i*o1*v1*v1+j*v1*v1+k*v1+l] =
+//			    t2[(i+o11)*o*v*v+(j+o11)*v*v+(k+v11)*v+(l+v11)];
+//			i_oovv1[o1*o1*v1*v1+
+//				i*o1*v1*v1+j*v1*v1+k*v1+l] =
+//			    i_oovv[o*o*v*v+
+//				(i+o11)*o*v*v+(j+o11)*v*v+(k+v11)*v+(l+v11)];
+//			t21[o1*o1*v1*v1+
+//				i*o1*v1*v1+j*v1*v1+k*v1+l] =
+//			    t2[o*o*v*v+
+//				(i+o11)*o*v*v+(j+o11)*v*v+(k+v11)*v+(l+v11)];
+//		}
+//		for (size_t i = 0; i < v1; i++)
+//		for (size_t j = 0; j < v1; j++)
+//		for (size_t k = 0; k < o1; k++)
+//		for (size_t l = 0; l < v1; l++) {
+//			i_vvov1[i*v1*o1*v1+j*v1*o1+k*v1+l] =
+//			    i_vvov[(i+v11)*v*o*v+(j+v11)*v*o+(k+o11)*v+(l+v11)];
+//			i_vvov1[v1*v1*o1*v1+
+//				i*v1*o1*v1+j*v1*o1+k*v1+l] =
+//			    i_vvov[v*v*o*v+
+//				(i+v11)*v*o*v+(j+v11)*v*o+(k+o11)*v+(l+v11)];
+//		}
+//		e_pt = ccsd_pt(o1, v1, d_ov1, f_ov1, t11, t21, i_oovo1,
+//		    i_oovv1, i_vvov1);
 	}
 	//} else
 	//	e_pt = ccsd_ri_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
