@@ -20,7 +20,7 @@
 #include <stdio.h> /*XXX*/
 #include <time.h>
 
-//#include <mpi.h>
+#include <mpi.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -240,6 +240,10 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *i_oovv, const double *i_vvov)
 {
 	double e_pt1 = 0.0, e_pt2 = 0.0;
+	int rank, size;
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
 
 	if (o < 2 || v < 2)
 		return (0.0);
@@ -248,11 +252,13 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
 	if (ij == NULL)
 		err(1, "malloc ij");
-	for (size_t i = 0; i < o; i++)
-	for (size_t j = i+1; j < o; j++) {
-		ij[2*nij+0] = i;
-		ij[2*nij+1] = j;
-		nij++;
+	for (size_t i = 0, n = 0; i < o; i++)
+	for (size_t j = i+1; j < o; j++, n++) {
+		if (n % size == rank) {
+			ij[2*nij+0] = i;
+			ij[2*nij+1] = j;
+			nij++;
+		}
 	}
 
 	const double *t2_aaaa, *t2_abab;
@@ -371,11 +377,11 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 #pragma omp master
 {
-	e_pt1 *= 2.0;
-	printf("aaaaaa %g\n", e_pt1);
-
-	time_t tim = time(NULL);
-	printf("ccsd_pt: %s", ctime(&tim));
+	if (rank == 0) {
+		printf("aaaaaa %g\n", 2.0 * e_pt1);
+		time_t tim = time(NULL);
+		printf("ccsd_pt: %s", ctime(&tim));
+	}
 }
 	abc11 = work + 0*v*v*v;
 	abc13 = work + 1*v*v*v;
@@ -493,13 +499,16 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 #pragma omp master
 {
-	e_pt2 *= 2.0;
-	printf("aabaab %g\n", e_pt2);
+	if (rank == 0)
+		printf("aabaab %g\n", 2.0 * e_pt2);
 }
 	free(ij);
 	free(work);
 }
-	return (e_pt1+e_pt2);
+	double e_pt = 2.0 * (e_pt1 + e_pt2);
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE, MPI_SUM,
+	    MPI_COMM_WORLD);
+	return (e_pt);
 }
 
 //static double

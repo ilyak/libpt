@@ -25,7 +25,7 @@
 #include <getopt.h>
 #include <unistd.h>
 
-//#include <mpi.h>
+#include <mpi.h>
 
 #include "pt.h"
 
@@ -464,12 +464,12 @@ main(int argc, char **argv)
 	double *t1, *t2, *i_oovv, *i_oovo, *i_vvov;
 	double e_pt = 0.0, e_ref = 0.0;
 	time_t tim;
-//	int rank;
+	int rank;
 	const char *errstr, *testpath = NULL;
 	char ch;
 
-//	MPI_Init(&argc, &argv);
-//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	while ((ch = getopt(argc, argv, "o:t:v:")) != -1) {
 		switch (ch) {
@@ -494,25 +494,17 @@ main(int argc, char **argv)
 	argv += optind;
 	argc -= optind;
 
-//	if (testpath == NULL)
-//		errx(1, "specify test data file");
-
 	if (testpath)
 		load_test_header(testpath, &o, &v, &x, &e_ref);
 	d_ov = xmalloc(o*v * sizeof(double));
 	f_ov = xmalloc(o*v * sizeof(double));
 	t1 = xmalloc(o*v * sizeof(double));
 	t2 = xmalloc(2*o*o*v*v * sizeof(double));
-	//t2t = xmalloc(2*o*o*v*v * sizeof(double));
-	//i_ooov = xmalloc(2*o*o*o*v * sizeof(double));
 	i_oovo = xmalloc(2*o*o*o*v * sizeof(double));
 	i_oovv = xmalloc(2*o*o*v*v * sizeof(double));
-	//i_ovvv = xmalloc(2*o*v*v*v * sizeof(double));
 	i_vvov = xmalloc(2*o*v*v*v * sizeof(double));
-//	ovx = xmalloc(o*v*x * sizeof(double));
-//	vvx = xmalloc(v*v*x * sizeof(double));
 
-//	if (rank == 0) {
+	if (rank == 0) {
 		if (testpath) {
 			load_test_data(testpath, o, v, d_ov, f_ov, t1, t2,
 			    i_oovo, i_oovv, i_vvov);
@@ -520,7 +512,7 @@ main(int argc, char **argv)
 			load_random_data(o, v, d_ov, f_ov, t1, t2,
 			    i_oovo, i_oovv, i_vvov);
 		}
-//	}
+	}
 
 //	for (i = 0; i < o; i++) {
 //	for (j = 0; j < o; j++) {
@@ -576,14 +568,13 @@ main(int argc, char **argv)
 	//setup_offsets(v, &it_oovv);
 	//setup_offsets(v, &it_ovvv);
 
-	//XXX
-//	MPI_Bcast(d_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-//	MPI_Bcast(f_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-//	MPI_Bcast(i_ooov, o*o*o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-//	MPI_Bcast(i_oovv, o*o*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-//	MPI_Bcast(i_ovvv, o*v*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-//	MPI_Bcast(t1, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-//	MPI_Bcast(t2, o*o*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(d_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(f_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(t1, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(t2, 2*o*o*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(i_oovo, 2*o*o*o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(i_oovv, 2*o*o*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(i_vvov, 2*o*v*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
 //	convert_t2(o, v, t2, &tt2);
 //	convert_ooov(o, v, i_ooov, &it_ooov);
@@ -598,10 +589,10 @@ main(int argc, char **argv)
 //	printf("ovvv\n");
 //	print_st(&it_ovvv);
 
-//	if (rank == 0) {
+	if (rank == 0) {
 		tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
-//	}
+	}
 	if (x == 0) {
 		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2, i_oovo,
 		    i_oovv, i_vvov);
@@ -666,15 +657,15 @@ main(int argc, char **argv)
 	//} else
 	//	e_pt = ccsd_ri_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
 	//	    &it_oovv, ovx, vvx);
-//	if (rank == 0) {
+	if (rank == 0) {
 		tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
-//	}
+	}
 
-//	if (rank == 0)
+	if (rank == 0)
 		printf("ccsd(t) energy: % .8lf\n", e_pt);
 	if (testpath) {
-//		if (rank == 0)
+		if (rank == 0)
 			printf("ccsd(t) ref:    % .8lf\n", e_ref);
 	} else
 		e_ref = e_pt;
@@ -686,8 +677,6 @@ main(int argc, char **argv)
 	free(i_oovo);
 	free(i_oovv);
 	free(i_vvov);
-//	free(ovx);
-//	free(vvx);
-//	MPI_Finalize();
+	MPI_Finalize();
 	return (fabs(e_pt - e_ref) < EPSILON ? 0 : 1);
 }
