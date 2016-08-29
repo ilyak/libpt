@@ -274,7 +274,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	double *work = malloc(10*v*v*v*sizeof(double));
 	if (work == NULL)
-		err(1, "malloc");
+		err(1, "malloc work");
 	abc11 = work + 0*v*v*v;
 	abc12 = work + 1*v*v*v;
 	abc13 = work + 2*v*v*v;
