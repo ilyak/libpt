@@ -246,6 +246,8 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 #pragma omp parallel
 {
 	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
+	if (ij == NULL)
+		err(1, "malloc ij");
 	for (size_t i = 0; i < o; i++)
 	for (size_t j = i+1; j < o; j++) {
 		ij[2*nij+0] = i;
