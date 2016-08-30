@@ -51,20 +51,6 @@ xmalloc(size_t size)
 	return (p);
 }
 
-//static void *
-//xreallocarray(void *ptr, size_t nmemb, size_t size)
-//{
-//	void *new_ptr;
-//
-//	if (nmemb == 0 || size == 0)
-//		errx(1, "xreallocarray: zero size");
-//	new_ptr = reallocarray(ptr, nmemb, size);
-//	if (new_ptr == NULL)
-//		err(1, "xreallocarray: allocating %zu * %zu bytes",
-//		    nmemb, size);
-//	return new_ptr;
-//}
-
 static void
 load_test_header(const char *testpath, size_t *o, size_t *v, size_t *x,
     double *e_ref)
@@ -449,23 +435,14 @@ setup_offsets(size_t ldim, struct st4 *st)
 }
 #endif
 
-//#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
-//#define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
-//#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
-//#define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
-//#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
-//#define T2T(a, b, i, j) t2t[a*v*o*o+b*o*o+i*o+j]
-
 int
 main(int argc, char **argv)
 {
 	size_t o = 0, v = 0, x = 0;
-	double *d_ov, *f_ov;
-	double *t1, *t2, *i_oovv, *i_oovo, *i_vvov;
 	double e_pt = 0.0, e_ref = 0.0;
-	time_t tim;
-	int rank;
+	double *d_ov, *f_ov, *t1, *t2, *i_oovv, *i_oovo, *i_vvov;
 	const char *errstr, *testpath = NULL;
+	int rank;
 	char ch;
 
 	MPI_Init(&argc, &argv);
@@ -496,13 +473,13 @@ main(int argc, char **argv)
 
 	if (testpath)
 		load_test_header(testpath, &o, &v, &x, &e_ref);
-	d_ov = xmalloc(o*v * sizeof(double));
-	f_ov = xmalloc(o*v * sizeof(double));
-	t1 = xmalloc(o*v * sizeof(double));
-	t2 = xmalloc(2*o*o*v*v * sizeof(double));
-	i_oovo = xmalloc(2*o*o*o*v * sizeof(double));
-	i_oovv = xmalloc(2*o*o*v*v * sizeof(double));
-	i_vvov = xmalloc(2*o*v*v*v * sizeof(double));
+	d_ov = xmalloc(o*v*sizeof(double));
+	f_ov = xmalloc(o*v*sizeof(double));
+	t1 = xmalloc(o*v*sizeof(double));
+	t2 = xmalloc(2*o*o*v*v*sizeof(double));
+	i_oovo = xmalloc(2*o*o*o*v*sizeof(double));
+	i_oovv = xmalloc(2*o*o*v*v*sizeof(double));
+	i_vvov = xmalloc(2*o*v*v*v*sizeof(double));
 
 	if (rank == 0) {
 		if (testpath) {
@@ -563,10 +540,10 @@ main(int argc, char **argv)
 //	i_ovvv -= o*v*v*v;
 //	i_vvov -= o*v*v*v;
 
-	//setup_offsets(v, &tt2);
-	//setup_offsets(v, &it_ooov);
-	//setup_offsets(v, &it_oovv);
-	//setup_offsets(v, &it_ovvv);
+//	setup_offsets(v, &tt2);
+//	setup_offsets(v, &it_ooov);
+//	setup_offsets(v, &it_oovv);
+//	setup_offsets(v, &it_ovvv);
 
 	MPI_Bcast(d_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(f_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -590,12 +567,18 @@ main(int argc, char **argv)
 //	print_st(&it_ovvv);
 
 	if (rank == 0) {
-		tim = time(NULL);
-		printf("ccsd_pt: %s", ctime(&tim));
+		time_t t = time(NULL);
+		printf("ccsd_pt: %s", ctime(&t));
 	}
-	if (x == 0) {
-		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2, i_oovo,
-		    i_oovv, i_vvov);
+
+	e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_vvov);
+
+	if (rank == 0) {
+		time_t t = time(NULL);
+		printf("ccsd_pt: %s", ctime(&t));
+		printf("ccsd(t) energy: % .8lf\n", e_pt);
+	}
+
 //		size_t o11 = 0, o12 = o, v11 = 0, v12 = v;
 //		size_t o1 = o12 - o11;
 //		size_t v1 = v12 - v11;
@@ -653,17 +636,7 @@ main(int argc, char **argv)
 //		}
 //		e_pt = ccsd_pt(o1, v1, d_ov1, f_ov1, t11, t21, i_oovo1,
 //		    i_oovv1, i_vvov1);
-	}
-	//} else
-	//	e_pt = ccsd_ri_pt(o, v, x, d_ov, f_ov, t1, &tt2, &it_ooov,
-	//	    &it_oovv, ovx, vvx);
-	if (rank == 0) {
-		tim = time(NULL);
-		printf("ccsd_pt: %s", ctime(&tim));
-	}
 
-	if (rank == 0)
-		printf("ccsd(t) energy: % .8lf\n", e_pt);
 	if (testpath) {
 		if (rank == 0)
 			printf("ccsd(t) ref:    % .8lf\n", e_ref);
