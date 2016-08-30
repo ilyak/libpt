@@ -51,6 +51,10 @@ double ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_vvov);
 
+double ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
+    const double *t1, const double *t2, const double *i_oovo,
+    const double *i_oovv, const double *i_vvov);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

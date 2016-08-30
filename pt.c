@@ -511,6 +511,140 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	return (e_pt);
 }
 
+double
+ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
+    const double *t1, const double *t2, const double *i_oovo,
+    const double *i_oovv, const double *i_vvov)
+{
+	double e_pt1 = 0.0;
+	int rank, size;
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+	if (o < 2 || v < 2)
+		return (0.0);
+#pragma omp parallel
+{
+	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
+	if (ij == NULL)
+		err(1, "malloc ij");
+	for (size_t i = 0, n = 0; i < o; i++)
+	for (size_t j = i+1; j < o; j++, n++) {
+		if (n % size == rank) {
+			ij[2*nij+0] = i;
+			ij[2*nij+1] = j;
+			nij++;
+		}
+	}
+
+	double *abc11, *abc12, *abc13, *abc21, *abc22, *abc23;
+	double *work = malloc(6*v*v*v*sizeof(double));
+	if (work == NULL)
+		err(1, "malloc work");
+	abc11 = work + 0*v*v*v;
+	abc12 = work + 1*v*v*v;
+	abc13 = work + 2*v*v*v;
+	abc21 = work + 3*v*v*v;
+	abc22 = work + 4*v*v*v;
+	abc23 = work + 5*v*v*v;
+
+#pragma omp for reduction(+:e_pt1) schedule(dynamic)
+	for (size_t it = 0; it < nij; it++) {
+		size_t i = ij[2*it+0];
+		size_t j = ij[2*it+1];
+	for (size_t k = j+1; k < o; k++) {
+
+	comp_t3a_abc_1(o,v,i,j,k,abc11,t2,i_vvov);
+	comp_t3a_abc_1(o,v,i,k,j,abc12,t2,i_vvov);
+	comp_t3a_abc_1(o,v,k,j,i,abc13,t2,i_vvov);
+
+	comp_t3a_abc_2(o,v,i,j,k,abc21,t2,i_oovo);
+	comp_t3a_abc_2(o,v,j,i,k,abc22,t2,i_oovo);
+	comp_t3a_abc_2(o,v,k,j,i,abc23,t2,i_oovo);
+
+	for (size_t a = 0; a < v; a++) {
+	for (size_t b = a+1; b < v; b++) {
+	for (size_t c = b+1; c < v; c++) {
+		double t3ax1, t3ax2, t3bx, dn;
+#if 0
+		t3ax1 =
++ijk11[j+i*o+k*o*o] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
+-ijk11[j+k*o+i*o*o] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
+-ijk11[k+i*o+j*o*o] //-comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
+-ijk12[j+i*o+k*o*o] //-comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
++ijk12[j+k*o+i*o*o] //+comp_t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
++ijk12[k+i*o+j*o*o] //+comp_t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
+-ijk13[j+i*o+k*o*o] //-comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
++ijk13[j+k*o+i*o*o] //+comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
++ijk13[k+i*o+j*o*o];//+comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
+
+		t3ax2 =
++ijk21[i+k*o+j*o*o] //+comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-ijk21[j+k*o+i*o*o] //-comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-ijk21[k+i*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-ijk22[i+k*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,i,j,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
++ijk22[j+k*o+i*o*o] //+comp_t3a_ijkabc_21(o,v,j,i,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
++ijk22[k+i*o+j*o*o] //+comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t_aaaa,i_oovo_aaaa)
+-ijk23[i+k*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
++ijk23[j+k*o+i*o*o] //+comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
++ijk23[k+i*o+j*o*o];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
+#endif
+		t3ax1 =
++abc11[a+c*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc11[b+c*v+a*v*v] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc11[c+a*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc12[a+c*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
++abc12[b+c*v+a*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
++abc12[c+a*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
+-abc13[a+c*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
++abc13[b+c*v+a*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
++abc13[c+a*v+b*v*v];//+comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
+
+		t3ax2 =
++abc21[b+a*v+c*v*v] //+comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-abc21[c+a*v+b*v*v] //-comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-abc21[b+c*v+a*v*v] //-comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-abc22[b+a*v+c*v*v] //-comp_t3a_ijkabc_21(o,v,i,j,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
++abc22[c+a*v+b*v*v] //+comp_t3a_ijkabc_21(o,v,j,i,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
++abc22[b+c*v+a*v*v] //+comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t_aaaa,i_oovo_aaaa)
+-abc23[b+a*v+c*v*v] //-comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
++abc23[c+a*v+b*v*v] //+comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
++abc23[b+c*v+a*v*v];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
+
+		t3bx =
++comp_t3b_ijkabc(o,v,i,j,k,a,b,c,t1,i_oovv,f_ov,t2)
+-comp_t3b_ijkabc(o,v,j,i,k,a,b,c,t1,i_oovv,f_ov,t2)
+-comp_t3b_ijkabc(o,v,k,j,i,a,b,c,t1,i_oovv,f_ov,t2)
+-comp_t3b_ijkabc(o,v,i,j,k,b,a,c,t1,i_oovv,f_ov,t2)
++comp_t3b_ijkabc(o,v,j,i,k,b,a,c,t1,i_oovv,f_ov,t2)
++comp_t3b_ijkabc(o,v,k,j,i,b,a,c,t1,i_oovv,f_ov,t2)
+-comp_t3b_ijkabc(o,v,i,j,k,c,b,a,t1,i_oovv,f_ov,t2)
++comp_t3b_ijkabc(o,v,j,i,k,c,b,a,t1,i_oovv,f_ov,t2)
++comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv,f_ov,t2);
+
+		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
+		e_pt1 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
+	}}}
+	}}
+
+#pragma omp master
+{
+	if (rank == 0) {
+		printf("aaaaaa %g\n", 2.0 * e_pt1);
+		time_t tim = time(NULL);
+		printf("ccsd_pt: %s", ctime(&tim));
+	}
+}
+	free(ij);
+	free(work);
+}
+	double e_pt = 2.0 * e_pt1;
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE, MPI_SUM,
+	    MPI_COMM_WORLD);
+	return (e_pt);
+}
+
 //static double
 //ccsd_pt_worker(int id, int nid, size_t o, size_t v, size_t x,
 //    const double *d_ov, const double *f_ov, const double *t1,
