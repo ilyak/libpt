@@ -28,6 +28,9 @@ check: pt
 	@echo pt07 && ./pt -t tests/pt07.dat && echo success
 	@echo pt08 && ./pt -t tests/pt08.dat && echo success
 	@echo pt09 && ./pt -t tests/pt09.dat && echo success
+	@echo upt01 && ./pt -t tests/upt01.dat && echo success
+	@echo upt02 && ./pt -t tests/upt02.dat && echo success
+	@echo upt03 && ./pt -t tests/upt03.dat && echo success
 
 clean:
 	$(RM) $(ALL_O) pt gmon.out *.core *.log
