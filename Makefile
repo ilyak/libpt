@@ -1,10 +1,10 @@
-# gcc on OpenBSD
+# gcc with Netlib BLAS on OpenBSD
 CC= mpicc
 CFLAGS= -std=c99 -Wall -Wextra -g -O3
 LDFLAGS= -L/usr/local/lib
 LIBS= -lblas -lg2c -lm
 
-# icc on Linux
+# icc with MKL on Linux
 #CC= mpicc
 #CFLAGS= -std=c99 -Wall -Wextra -g -O3 -mkl=sequential -fopenmp
 #LDFLAGS=
