@@ -631,7 +631,7 @@ ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 #pragma omp master
 {
 	if (rank == 0) {
-		printf("aaaaaa %g\n", 2.0 * e_pt1);
+		printf("aaaaaa %g\n", e_pt1);
 		time_t tim = time(NULL);
 		printf("ccsd_pt: %s", ctime(&tim));
 	}
@@ -639,7 +639,7 @@ ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	free(ij);
 	free(work);
 }
-	double e_pt = 2.0 * e_pt1;
+	double e_pt = e_pt1;
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE, MPI_SUM,
 	    MPI_COMM_WORLD);
 	return (e_pt);
