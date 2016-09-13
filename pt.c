@@ -186,6 +186,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	abc22 = work + 4*v*v*v;
 	abc23 = work + 5*v*v*v;
 
+	/* aaaa spin-block */
 #pragma omp for reduction(+:e_pt1) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
 		size_t i = ij[2*it+0];
@@ -292,6 +293,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	abc25 = work + 8*v*v*v;
 	abc27 = work + 9*v*v*v;
 
+	/* abab spin-block */
 #pragma omp for reduction(+:e_pt2) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
 		size_t i = ij[2*it+0];
