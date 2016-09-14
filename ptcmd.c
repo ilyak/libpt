@@ -252,23 +252,13 @@ main(int argc, char **argv)
 	i_oovv = xmalloc(nsp*o*o*v*v*sizeof(double));
 	i_vvov = xmalloc(nsp*o*v*v*v*sizeof(double));
 
-	if (rank == 0) {
-		if (testpath) {
-			load_test_data(testpath, o, v, is_upt, d_ov, f_ov,
-			    t1, t2, i_oovo, i_oovv, i_vvov);
-		} else {
-			load_random_data(o, v, is_upt, d_ov, f_ov,
-			    t1, t2, i_oovo, i_oovv, i_vvov);
-		}
+	if (testpath) {
+		load_test_data(testpath, o, v, is_upt, d_ov, f_ov,
+		    t1, t2, i_oovo, i_oovv, i_vvov);
+	} else {
+		load_random_data(o, v, is_upt, d_ov, f_ov,
+		    t1, t2, i_oovo, i_oovv, i_vvov);
 	}
-
-	MPI_Bcast(d_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(f_ov, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(t1, o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(t2, nsp*o*o*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(i_oovo, nsp*o*o*o*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(i_oovv, nsp*o*o*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(i_vvov, nsp*o*v*v*v, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
 	if (rank == 0) {
 		time_t t = time(NULL);
