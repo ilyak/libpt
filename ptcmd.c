@@ -91,7 +91,7 @@ read_next_double(FILE *fp)
 static void
 load_test_data(const char *testpath, size_t o, size_t v, int is_upt,
     double *d_ov, double *f_ov, double *t1, double *t2, double *i_oovo,
-    double *i_oovv, double *i_vvov)
+    double *i_oovv, double *i_ovvv)
 {
 	FILE *fp;
 	size_t i;
@@ -153,13 +153,13 @@ load_test_data(const char *testpath, size_t o, size_t v, int is_upt,
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*v*v*v; i++) {
-		i_vvov[i] = read_next_double(fp);
+		i_ovvv[i] = read_next_double(fp);
 	}
 	if (!is_upt) {
 		skip_line(fp);
 		skip_line(fp);
 		for (i = 0; i < o*v*v*v; i++) {
-			i_vvov[o*v*v*v+i] = read_next_double(fp);
+			i_ovvv[o*v*v*v+i] = read_next_double(fp);
 		}
 	}
 	fclose(fp);
@@ -174,7 +174,7 @@ random_double(void)
 static void
 load_random_data(size_t o, size_t v, int is_upt, double *d_ov,
     double *f_ov, double *t1, double *t2, double *i_oovo,
-    double *i_oovv, double *i_vvov)
+    double *i_oovv, double *i_ovvv)
 {
 	size_t i, nsp = is_upt ? 1 : 2;
 
@@ -197,7 +197,7 @@ load_random_data(size_t o, size_t v, int is_upt, double *d_ov,
 		i_oovv[i] = random_double();
 	}
 	for (i = 0; i < nsp*o*v*v*v; i++) {
-		i_vvov[i] = random_double();
+		i_ovvv[i] = random_double();
 	}
 }
 
@@ -206,7 +206,7 @@ main(int argc, char **argv)
 {
 	size_t o = 0, v = 0, nsp;
 	double e_pt = 0.0, e_ref = 0.0;
-	double *d_ov, *f_ov, *t1, *t2, *i_oovv, *i_oovo, *i_vvov;
+	double *d_ov, *f_ov, *t1, *t2, *i_oovv, *i_oovo, *i_ovvv;
 	const char *errstr, *testpath = NULL;
 	int is_upt = 0, rank;
 	char ch;
@@ -250,15 +250,15 @@ main(int argc, char **argv)
 	t2 = xmalloc(nsp*o*o*v*v*sizeof(double));
 	i_oovo = xmalloc(nsp*o*o*o*v*sizeof(double));
 	i_oovv = xmalloc(nsp*o*o*v*v*sizeof(double));
-	i_vvov = xmalloc(nsp*o*v*v*v*sizeof(double));
+	i_ovvv = xmalloc(nsp*o*v*v*v*sizeof(double));
 
 	/* don't do MPI_Bcast since it takes int as count which may overflow */
 	if (testpath) {
 		load_test_data(testpath, o, v, is_upt, d_ov, f_ov,
-		    t1, t2, i_oovo, i_oovv, i_vvov);
+		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	} else {
 		load_random_data(o, v, is_upt, d_ov, f_ov,
-		    t1, t2, i_oovo, i_oovv, i_vvov);
+		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	}
 
 	if (rank == 0) {
@@ -267,10 +267,10 @@ main(int argc, char **argv)
 	}
 	if (is_upt) {
 		e_pt = ccsd_upt(o, v, d_ov, f_ov, t1, t2,
-		    i_oovo, i_oovv, i_vvov);
+		    i_oovo, i_oovv, i_ovvv);
 	} else {
 		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2,
-		    i_oovo, i_oovv, i_vvov);
+		    i_oovo, i_oovv, i_ovvv);
 	}
 	if (rank == 0) {
 		time_t t = time(NULL);
@@ -289,7 +289,7 @@ main(int argc, char **argv)
 	free(t2);
 	free(i_oovo);
 	free(i_oovv);
-	free(i_vvov);
+	free(i_ovvv);
 	MPI_Finalize();
 	return (fabs(e_pt - e_ref) < EPSILON ? 0 : 1);
 }
