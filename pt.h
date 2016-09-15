@@ -38,7 +38,7 @@ extern "C" {
  *   t2 - CCSD T2 amplitudes, aaaa and abab blocks (size 2*o*o*v*v)
  *   i_oovo - OOOV integrals transposed, aaaa and abab blocks (size 2*o*o*o*v)
  *   i_oovv - OOVV integrals, aaaa and abab blocks (size 2*o*o*v*v)
- *   i_vvov - OVVV integrals transposed, aaaa and abab blocks (size 2*o*v*v*v)
+ *   i_ovvv - OVVV integrals, aaaa and abab blocks (size 2*o*v*v*v)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
@@ -52,7 +52,7 @@ extern "C" {
  */
 double ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
-    const double *i_oovv, const double *i_vvov);
+    const double *i_oovv, const double *i_ovvv);
 
 /* Compute CCSD(T) energy correction in parallel for the unrestricted case.
  *
@@ -68,7 +68,7 @@ double ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
  *   t2 - CCSD T2 amplitudes (size o*o*v*v)
  *   i_oovo - OOOV integrals transposed (size o*o*o*v)
  *   i_oovv - OOVV integrals (size o*o*v*v)
- *   i_vvov - OVVV integrals transposed (size o*v*v*v)
+ *   i_ovvv - OVVV integrals (size o*v*v*v)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
@@ -82,7 +82,7 @@ double ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
  */
 double ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
-    const double *i_oovv, const double *i_vvov);
+    const double *i_oovv, const double *i_ovvv);
 
 #ifdef __cplusplus
 } /* extern "C" */
