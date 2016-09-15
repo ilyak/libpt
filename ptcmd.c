@@ -252,7 +252,7 @@ main(int argc, char **argv)
 	i_oovv = xmalloc(nsp*o*o*v*v*sizeof(double));
 	i_vvov = xmalloc(nsp*o*v*v*v*sizeof(double));
 
-	/* cannot do MPI_Bcast since it takes int as count which overflows */
+	/* don't do MPI_Bcast since it takes int as count which may overflow */
 	if (testpath) {
 		load_test_data(testpath, o, v, is_upt, d_ov, f_ov,
 		    t1, t2, i_oovo, i_oovv, i_vvov);
