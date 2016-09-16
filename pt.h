@@ -53,6 +53,9 @@ extern "C" {
 double ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv);
+double ccsd_pt_disk(size_t o, size_t v, const double *d_ov, const double *f_ov,
+    const double *t1, const double *t2, const double *i_oovo,
+    const double *i_oovv, const char *i_ovvv_path);
 
 /* Compute CCSD(T) energy correction in parallel for the unrestricted case.
  *
