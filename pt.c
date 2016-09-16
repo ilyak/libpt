@@ -165,14 +165,6 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		size_t j = ij[2*it+1];
 	for (size_t k = j+1; k < o; k++) {
 
-//	comp_t3a_ijk_1(o,v,a,b,c,ijk11,t2_aaaa,i_vvov_aaaa);
-//	comp_t3a_ijk_1(o,v,b,a,c,ijk12,t2_aaaa,i_vvov_aaaa);
-//	comp_t3a_ijk_1(o,v,c,b,a,ijk13,t2_aaaa,i_vvov_aaaa);
-
-//	comp_t3a_ijk_2(o,v,a,b,c,ijk21,t2t_aaaa,i_oovo_aaaa);
-//	comp_t3a_ijk_2(o,v,a,c,b,ijk22,t2t_aaaa,i_oovo_aaaa);
-//	comp_t3a_ijk_2(o,v,c,b,a,ijk23,t2t_aaaa,i_oovo_aaaa);
-
 	comp_t3a_abc_1(o,v,i,j,k,abc11,t2_aaaa,i_ovvv_aaaa);
 	comp_t3a_abc_1(o,v,i,k,j,abc12,t2_aaaa,i_ovvv_aaaa);
 	comp_t3a_abc_1(o,v,k,j,i,abc13,t2_aaaa,i_ovvv_aaaa);
@@ -185,29 +177,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	for (size_t b = a+1; b < v; b++) {
 	for (size_t c = b+1; c < v; c++) {
 		double t3ax1, t3ax2, t3bx, dn;
-#if 0
-		t3ax1 =
-+ijk11[j+i*o+k*o*o] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
--ijk11[j+k*o+i*o*o] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
--ijk11[k+i*o+j*o*o] //-comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
--ijk12[j+i*o+k*o*o] //-comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
-+ijk12[j+k*o+i*o*o] //+comp_t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
-+ijk12[k+i*o+j*o*o] //+comp_t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
--ijk13[j+i*o+k*o*o] //-comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
-+ijk13[j+k*o+i*o*o] //+comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
-+ijk13[k+i*o+j*o*o];//+comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
 
-		t3ax2 =
-+ijk21[i+k*o+j*o*o] //+comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
--ijk21[j+k*o+i*o*o] //-comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
--ijk21[k+i*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t_aaaa,i_oovo_aaaa)
--ijk22[i+k*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,i,j,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
-+ijk22[j+k*o+i*o*o] //+comp_t3a_ijkabc_21(o,v,j,i,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
-+ijk22[k+i*o+j*o*o] //+comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t_aaaa,i_oovo_aaaa)
--ijk23[i+k*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
-+ijk23[j+k*o+i*o*o] //+comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
-+ijk23[k+i*o+j*o*o];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
-#endif
 		t3ax1 =
 +abc11[a+c*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
 -abc11[b+c*v+a*v*v] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
@@ -272,24 +242,6 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		size_t j = ij[2*it+1];
 	for (size_t k = 0; k < o; k++) {
 
-//	comp_t3a_ijk_1(o,v,a,c,b,ijk11,t2_aaaa,i_vvov_abab);
-//	comp_t3a_ijk_1(o,v,b,c,a,ijk12,t2_aaaa,i_vvov_abab);
-//	comp_t3a_ijk_1(o,v,a,b,c,ijk13,t2_abab,i_vvov_abab);
-////	comp_t3a_ijk_1(o,v,a,b,c,ijk14,t2_abab,i_vvov_abab);
-//	comp_t3a_ijk_1(o,v,b,a,c,ijk15,t2_abab,i_vvov_abab);
-////	comp_t3a_ijk_1(o,v,b,a,c,ijk16,t2_abab,i_vvov_abab);
-//	comp_t3a_ijk_1(o,v,c,a,b,ijk17,t2_abab,i_vvov_aaaa);
-////	comp_t3a_ijk_1(o,v,c,a,b,ijk18,t2_abab,i_vvov_aaaa);
-
-//	comp_t3a_ijk_2(o,v,a,b,c,ijk21,t2t_aaaa,i_oovo_abab);
-////	comp_t3a_ijk_2(o,v,a,b,c,ijk22,t2t_aaaa,i_oovo_abab);
-//	comp_t3a_ijk_2(o,v,a,c,b,ijk23,t2t_abab,i_oovo_abab);
-//	comp_t3a_ijk_2(o,v,b,c,a,ijk24,t2t_abab,i_oovo_abab);
-////	comp_t3a_ijk_2(o,v,b,c,a,ijk25,t2t_abab,i_oovo_abab);
-////	comp_t3a_ijk_2(o,v,a,c,b,ijk26,t2t_abab,i_oovo_abab);
-//	comp_t3a_ijk_2(o,v,c,a,b,ijk27,t2t_abab,i_oovo_aaaa);
-//	comp_t3a_ijk_2(o,v,c,b,a,ijk28,t2t_abab,i_oovo_aaaa);
-
 	comp_t3a_abc_1(o,v,i,j,k,abc11,t2_aaaa,i_ovvv_abab);
 //	comp_t3a_abc_1(o,v,i,j,k,abc12,t2_aaaa,i_ovvv_abab);
 	comp_t3a_abc_1(o,v,i,k,j,abc13,t2_abab,i_ovvv_abab);
@@ -312,27 +264,7 @@ ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	for (size_t b = a+1; b < v; b++) {
 	for (size_t c = 0; c < v; c++) {
 		double t3ax1, t3ax2, t3bx, dn;
-#if 0
-		t3ax1 =
--ijk11[j+i*o+k*o*o] //-comp_t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
-+ijk12[j+i*o+k*o*o] //+comp_t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
--ijk13[k+i*o+j*o*o] //-comp_t3a_ijkabc_11h(o,v,i,k,j,a,b,c,t2_abab,i_vvov_abab)
-+ijk13[k+j*o+i*o*o] //+comp_t3a_ijkabc_11h(o,v,j,k,i,a,b,c,t2_abab,i_vvov_abab)
-+ijk15[k+i*o+j*o*o] //+comp_t3a_ijkabc_11h(o,v,i,k,j,b,a,c,t2_abab,i_vvov_abab)
--ijk15[k+j*o+i*o*o] //-comp_t3a_ijkabc_11h(o,v,j,k,i,b,a,c,t2_abab,i_vvov_abab)
--ijk17[j+k*o+i*o*o] //-comp_t3a_ijkabc_11h(o,v,k,j,i,c,a,b,t2_abab,i_vvov_aaaa)
-+ijk17[i+k*o+j*o*o];//+comp_t3a_ijkabc_11h(o,v,k,i,j,c,a,b,t2_abab,i_vvov_aaaa)
 
-		t3ax2 =
--ijk21[i+j*o+k*o*o] //-comp_t3a_ijkabc_21h(o,v,i,k,j,a,b,c,t2t_aaaa,i_oovo_abab)
-+ijk21[j+i*o+k*o*o] //+comp_t3a_ijkabc_21h(o,v,j,k,i,a,b,c,t2t_aaaa,i_oovo_abab)
--ijk23[i+k*o+j*o*o] //-comp_t3a_ijkabc_21h(o,v,i,j,k,a,c,b,t2t_abab,i_oovo_abab)
-+ijk24[i+k*o+j*o*o] //+comp_t3a_ijkabc_21h(o,v,i,j,k,b,c,a,t2t_abab,i_oovo_abab)
--ijk24[j+k*o+i*o*o] //-comp_t3a_ijkabc_21h(o,v,j,i,k,b,c,a,t2t_abab,i_oovo_abab)
-+ijk23[j+k*o+i*o*o] //+comp_t3a_ijkabc_21h(o,v,j,i,k,a,c,b,t2t_abab,i_oovo_abab)
--ijk27[k+i*o+j*o*o] //-comp_t3a_ijkabc_21h(o,v,k,j,i,c,a,b,t2t_abab,i_oovo_aaaa)
-+ijk28[k+i*o+j*o*o];//+comp_t3a_ijkabc_21h(o,v,k,j,i,c,b,a,t2t_abab,i_oovo_aaaa)
-#endif
 		t3ax1 =
 -abc11[a+b*v+c*v*v] //-comp_t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
 +abc11[b+a*v+c*v*v] //+comp_t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
@@ -439,29 +371,7 @@ ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	for (size_t b = a+1; b < v; b++) {
 	for (size_t c = b+1; c < v; c++) {
 		double t3ax1, t3ax2, t3bx, dn;
-#if 0
-		t3ax1 =
-+ijk11[j+i*o+k*o*o] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
--ijk11[j+k*o+i*o*o] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
--ijk11[k+i*o+j*o*o] //-comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
--ijk12[j+i*o+k*o*o] //-comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
-+ijk12[j+k*o+i*o*o] //+comp_t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
-+ijk12[k+i*o+j*o*o] //+comp_t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
--ijk13[j+i*o+k*o*o] //-comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
-+ijk13[j+k*o+i*o*o] //+comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
-+ijk13[k+i*o+j*o*o];//+comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
 
-		t3ax2 =
-+ijk21[i+k*o+j*o*o] //+comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
--ijk21[j+k*o+i*o*o] //-comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
--ijk21[k+i*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t_aaaa,i_oovo_aaaa)
--ijk22[i+k*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,i,j,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
-+ijk22[j+k*o+i*o*o] //+comp_t3a_ijkabc_21(o,v,j,i,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
-+ijk22[k+i*o+j*o*o] //+comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t_aaaa,i_oovo_aaaa)
--ijk23[i+k*o+j*o*o] //-comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
-+ijk23[j+k*o+i*o*o] //+comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
-+ijk23[k+i*o+j*o*o];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
-#endif
 		t3ax1 =
 +abc11[a+c*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
 -abc11[b+c*v+a*v*v] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
