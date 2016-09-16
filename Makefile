@@ -10,7 +10,7 @@ LIBS= -lblas -lg2c -lm
 #LDFLAGS=
 #LIBS=
 
-ALL_O= pt.o ptcmd2.o strtonum.o
+ALL_O= pt.o ptcmd.o strtonum.o
 RM= rm -f
 
 all: pt
