@@ -591,15 +591,17 @@ ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	}
 
 	double *abc11, *abc12, *abc13, *abc21, *abc22, *abc23;
-	double *work = malloc(6*v*v*v*sizeof(double));
+	double *work = malloc(4*v*v*v*sizeof(double));
+	double *t3ax1;
 	if (work == NULL)
 		err(1, "malloc work");
-	abc11 = work + 0*v*v*v;
-	abc12 = work + 1*v*v*v;
-	abc13 = work + 2*v*v*v;
-	abc21 = work + 3*v*v*v;
-	abc22 = work + 4*v*v*v;
-	abc23 = work + 5*v*v*v;
+	t3ax1 = work;
+	abc11 = work + 1*v*v*v;
+	abc12 = work + 2*v*v*v;
+	abc13 = work + 3*v*v*v;
+	abc21 = work + 1*v*v*v;
+	abc22 = work + 2*v*v*v;
+	abc23 = work + 3*v*v*v;
 
 #pragma omp for reduction(+:e_pt1) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
@@ -611,16 +613,10 @@ ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_1(o,v,i,k,j,abc12,t2,i_ovvv+j*v*v*v);
 	comp_t3a_abc_1(o,v,k,j,i,abc13,t2,i_ovvv+i*v*v*v);
 
-	comp_t3a_abc_2(o,v,i,j,k,abc21,t2,i_oovo);
-	comp_t3a_abc_2(o,v,j,i,k,abc22,t2,i_oovo);
-	comp_t3a_abc_2(o,v,k,j,i,abc23,t2,i_oovo);
-
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = a+1; b < v; b++) {
 	for (size_t c = b+1; c < v; c++) {
-		double t3ax1, t3ax2, t3bx, dn;
-
-		t3ax1 =
+		t3ax1[a+b*v+c*v*v] =
 +abc11[a+c*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
 -abc11[b+c*v+a*v*v] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
 -abc11[c+a*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
@@ -630,6 +626,16 @@ ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 -abc13[a+c*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
 +abc13[b+c*v+a*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
 +abc13[c+a*v+b*v*v];//+comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
+	}}}
+
+	comp_t3a_abc_2(o,v,i,j,k,abc21,t2,i_oovo);
+	comp_t3a_abc_2(o,v,j,i,k,abc22,t2,i_oovo);
+	comp_t3a_abc_2(o,v,k,j,i,abc23,t2,i_oovo);
+
+	for (size_t a = 0; a < v; a++) {
+	for (size_t b = a+1; b < v; b++) {
+	for (size_t c = b+1; c < v; c++) {
+		double t3ax, t3ax2, t3bx, dn;
 
 		t3ax2 =
 +abc21[b+a*v+c*v*v] //+comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
@@ -654,7 +660,8 @@ ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 +comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv,f_ov,t2);
 
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
-		e_pt1 += (t3ax1+t3ax2) * (t3ax1+t3ax2-t3bx) / dn;
+		t3ax = t3ax1[a+b*v+c*v*v]+t3ax2;
+		e_pt1 += t3ax * (t3ax-t3bx) / dn;
 	}}}
 	}}
 
