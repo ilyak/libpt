@@ -33,17 +33,17 @@ check: pt
 	@echo upt03 && ./pt -t tests/upt03.dat && echo success
 
 checkmpi: pt
-	@echo rpt01 && mpirun -np 3 ./pt -t tests/rpt01.dat && echo success
+	@echo rpt01 && mpirun -np 2 ./pt -t tests/rpt01.dat && echo success
 	@echo rpt02 && mpirun -np 3 ./pt -t tests/rpt02.dat && echo success
-	@echo rpt03 && mpirun -np 3 ./pt -t tests/rpt03.dat && echo success
+	@echo rpt03 && mpirun -np 4 ./pt -t tests/rpt03.dat && echo success
 	@echo rpt04 && mpirun -np 3 ./pt -t tests/rpt04.dat && echo success
-	@echo rpt05 && mpirun -np 3 ./pt -t tests/rpt05.dat && echo success
-	@echo rpt06 && mpirun -np 3 ./pt -t tests/rpt06.dat && echo success
-	@echo rpt07 && mpirun -np 3 ./pt -t tests/rpt07.dat && echo success
+	@echo rpt05 && mpirun -np 1 ./pt -t tests/rpt05.dat && echo success
+	@echo rpt06 && mpirun -np 2 ./pt -t tests/rpt06.dat && echo success
+	@echo rpt07 && mpirun -np 4 ./pt -t tests/rpt07.dat && echo success
 	@echo rpt08 && mpirun -np 3 ./pt -t tests/rpt08.dat && echo success
-	@echo rpt09 && mpirun -np 3 ./pt -t tests/rpt09.dat && echo success
+	@echo rpt09 && mpirun -np 2 ./pt -t tests/rpt09.dat && echo success
 	@echo upt01 && mpirun -np 3 ./pt -t tests/upt01.dat && echo success
-	@echo upt02 && mpirun -np 3 ./pt -t tests/upt02.dat && echo success
+	@echo upt02 && mpirun -np 4 ./pt -t tests/upt02.dat && echo success
 	@echo upt03 && mpirun -np 3 ./pt -t tests/upt03.dat && echo success
 
 clean:
