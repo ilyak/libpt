@@ -261,6 +261,15 @@ main(int argc, char **argv)
 		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	}
 
+	double *i_ovvv2 = xmalloc(nsp*o*v*v*(v-1)/2*sizeof(double));
+	for (size_t i = 0; i < o; i++) {
+	for (size_t a = 0; a < v; a++) {
+	for (size_t b = 0; b < v; b++) {
+	for (size_t c = 0; c < b; c++) {
+		i_ovvv2[i*v*v*(v-1)/2+a*v*(v-1)/2+b*(b-1)/2+c] =
+		    i_ovvv[i*v*v*v+a*v*v+b*v+c];
+	}}}}
+
 	if (rank == 0) {
 		time_t t = time(NULL);
 		printf("ccsd_pt: %s", ctime(&t));
