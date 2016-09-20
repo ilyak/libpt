@@ -196,8 +196,13 @@ load_random_data(size_t o, size_t v, int is_upt, double *d_ov,
 	for (i = 0; i < nsp*o*o*v*v; i++) {
 		i_oovv[i] = random_double();
 	}
-	for (i = 0; i < nsp*o*v*v*v; i++) {
+	for (i = 0; i < o*v*v*(v-1)/2; i++) {
 		i_ovvv[i] = random_double();
+	}
+	if (!is_upt) {
+		for (i = 0; i < o*v*v*v; i++) {
+			i_ovvv[o*v*v*(v-1)/2+i] = random_double();
+		}
 	}
 }
 
@@ -250,28 +255,28 @@ main(int argc, char **argv)
 	t2 = xmalloc(nsp*o*o*v*v*sizeof(double));
 	i_oovo = xmalloc(nsp*o*o*o*v*sizeof(double));
 	i_oovv = xmalloc(nsp*o*o*v*v*sizeof(double));
-	i_ovvv = xmalloc(nsp*o*v*v*v*sizeof(double));
+	i_ovvv = xmalloc(o*v*(v*(v-1)/2+(nsp-1)*v*v)*sizeof(double));
 
 	/* don't do MPI_Bcast since it takes int as count which may overflow */
 	if (testpath) {
+		double *i_ovvv2 = xmalloc(nsp*o*v*v*v*sizeof(double));
 		load_test_data(testpath, o, v, is_upt, d_ov, f_ov,
-		    t1, t2, i_oovo, i_oovv, i_ovvv);
+		    t1, t2, i_oovo, i_oovv, i_ovvv2);
+		for (size_t i = 0; i < o; i++) {
+		for (size_t a = 0; a < v; a++) {
+		for (size_t b = 0; b < v; b++) {
+		for (size_t c = 0; c < b; c++) {
+			i_ovvv[i*v*v*(v-1)/2+a*v*(v-1)/2+b*(b-1)/2+c] =
+			    i_ovvv2[i*v*v*v+a*v*v+b*v+c];
+		}}}}
+		if (!is_upt)
+			memcpy(i_ovvv+o*v*v*(v-1)/2, i_ovvv2+o*v*v*v,
+			    o*v*v*v*sizeof(double));
+		free(i_ovvv2);
 	} else {
 		load_random_data(o, v, is_upt, d_ov, f_ov,
 		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	}
-
-	double *i_ovvv2 = xmalloc(o*v*(v*(v-1)/2+v*v)*sizeof(double));
-	for (size_t i = 0; i < o; i++) {
-	for (size_t a = 0; a < v; a++) {
-	for (size_t b = 0; b < v; b++) {
-	for (size_t c = 0; c < b; c++) {
-		i_ovvv2[i*v*v*(v-1)/2+a*v*(v-1)/2+b*(b-1)/2+c] =
-		    i_ovvv[i*v*v*v+a*v*v+b*v+c];
-	}}}}
-	if (!is_upt)
-		memcpy(i_ovvv2+o*v*v*(v-1)/2, i_ovvv+o*v*v*v,
-		    o*v*v*v*sizeof(double));
 
 	if (rank == 0) {
 		time_t t = time(NULL);
@@ -279,10 +284,10 @@ main(int argc, char **argv)
 	}
 	if (is_upt) {
 		e_pt = ccsd_upt(o, v, d_ov, f_ov, t1, t2,
-		    i_oovo, i_oovv, i_ovvv2);
+		    i_oovo, i_oovv, i_ovvv);
 	} else {
 		e_pt = ccsd_rpt(o, v, d_ov, f_ov, t1, t2,
-		    i_oovo, i_oovv, i_ovvv2);
+		    i_oovo, i_oovv, i_ovvv);
 	}
 	if (rank == 0) {
 		time_t t = time(NULL);
