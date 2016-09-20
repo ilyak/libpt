@@ -162,7 +162,7 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	abc = work + v*v*v;
 
 	/* aaaa spin-block */
-#pragma omp for reduction(+:e_pt1) schedule(dynamic)
+#pragma omp for reduction(+:e_pt) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
 		size_t i = ij[2*it+0];
 		size_t j = ij[2*it+1];
@@ -318,7 +318,7 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	abc25 = work + 2*v*v*v;
 
 	/* abab spin-block */
-#pragma omp for reduction(+:e_pt2) schedule(dynamic)
+#pragma omp for reduction(+:e_pt) schedule(dynamic)
 	for (size_t it = 0; it < nij; it++) {
 		size_t i = ij[2*it+0];
 		size_t j = ij[2*it+1];
