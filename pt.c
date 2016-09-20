@@ -72,18 +72,28 @@ comp_t3a_abc_1(size_t o, size_t v, size_t i, size_t j, size_t k,
     double *abc, const double *t2, const double *i_ovvv)
 {
 	const double *t2_p = &T2(i,j,0,0);
-	const double *i_ovvv_p = &I_OVVV(k,0,0,0);
-//	const double *i_ovvv_p = &i_ovvv[k*v*v*(v-1)/2];
+	const double *i_ovvv_p = &i_ovvv[k*v*v*(v-1)/2];
 	int lda = v;
-	int ldb = v*v;
-//	int ldb = v*(v-1)/2;
+	int ldb = v*(v-1)/2;
 
 	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
-//	gemm('T', 'T', v, v*(v-1)/2, v, 1.0, t2_p, lda,
-//	    i_ovvv_p, ldb, 0, abc, v);
-	gemm('T', 'T', v, v*v, v, 1.0, t2_p, lda,
+	gemm('T', 'T', v, v*(v-1)/2, v, 1.0, t2_p, lda,
 	    i_ovvv_p, ldb, 0, abc, v);
+}
+
+static void
+comp_t3a_abc_12(size_t o, size_t v, size_t i, size_t j, size_t k,
+    double *abc, const double *t2, const double *i_ovvv)
+{
+	const double *t2_p = &T2(i,j,0,0);
+	const double *i_ovvv_p = &I_OVVV(k,0,0,0);
+	int lda = v;
+	int ldb = v*v;
+
+	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
+
+	gemm('T', 'T', v, v*v, v, 1.0, t2_p, lda, i_ovvv_p, ldb, 0, abc, v);
 }
 
 static void
@@ -176,25 +186,15 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < b; c++) {
 		t3ax1[a+b*v+c*v*v] =
--abc11[a+b*v+c*v*v] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
-+abc11[b+a*v+c*v*v] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
-+abc11[c+b*v+a*v*v] //-comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
-+abc12[a+b*v+c*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
--abc12[b+a*v+c*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
--abc12[c+b*v+a*v*v] //+comp_t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
-+abc13[a+b*v+c*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
--abc13[b+a*v+c*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
--abc13[c+b*v+a*v*v];//+comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
-//		t3ax1[a+b*v+c*v*v] =
-//+abc11[a+c*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
-//-abc11[b+c*v+a*v*v] //-comp_t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
-//-abc11[c+a*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
-//-abc12[a+c*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
-//+abc12[b+c*v+a*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
-//+abc12[c+a*v+b*v*v] //+comp_t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
-//-abc13[a+c*v+b*v*v] //-comp_t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
-//+abc13[b+c*v+a*v*v] //+comp_t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
-//+abc13[c+a*v+b*v*v];//+comp_t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
++abc11[a+v*b*(b-1)/2+v*c] //+t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc11[b+v*a*(a-1)/2+v*c] //-t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
++abc11[c+v*a*(a-1)/2+v*b] //-t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc12[a+v*b*(b-1)/2+v*c] //-t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
++abc12[b+v*a*(a-1)/2+v*c] //+t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
+-abc12[c+v*a*(a-1)/2+v*b] //+t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
+-abc13[a+v*b*(b-1)/2+v*c] //-t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
++abc13[b+v*a*(a-1)/2+v*c] //+t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
+-abc13[c+v*a*(a-1)/2+v*b];//+t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
 	}}}
 
 	comp_t3a_abc_2(o,v,i,j,k,abc21,t2_aaaa,i_oovo_aaaa);
@@ -274,13 +274,13 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	t2_aaaa = t2;
 	t2_abab = t2 + o*o*v*v;
 	i_ovvv_aaaa = i_ovvv;
-	i_ovvv_abab = i_ovvv + o*v*v*v;
+	i_ovvv_abab = i_ovvv + o*v*v*(v-1)/2;
 	i_oovo_aaaa = i_oovo;
 	i_oovo_abab = i_oovo + o*o*o*v;
 	i_oovv_aaaa = i_oovv;
 	i_oovv_abab = i_oovv + o*o*v*v;
 
-	double *abc11, *abc13, *abc14, *abc17, *abc18;
+	double *abc11, *abc13, *abc14, *abc17x, *abc18x;
 	double *abc21, *abc22, *abc23, *abc25, *abc27;
 	double *t3ax1;
 
@@ -291,8 +291,8 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	abc11 = work + 1*v*v*v;
 	abc13 = work + 2*v*v*v;
 	abc14 = work + 3*v*v*v;
-	abc17 = work + 4*v*v*v;
-	abc18 = work + 5*v*v*v;
+	abc17x = work + 4*v*v*v;
+	abc18x = work + 5*v*v*v;
 	abc21 = work + 1*v*v*v;
 	abc22 = work + 2*v*v*v;
 	abc23 = work + 3*v*v*v;
@@ -306,27 +306,27 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		size_t j = ij[2*it+1];
 	for (size_t k = 0; k < o; k++) {
 
-	comp_t3a_abc_1(o,v,i,j,k,abc11,t2_aaaa,i_ovvv_abab);
-//	comp_t3a_abc_1(o,v,i,j,k,abc12,t2_aaaa,i_ovvv_abab);
-	comp_t3a_abc_1(o,v,i,k,j,abc13,t2_abab,i_ovvv_abab);
-	comp_t3a_abc_1(o,v,j,k,i,abc14,t2_abab,i_ovvv_abab);
-//	comp_t3a_abc_1(o,v,i,k,j,abc15,t2_abab,i_ovvv_abab);
-//	comp_t3a_abc_1(o,v,j,k,i,abc16,t2_abab,i_ovvv_abab);
-	comp_t3a_abc_1(o,v,k,j,i,abc17,t2_abab,i_ovvv_aaaa);
-	comp_t3a_abc_1(o,v,k,i,j,abc18,t2_abab,i_ovvv_aaaa);
+	comp_t3a_abc_12(o,v,i,j,k,abc11,t2_aaaa,i_ovvv_abab);
+//	comp_t3a_abc_12(o,v,i,j,k,abc12,t2_aaaa,i_ovvv_abab);
+	comp_t3a_abc_12(o,v,i,k,j,abc13,t2_abab,i_ovvv_abab);
+	comp_t3a_abc_12(o,v,j,k,i,abc14,t2_abab,i_ovvv_abab);
+//	comp_t3a_abc_12(o,v,i,k,j,abc15,t2_abab,i_ovvv_abab);
+//	comp_t3a_abc_12(o,v,j,k,i,abc16,t2_abab,i_ovvv_abab);
+	comp_t3a_abc_1(o,v,k,j,i,abc17x,t2_abab,i_ovvv_aaaa);
+	comp_t3a_abc_1(o,v,k,i,j,abc18x,t2_abab,i_ovvv_aaaa);
 
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < v; c++) {
 		t3ax1[a+b*v+c*v*v] =
--abc11[a+b*v+c*v*v] //-comp_t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
-+abc11[b+a*v+c*v*v] //+comp_t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
--abc13[a+c*v+b*v*v] //-comp_t3a_ijkabc_11h(o,v,i,k,j,a,b,c,t2_abab,i_vvov_abab)
-+abc14[a+c*v+b*v*v] //+comp_t3a_ijkabc_11h(o,v,j,k,i,a,b,c,t2_abab,i_vvov_abab)
-+abc13[b+c*v+a*v*v] //+comp_t3a_ijkabc_11h(o,v,i,k,j,b,a,c,t2_abab,i_vvov_abab)
--abc14[b+c*v+a*v*v] //-comp_t3a_ijkabc_11h(o,v,j,k,i,b,a,c,t2_abab,i_vvov_abab)
--abc17[c+b*v+a*v*v] //-comp_t3a_ijkabc_11h(o,v,k,j,i,c,a,b,t2_abab,i_vvov_aaaa)
-+abc18[c+b*v+a*v*v];//+comp_t3a_ijkabc_11h(o,v,k,i,j,c,a,b,t2_abab,i_vvov_aaaa)
+-abc11[a+b*v+c*v*v] //-t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
++abc11[b+a*v+c*v*v] //+t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
+-abc13[a+c*v+b*v*v] //-t3a_ijkabc_11h(o,v,i,k,j,a,b,c,t2_abab,i_vvov_abab)
++abc14[a+c*v+b*v*v] //+t3a_ijkabc_11h(o,v,j,k,i,a,b,c,t2_abab,i_vvov_abab)
++abc13[b+c*v+a*v*v] //+t3a_ijkabc_11h(o,v,i,k,j,b,a,c,t2_abab,i_vvov_abab)
+-abc14[b+c*v+a*v*v] //-t3a_ijkabc_11h(o,v,j,k,i,b,a,c,t2_abab,i_vvov_abab)
+-abc17x[c+v*a*(a-1)/2+v*b] //-ijkabc_11h(o,v,k,j,i,c,a,b,t2_abab,i_vvov_aaaa)
++abc18x[c+v*a*(a-1)/2+v*b];//+ijkabc_11h(o,v,k,i,j,c,a,b,t2_abab,i_vvov_aaaa)
 	}}}
 
 	comp_t3a_abc_2(o,v,i,k,j,abc21,t2_aaaa,i_oovo_abab);

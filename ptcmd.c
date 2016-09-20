@@ -261,7 +261,7 @@ main(int argc, char **argv)
 		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	}
 
-	double *i_ovvv2 = xmalloc(nsp*o*v*v*(v-1)/2*sizeof(double));
+	double *i_ovvv2 = xmalloc(o*v*(v*(v-1)/2+v*v)*sizeof(double));
 	for (size_t i = 0; i < o; i++) {
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = 0; b < v; b++) {
@@ -269,6 +269,9 @@ main(int argc, char **argv)
 		i_ovvv2[i*v*v*(v-1)/2+a*v*(v-1)/2+b*(b-1)/2+c] =
 		    i_ovvv[i*v*v*v+a*v*v+b*v+c];
 	}}}}
+	if (!is_upt)
+		memcpy(i_ovvv2+o*v*v*(v-1)/2, i_ovvv+o*v*v*v,
+		    o*v*v*v*sizeof(double));
 
 	if (rank == 0) {
 		time_t t = time(NULL);
@@ -276,10 +279,10 @@ main(int argc, char **argv)
 	}
 	if (is_upt) {
 		e_pt = ccsd_upt(o, v, d_ov, f_ov, t1, t2,
-		    i_oovo, i_oovv, i_ovvv);
+		    i_oovo, i_oovv, i_ovvv2);
 	} else {
 		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2,
-		    i_oovo, i_oovv, i_ovvv);
+		    i_oovo, i_oovv, i_ovvv2);
 	}
 	if (rank == 0) {
 		time_t t = time(NULL);
