@@ -281,7 +281,7 @@ main(int argc, char **argv)
 		e_pt = ccsd_upt(o, v, d_ov, f_ov, t1, t2,
 		    i_oovo, i_oovv, i_ovvv2);
 	} else {
-		e_pt = ccsd_pt(o, v, d_ov, f_ov, t1, t2,
+		e_pt = ccsd_rpt(o, v, d_ov, f_ov, t1, t2,
 		    i_oovo, i_oovv, i_ovvv2);
 	}
 	if (rank == 0) {
