@@ -15,12 +15,10 @@
  */
 
 #include <err.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h> /*XXX*/
 #include <time.h>
-#include <unistd.h>
 
 #include <mpi.h>
 #ifdef _OPENMP
@@ -156,14 +154,12 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	i_oovo_aaaa = i_oovo;
 	i_oovv_aaaa = i_oovv;
 
-	double *t3ax1, *abc1, *abc2, *abc3;
-	double *work = malloc(4*v*v*v*sizeof(double));
+	double *t3ax1, *abc;
+	double *work = malloc(2*v*v*v*sizeof(double));
 	if (work == NULL)
 		err(1, "malloc work");
 	t3ax1 = work;
-	abc1 = work + 1*v*v*v;
-	abc2 = work + 2*v*v*v;
-	abc3 = work + 3*v*v*v;
+	abc = work + v*v*v;
 
 	/* aaaa spin-block */
 #pragma omp for reduction(+:e_pt1) schedule(dynamic)
@@ -172,44 +168,72 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 		size_t j = ij[2*it+1];
 	for (size_t k = j+1; k < o; k++) {
 
-	comp_t3a_abc_1(o,v,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
-	comp_t3a_abc_1(o,v,i,k,j,abc2,t2_aaaa,i_ovvv_aaaa);
-	comp_t3a_abc_1(o,v,k,j,i,abc3,t2_aaaa,i_ovvv_aaaa);
+	memset(t3ax1, 0, v*v*v*sizeof(double));
 
+	comp_t3a_abc_1(o,v,i,j,k,abc,t2_aaaa,i_ovvv_aaaa);
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < b; c++) {
-		t3ax1[a+b*v+c*v*v] =
-+abc1[a+v*b*(b-1)/2+v*c] //+t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
--abc1[b+v*a*(a-1)/2+v*c] //-t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
-+abc1[c+v*a*(a-1)/2+v*b] //-t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
--abc2[a+v*b*(b-1)/2+v*c] //-t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
-+abc2[b+v*a*(a-1)/2+v*c] //+t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
--abc2[c+v*a*(a-1)/2+v*b] //+t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
--abc3[a+v*b*(b-1)/2+v*c] //-t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
-+abc3[b+v*a*(a-1)/2+v*c] //+t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
--abc3[c+v*a*(a-1)/2+v*b];//+t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
+		t3ax1[a+b*v+c*v*v] +=
++abc[a+v*b*(b-1)/2+v*c] //+t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
+-abc[b+v*a*(a-1)/2+v*c] //-t3a_ijkabc_11(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
++abc[c+v*a*(a-1)/2+v*b];//-t3a_ijkabc_11(o,v,i,k,j,a,b,c,t2_aaaa,i_vvov_aaaa)
 	}}}
 
-	comp_t3a_abc_2(o,v,i,j,k,abc1,t2_aaaa,i_oovo_aaaa);
-	comp_t3a_abc_2(o,v,j,i,k,abc2,t2_aaaa,i_oovo_aaaa);
-	comp_t3a_abc_2(o,v,k,j,i,abc3,t2_aaaa,i_oovo_aaaa);
+	comp_t3a_abc_1(o,v,i,k,j,abc,t2_aaaa,i_ovvv_aaaa);
+	for (size_t a = 0; a < v; a++) {
+	for (size_t b = 0; b < a; b++) {
+	for (size_t c = 0; c < b; c++) {
+		t3ax1[a+b*v+c*v*v] +=
+-abc[a+v*b*(b-1)/2+v*c] //-t3a_ijkabc_11(o,v,i,j,k,b,a,c,t2_aaaa,i_vvov_aaaa)
++abc[b+v*a*(a-1)/2+v*c] //+t3a_ijkabc_11(o,v,k,j,i,b,a,c,t2_aaaa,i_vvov_aaaa)
+-abc[c+v*a*(a-1)/2+v*b];//+t3a_ijkabc_11(o,v,i,k,j,b,a,c,t2_aaaa,i_vvov_aaaa)
+	}}}
+
+	comp_t3a_abc_1(o,v,k,j,i,abc,t2_aaaa,i_ovvv_aaaa);
+	for (size_t a = 0; a < v; a++) {
+	for (size_t b = 0; b < a; b++) {
+	for (size_t c = 0; c < b; c++) {
+		t3ax1[a+b*v+c*v*v] +=
+-abc[a+v*b*(b-1)/2+v*c] //-t3a_ijkabc_11(o,v,i,j,k,c,b,a,t2_aaaa,i_vvov_aaaa)
++abc[b+v*a*(a-1)/2+v*c] //+t3a_ijkabc_11(o,v,k,j,i,c,b,a,t2_aaaa,i_vvov_aaaa)
+-abc[c+v*a*(a-1)/2+v*b];//+t3a_ijkabc_11(o,v,i,k,j,c,b,a,t2_aaaa,i_vvov_aaaa);
+	}}}
+
+	comp_t3a_abc_2(o,v,i,j,k,abc,t2_aaaa,i_oovo_aaaa);
+	for (size_t a = 0; a < v; a++) {
+	for (size_t b = 0; b < a; b++) {
+	for (size_t c = 0; c < b; c++) {
+		t3ax1[a+b*v+c*v*v] +=
++abc[b+a*v+c*v*v] //+comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-abc[c+a*v+b*v*v] //-comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
+-abc[b+c*v+a*v*v];//-comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t_aaaa,i_oovo_aaaa)
+	}}}
+
+	comp_t3a_abc_2(o,v,j,i,k,abc,t2_aaaa,i_oovo_aaaa);
+	for (size_t a = 0; a < v; a++) {
+	for (size_t b = 0; b < a; b++) {
+	for (size_t c = 0; c < b; c++) {
+		t3ax1[a+b*v+c*v*v] +=
+-abc[b+a*v+c*v*v] //-comp_t3a_ijkabc_21(o,v,i,j,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
++abc[c+a*v+b*v*v] //+comp_t3a_ijkabc_21(o,v,j,i,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
++abc[b+c*v+a*v*v];//+comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t_aaaa,i_oovo_aaaa)
+	}}}
+
+	comp_t3a_abc_2(o,v,k,j,i,abc,t2_aaaa,i_oovo_aaaa);
+	for (size_t a = 0; a < v; a++) {
+	for (size_t b = 0; b < a; b++) {
+	for (size_t c = 0; c < b; c++) {
+		t3ax1[a+b*v+c*v*v] +=
+-abc[b+a*v+c*v*v] //-comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
++abc[c+a*v+b*v*v] //+comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
++abc[b+c*v+a*v*v];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
+	}}}
 
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < b; c++) {
-		double t3ax, t3ax2, t3bx, dn;
-
-		t3ax2 =
-+abc1[b+a*v+c*v*v] //+comp_t3a_ijkabc_21(o,v,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
--abc1[c+a*v+b*v*v] //-comp_t3a_ijkabc_21(o,v,j,i,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
--abc1[b+c*v+a*v*v] //-comp_t3a_ijkabc_21(o,v,k,j,i,a,b,c,t2t_aaaa,i_oovo_aaaa)
--abc2[b+a*v+c*v*v] //-comp_t3a_ijkabc_21(o,v,i,j,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
-+abc2[c+a*v+b*v*v] //+comp_t3a_ijkabc_21(o,v,j,i,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
-+abc2[b+c*v+a*v*v] //+comp_t3a_ijkabc_21(o,v,k,j,i,a,c,b,t2t_aaaa,i_oovo_aaaa)
--abc3[b+a*v+c*v*v] //-comp_t3a_ijkabc_21(o,v,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
-+abc3[c+a*v+b*v*v] //+comp_t3a_ijkabc_21(o,v,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
-+abc3[b+c*v+a*v*v];//+comp_t3a_ijkabc_21(o,v,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa);
+		double t3ax, t3bx, dn;
 
 		t3bx =
 +comp_t3b_ijkabc(o,v,i,j,k,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
@@ -223,7 +247,7 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 +comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
 
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
-		t3ax = t3ax1[a+b*v+c*v*v]+t3ax2;
+		t3ax = t3ax1[a+b*v+c*v*v];
 		e_pt += t3ax * (t3ax-t3bx) / dn;
 	}}}
 	}}
@@ -372,7 +396,7 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 }
 
 double
-ccsd_pt(size_t o, size_t v, const double *d_ov, const double *f_ov,
+ccsd_rpt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv)
 {
