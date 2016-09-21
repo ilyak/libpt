@@ -32,7 +32,7 @@
 //#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
 #define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
 #define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
-#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
+//#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
 //#define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
 //#define T1(i, a) t1[i*v+a]
 #define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
@@ -66,7 +66,7 @@ gemm(char transa, char transb, int m, int n, int k, double alpha,
 }
 
 static void
-comp_t3a_abc_1(size_t o, size_t v, size_t i, size_t j, size_t k,
+comp_t3a_abc_1a(size_t o, size_t v, size_t i, size_t j, size_t k,
     double *abc, const double *t2, const double *i_ovvv)
 {
 	const double *t2_p = &T2(i,j,0,0);
@@ -81,17 +81,18 @@ comp_t3a_abc_1(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static void
-comp_t3a_abc_12(size_t o, size_t v, size_t i, size_t j, size_t k,
+comp_t3a_abc_1b(size_t o, size_t v, size_t i, size_t j, size_t k,
     double *abc, const double *t2, const double *i_ovvv)
 {
 	const double *t2_p = &T2(i,j,0,0);
-	const double *i_ovvv_p = &I_OVVV(k,0,0,0);
+	const double *i_ovvv_p = &i_ovvv[k*v*v*v];
 	int lda = v;
 	int ldb = v*v;
 
 	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
-	gemm('T', 'T', v, v*v, v, 1.0, t2_p, lda, i_ovvv_p, ldb, 0, abc, v);
+	gemm('T', 'T', v, v*v, v, 1.0, t2_p, lda,
+	    i_ovvv_p, ldb, 0, abc, v);
 }
 
 static void
@@ -105,7 +106,8 @@ comp_t3a_abc_2(size_t o, size_t v, size_t i, size_t j, size_t k,
 
 	/* t3a2(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_oovo(j,k,c,l)) */
 
-	gemm('N', 'N', v*v, v, o, 1.0, t2_p, lda, i_oovo_p, ldb, 0, abc, v*v);
+	gemm('N', 'N', v*v, v, o, 1.0, t2_p, lda,
+	    i_oovo_p, ldb, 0, abc, v*v);
 }
 
 static double
@@ -166,9 +168,9 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	memset(t3ax1, 0, v*v*v*sizeof(double));
 
-	comp_t3a_abc_1(o,v,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
-	comp_t3a_abc_1(o,v,i,k,j,abc2,t2_aaaa,i_ovvv_aaaa);
-	comp_t3a_abc_1(o,v,k,j,i,abc3,t2_aaaa,i_ovvv_aaaa);
+	comp_t3a_abc_1a(o,v,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
+	comp_t3a_abc_1a(o,v,i,k,j,abc2,t2_aaaa,i_ovvv_aaaa);
+	comp_t3a_abc_1a(o,v,k,j,i,abc3,t2_aaaa,i_ovvv_aaaa);
 	for (size_t a = 2; a < v; a++) {
 	for (size_t b = 1; b < a; b++) {
 	for (size_t c = 0; c < b; c++) {
@@ -289,12 +291,12 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	memset(t3ax1, 0, v*v*v*sizeof(double));
 
-	comp_t3a_abc_12(o,v,i,j,k,abc11,t2_aaaa,i_ovvv_abab);
-//	comp_t3a_abc_12(o,v,i,j,k,abc12,t2_aaaa,i_ovvv_abab);
-	comp_t3a_abc_12(o,v,i,k,j,abc13,t2_abab,i_ovvv_abab);
-	comp_t3a_abc_12(o,v,j,k,i,abc14,t2_abab,i_ovvv_abab);
-//	comp_t3a_abc_12(o,v,i,k,j,abc15,t2_abab,i_ovvv_abab);
-//	comp_t3a_abc_12(o,v,j,k,i,abc16,t2_abab,i_ovvv_abab);
+	comp_t3a_abc_1b(o,v,i,j,k,abc11,t2_aaaa,i_ovvv_abab);
+//	comp_t3a_abc_1b(o,v,i,j,k,abc12,t2_aaaa,i_ovvv_abab);
+	comp_t3a_abc_1b(o,v,i,k,j,abc13,t2_abab,i_ovvv_abab);
+	comp_t3a_abc_1b(o,v,j,k,i,abc14,t2_abab,i_ovvv_abab);
+//	comp_t3a_abc_1b(o,v,i,k,j,abc15,t2_abab,i_ovvv_abab);
+//	comp_t3a_abc_1b(o,v,j,k,i,abc16,t2_abab,i_ovvv_abab);
 	for (size_t a = 1; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < v; c++) {
@@ -307,8 +309,8 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 -abc14[b+c*v+a*v*v];//-t3a_ijkabc_11h(o,v,j,k,i,b,a,c,t2_abab,i_vvov_abab)
 	}}}
 
-	comp_t3a_abc_1(o,v,k,j,i,abc17x,t2_abab,i_ovvv_aaaa);
-	comp_t3a_abc_1(o,v,k,i,j,abc18x,t2_abab,i_ovvv_aaaa);
+	comp_t3a_abc_1a(o,v,k,j,i,abc17x,t2_abab,i_ovvv_aaaa);
+	comp_t3a_abc_1a(o,v,k,i,j,abc18x,t2_abab,i_ovvv_aaaa);
 	comp_t3a_abc_2(o,v,i,k,j,abc21,t2_aaaa,i_oovo_abab);
 	comp_t3a_abc_2(o,v,j,k,i,abc22,t2_aaaa,i_oovo_abab);
 	for (size_t a = 1; a < v; a++) {
@@ -327,7 +329,6 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 //	comp_t3a_abc_2(o,v,j,i,k,abc26,t2_abab,i_oovo_abab);
 	comp_t3a_abc_2(o,v,k,j,i,abc27,t2_abab,i_oovo_aaaa);
 //	comp_t3a_abc_2(o,v,k,j,i,abc28,t2_abab,i_oovo_aaaa);
-
 	for (size_t a = 1; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < v; c++) {
