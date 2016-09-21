@@ -25,8 +25,9 @@
 #include <getopt.h>
 #include <unistd.h>
 
+#ifdef WITH_MPI
 #include <mpi.h>
-
+#endif
 #include "pt.h"
 
 #define EPSILON 1.0e-8
@@ -213,12 +214,13 @@ main(int argc, char **argv)
 	double e_pt = 0.0, e_ref = 0.0;
 	double *d_ov, *f_ov, *t1, *t2, *i_oovv, *i_oovo, *i_ovvv;
 	const char *errstr, *testpath = NULL;
-	int is_upt = 0, rank;
+	int is_upt = 0, rank = 0;
 	char ch;
 
+#ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
+#endif
 	while ((ch = getopt(argc, argv, "o:t:uv:")) != -1) {
 		switch (ch) {
 		case 'o':
@@ -257,7 +259,6 @@ main(int argc, char **argv)
 	i_oovv = xmalloc(nsp*o*o*v*v*sizeof(double));
 	i_ovvv = xmalloc(o*v*(v*(v-1)/2+(nsp-1)*v*v)*sizeof(double));
 
-	/* don't do MPI_Bcast since it takes int as count which may overflow */
 	if (testpath) {
 		double *i_ovvv2 = xmalloc(nsp*o*v*v*v*sizeof(double));
 		load_test_data(testpath, o, v, is_upt, d_ov, f_ov,
@@ -307,6 +308,8 @@ main(int argc, char **argv)
 	free(i_oovo);
 	free(i_oovv);
 	free(i_ovvv);
+#ifdef WITH_MPI
 	MPI_Finalize();
+#endif
 	return (fabs(e_pt - e_ref) < EPSILON ? 0 : 1);
 }

@@ -20,7 +20,9 @@
 #include <stdio.h> /*XXX*/
 #include <time.h>
 
+#ifdef WITH_MPI
 #include <mpi.h>
+#endif
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -129,9 +131,10 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
 
+#ifdef WITH_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
-
+#endif
 #pragma omp parallel
 {
 	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
@@ -224,8 +227,10 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	free(ij);
 	free(work);
 }
+#ifdef WITH_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
 	    MPI_SUM, MPI_COMM_WORLD);
+#endif
 	return (e_pt);
 }
 
@@ -237,9 +242,10 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
 
+#ifdef WITH_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
-
+#endif
 #pragma omp parallel
 {
 	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
@@ -361,8 +367,10 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	free(ij);
 	free(work);
 }
+#ifdef WITH_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
 	    MPI_SUM, MPI_COMM_WORLD);
+#endif
 	return (e_pt);
 }
 
