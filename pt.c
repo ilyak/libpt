@@ -175,8 +175,8 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_1(o,v,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
 	comp_t3a_abc_1(o,v,i,k,j,abc2,t2_aaaa,i_ovvv_aaaa);
 	comp_t3a_abc_1(o,v,k,j,i,abc3,t2_aaaa,i_ovvv_aaaa);
-	for (size_t a = 0; a < v; a++) {
-	for (size_t b = 0; b < a; b++) {
+	for (size_t a = 2; a < v; a++) {
+	for (size_t b = 1; b < a; b++) {
 	for (size_t c = 0; c < b; c++) {
 		t3ax1[c+b*v+a*v*v] +=
 +abc1[a+v*b*(b-1)/2+v*c] //+t3a_ijkabc_11(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
@@ -193,8 +193,8 @@ ccsd_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_2(o,v,i,j,k,abc1,t2_aaaa,i_oovo_aaaa);
 	comp_t3a_abc_2(o,v,j,i,k,abc2,t2_aaaa,i_oovo_aaaa);
 	comp_t3a_abc_2(o,v,k,j,i,abc3,t2_aaaa,i_oovo_aaaa);
-	for (size_t a = 0; a < v; a++) {
-	for (size_t b = 0; b < a; b++) {
+	for (size_t a = 2; a < v; a++) {
+	for (size_t b = 1; b < a; b++) {
 	for (size_t c = 0; c < b; c++) {
 		double t3ax, t3bx, dn;
 
@@ -306,7 +306,7 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_12(o,v,j,k,i,abc14,t2_abab,i_ovvv_abab);
 //	comp_t3a_abc_12(o,v,i,k,j,abc15,t2_abab,i_ovvv_abab);
 //	comp_t3a_abc_12(o,v,j,k,i,abc16,t2_abab,i_ovvv_abab);
-	for (size_t a = 0; a < v; a++) {
+	for (size_t a = 1; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < v; c++) {
 		t3ax1[c+b*v+a*v*v] +=
@@ -322,7 +322,7 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_1(o,v,k,i,j,abc18x,t2_abab,i_ovvv_aaaa);
 	comp_t3a_abc_2(o,v,i,k,j,abc21,t2_aaaa,i_oovo_abab);
 	comp_t3a_abc_2(o,v,j,k,i,abc22,t2_aaaa,i_oovo_abab);
-	for (size_t a = 0; a < v; a++) {
+	for (size_t a = 1; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < v; c++) {
 		t3ax1[c+b*v+a*v*v] +=
@@ -339,7 +339,7 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_2(o,v,k,j,i,abc27,t2_abab,i_oovo_aaaa);
 //	comp_t3a_abc_2(o,v,k,j,i,abc28,t2_abab,i_oovo_aaaa);
 
-	for (size_t a = 0; a < v; a++) {
+	for (size_t a = 1; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < v; c++) {
 		double t3ax, t3bx, dn;
