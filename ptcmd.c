@@ -153,14 +153,14 @@ load_test_data(const char *testpath, size_t o, size_t v, int is_rpt,
 	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o*v*v*v; i++) {
+	for (i = 0; i < o*v*v*(v-1)/2; i++) {
 		i_ovvv[i] = read_next_double(fp);
 	}
 	if (is_rpt) {
 		skip_line(fp);
 		skip_line(fp);
 		for (i = 0; i < o*v*v*v; i++) {
-			i_ovvv[o*v*v*v+i] = read_next_double(fp);
+			i_ovvv[o*v*v*(v-1)/2+i] = read_next_double(fp);
 		}
 	}
 	fclose(fp);
@@ -260,20 +260,8 @@ main(int argc, char **argv)
 	i_ovvv = xmalloc(o*v*(v*(v-1)/2+(nsp-1)*v*v)*sizeof(double));
 
 	if (testpath) {
-		double *i_ovvv2 = xmalloc(nsp*o*v*v*v*sizeof(double));
 		load_test_data(testpath, o, v, is_rpt, d_ov, f_ov,
-		    t1, t2, i_oovo, i_oovv, i_ovvv2);
-		for (size_t i = 0; i < o; i++) {
-		for (size_t a = 0; a < v; a++) {
-		for (size_t b = 0; b < v; b++) {
-		for (size_t c = 0; c < b; c++) {
-			i_ovvv[i*v*v*(v-1)/2+a*v*(v-1)/2+b*(b-1)/2+c] =
-			    i_ovvv2[i*v*v*v+a*v*v+b*v+c];
-		}}}}
-		if (is_rpt)
-			memcpy(i_ovvv+o*v*v*(v-1)/2, i_ovvv2+o*v*v*v,
-			    o*v*v*v*sizeof(double));
-		free(i_ovvv2);
+		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	} else {
 		load_random_data(o, v, is_rpt, d_ov, f_ov,
 		    t1, t2, i_oovo, i_oovv, i_ovvv);
