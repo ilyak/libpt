@@ -282,14 +282,14 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	t3ax1 = work;
 	abc11 = work + 1*v*v*v;
 	abc13 = work + 2*v*v*v;
-	abc14 = work + 1*v*v*v;
-	abc17x = work + 2*v*v*v;
-	abc18x = work + 3*v*v*v;
-	abc21 = work + 1*v*v*v;
-	abc22 = work + 2*v*v*v;
-	abc27 = work + 3*v*v*v;
+	abc14 = work + 3*v*v*v;
+	abc17x = work + 1*v*v*v;
+	abc18x = work + 1*v*v*v + v*v*(v-1)/2;
+	abc21 = work + 2*v*v*v;
+	abc22 = work + 3*v*v*v;
 	abc23 = work + 1*v*v*v;
 	abc25 = work + 2*v*v*v;
+	abc27 = work + 3*v*v*v;
 
 	/* abab spin-block */
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -303,48 +303,40 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_12(o,v,i,j,k,abc11,t2_aaaa,i_ovvv_abab);
 //	comp_t3a_abc_12(o,v,i,j,k,abc12,t2_aaaa,i_ovvv_abab);
 	comp_t3a_abc_12(o,v,i,k,j,abc13,t2_abab,i_ovvv_abab);
-	for (size_t a = 0; a < v; a++) {
-	for (size_t b = 0; b < a; b++) {
-	for (size_t c = 0; c < v; c++) {
-		t3ax1[a+b*v+c*v*v] +=
--abc11[a+b*v+c*v*v] //-t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
-+abc11[b+a*v+c*v*v] //+t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
--abc13[a+c*v+b*v*v] //-t3a_ijkabc_11h(o,v,i,k,j,a,b,c,t2_abab,i_vvov_abab)
-+abc13[b+c*v+a*v*v];//+t3a_ijkabc_11h(o,v,i,k,j,b,a,c,t2_abab,i_vvov_abab)
-	}}}
-
 	comp_t3a_abc_12(o,v,j,k,i,abc14,t2_abab,i_ovvv_abab);
 //	comp_t3a_abc_12(o,v,i,k,j,abc15,t2_abab,i_ovvv_abab);
 //	comp_t3a_abc_12(o,v,j,k,i,abc16,t2_abab,i_ovvv_abab);
-	comp_t3a_abc_1(o,v,k,j,i,abc17x,t2_abab,i_ovvv_aaaa);
-	comp_t3a_abc_1(o,v,k,i,j,abc18x,t2_abab,i_ovvv_aaaa);
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < v; c++) {
-		t3ax1[a+b*v+c*v*v] +=
+		t3ax1[c+b*v+a*v*v] +=
+-abc11[a+b*v+c*v*v] //-t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
++abc11[b+a*v+c*v*v] //+t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
+-abc13[a+c*v+b*v*v] //-t3a_ijkabc_11h(o,v,i,k,j,a,b,c,t2_abab,i_vvov_abab)
++abc13[b+c*v+a*v*v] //+t3a_ijkabc_11h(o,v,i,k,j,b,a,c,t2_abab,i_vvov_abab)
 +abc14[a+c*v+b*v*v] //+t3a_ijkabc_11h(o,v,j,k,i,a,b,c,t2_abab,i_vvov_abab)
--abc14[b+c*v+a*v*v] //-t3a_ijkabc_11h(o,v,j,k,i,b,a,c,t2_abab,i_vvov_abab)
--abc17x[c+v*a*(a-1)/2+v*b] //-ijkabc_11h(o,v,k,j,i,c,a,b,t2_abab,i_vvov_aaaa)
-+abc18x[c+v*a*(a-1)/2+v*b];//+ijkabc_11h(o,v,k,i,j,c,a,b,t2_abab,i_vvov_aaaa)
+-abc14[b+c*v+a*v*v];//-t3a_ijkabc_11h(o,v,j,k,i,b,a,c,t2_abab,i_vvov_abab)
 	}}}
 
+	comp_t3a_abc_1(o,v,k,j,i,abc17x,t2_abab,i_ovvv_aaaa);
+	comp_t3a_abc_1(o,v,k,i,j,abc18x,t2_abab,i_ovvv_aaaa);
 	comp_t3a_abc_2(o,v,i,k,j,abc21,t2_aaaa,i_oovo_abab);
 	comp_t3a_abc_2(o,v,j,k,i,abc22,t2_aaaa,i_oovo_abab);
-	comp_t3a_abc_2(o,v,k,j,i,abc27,t2_abab,i_oovo_aaaa);
 	for (size_t a = 0; a < v; a++) {
 	for (size_t b = 0; b < a; b++) {
 	for (size_t c = 0; c < v; c++) {
-		t3ax1[a+b*v+c*v*v] +=
+		t3ax1[c+b*v+a*v*v] +=
+-abc17x[c+v*a*(a-1)/2+v*b] //-ijkabc_11h(o,v,k,j,i,c,a,b,t2_abab,i_vvov_aaaa)
++abc18x[c+v*a*(a-1)/2+v*b] //+ijkabc_11h(o,v,k,i,j,c,a,b,t2_abab,i_vvov_aaaa)
 -abc21[b+a*v+c*v*v] //-comp_t3a_ijkabc_21h(o,v,i,k,j,a,b,c,t2t_aaaa,i_oovo_abab)
-+abc22[b+a*v+c*v*v] //+comp_t3a_ijkabc_21h(o,v,j,k,i,a,b,c,t2t_aaaa,i_oovo_abab)
--abc27[a+c*v+b*v*v] //-comp_t3a_ijkabc_21h(o,v,k,j,i,c,a,b,t2t_abab,i_oovo_aaaa)
-+abc27[b+c*v+a*v*v];//+comp_t3a_ijkabc_21h(o,v,k,j,i,c,b,a,t2t_abab,i_oovo_aaaa)
++abc22[b+a*v+c*v*v];//+comp_t3a_ijkabc_21h(o,v,j,k,i,a,b,c,t2t_aaaa,i_oovo_abab)
 	}}}
 
 	comp_t3a_abc_2(o,v,i,j,k,abc23,t2_abab,i_oovo_abab);
 //	comp_t3a_abc_2(o,v,i,j,k,abc24,t2_abab,i_oovo_abab);
 	comp_t3a_abc_2(o,v,j,i,k,abc25,t2_abab,i_oovo_abab);
 //	comp_t3a_abc_2(o,v,j,i,k,abc26,t2_abab,i_oovo_abab);
+	comp_t3a_abc_2(o,v,k,j,i,abc27,t2_abab,i_oovo_aaaa);
 //	comp_t3a_abc_2(o,v,k,j,i,abc28,t2_abab,i_oovo_aaaa);
 
 	for (size_t a = 0; a < v; a++) {
@@ -352,11 +344,13 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	for (size_t c = 0; c < v; c++) {
 		double t3ax, t3bx, dn;
 
-		t3ax1[a+b*v+c*v*v] +=
+		t3ax1[c+b*v+a*v*v] +=
 -abc23[c+a*v+b*v*v] //-comp_t3a_ijkabc_21h(o,v,i,j,k,a,c,b,t2t_abab,i_oovo_abab)
 +abc23[c+b*v+a*v*v] //+comp_t3a_ijkabc_21h(o,v,i,j,k,b,c,a,t2t_abab,i_oovo_abab)
 -abc25[c+b*v+a*v*v] //-comp_t3a_ijkabc_21h(o,v,j,i,k,b,c,a,t2t_abab,i_oovo_abab)
-+abc25[c+a*v+b*v*v];//+comp_t3a_ijkabc_21h(o,v,j,i,k,a,c,b,t2t_abab,i_oovo_abab)
++abc25[c+a*v+b*v*v] //+comp_t3a_ijkabc_21h(o,v,j,i,k,a,c,b,t2t_abab,i_oovo_abab)
+-abc27[a+c*v+b*v*v] //-comp_t3a_ijkabc_21h(o,v,k,j,i,c,a,b,t2t_abab,i_oovo_aaaa)
++abc27[b+c*v+a*v*v];//+comp_t3a_ijkabc_21h(o,v,k,j,i,c,b,a,t2t_abab,i_oovo_aaaa)
 
 		t3bx =
 	+comp_t3b_ijkabc(o,v,i,j,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
@@ -370,7 +364,7 @@ ccsd_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	+comp_t3b_ijkabc(o,v,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
 
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
-		t3ax = t3ax1[a+b*v+c*v*v];
+		t3ax = t3ax1[c+b*v+a*v*v];
 		e_pt += t3ax * (t3ax-t3bx) / dn;
 	}}}
 	}}
