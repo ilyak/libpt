@@ -26,7 +26,7 @@ extern "C" {
 
 /* Compute CCSD(T) energy correction in parallel.
  *
- * The routine is MPI/OpenMP parallel. All MPI processes must receive same
+ * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
  *
  * Arguments:
@@ -38,7 +38,8 @@ extern "C" {
  *   t2 - CCSD T2 amplitudes, aaaa and abab blocks (size 2*o*o*v*v)
  *   i_oovo - OOOV integrals transposed, aaaa and abab blocks (size 2*o*o*o*v)
  *   i_oovv - OOVV integrals, aaaa and abab blocks (size 2*o*o*v*v)
- *   i_ovvv - OVVV integrals, aaaa and abab blocks (size 2*o*v*v*v)
+ *   i_ovvv - OVVV integrals, aaaa block with vv symmetry followed by full
+ *       abab block (size o*v*v*(v-1)/2+o*v*v*v)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
@@ -56,19 +57,19 @@ double ccsd_rpt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 /* Compute CCSD(T) energy correction in parallel for the unrestricted case.
  *
- * The routine is MPI/OpenMP parallel. All MPI processes must receive same
+ * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
  *
  * Arguments:
- *   o - full size of occupied space
- *   v - full size of virtual space
+ *   o - size of full occupied space
+ *   v - size of full virtual space
  *   d_ov - Delta matrix (size o*v)
  *   f_ov - Fock matrix (size o*v)
  *   t1 - CCSD T1 amplitudes (size o*v)
  *   t2 - CCSD T2 amplitudes (size o*o*v*v)
  *   i_oovo - OOOV integrals transposed (size o*o*o*v)
  *   i_oovv - OOVV integrals (size o*o*v*v)
- *   i_ovvv - OVVV integrals (size o*v*v*v)
+ *   i_ovvv - OVVV integrals with vv symmetry (size o*v*v*(v-1)/2)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
