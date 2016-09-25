@@ -269,23 +269,23 @@ main(int argc, char **argv)
 
 	if (rank == 0) {
 		time_t t = time(NULL);
-		printf("ccsd_pt: %s", ctime(&t));
+		printf("cc_pt: %s", ctime(&t));
 	}
 	if (is_rpt) {
-		e_pt = ccsd_rpt(o, v, d_ov, f_ov, t1, t2,
+		e_pt = cc_rpt(o, v, d_ov, f_ov, t1, t2,
 		    i_oovo, i_oovv, i_ovvv);
 	} else {
-		e_pt = ccsd_upt(o, v, d_ov, f_ov, t1, t2,
+		e_pt = cc_upt(o, v, d_ov, f_ov, t1, t2,
 		    i_oovo, i_oovv, i_ovvv);
 	}
 	if (rank == 0) {
 		time_t t = time(NULL);
-		printf("ccsd_pt: %s", ctime(&t));
-		printf("ccsd(t) energy: % .8lf\n", e_pt);
+		printf("cc_pt: %s", ctime(&t));
+		printf("cc (t) energy: % .8lf\n", e_pt);
 	}
 	if (testpath) {
 		if (rank == 0)
-			printf("ccsd(t) ref:    % .8lf\n", e_ref);
+			printf("cc (t) ref:    % .8lf\n", e_ref);
 	} else
 		e_ref = e_pt;
 

@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-/* Compute CCSD(T) energy correction in parallel.
+/* Compute coupled-cluster (T) energy correction in parallel.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
@@ -46,16 +46,17 @@ extern "C" {
  * d_ov[o=0,v=1], d_ov[o=0,v=2], and so forth. The tensors are expected to
  * be properly (anti-)symmetrized.
  *
- * The function returns CCSD(T) energy correction.
+ * The function returns coupled-cluster (T) energy correction.
  *
  * References:
  *   J. Chem. Phys. 98, 8718 (1993); http://dx.doi.org/10.1063/1.464480
  */
-double ccsd_rpt(size_t o, size_t v, const double *d_ov, const double *f_ov,
+double cc_rpt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv);
 
-/* Compute CCSD(T) energy correction in parallel for the unrestricted case.
+/* Compute coupled-cluster (T) energy correction in parallel for the
+ * unrestricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
@@ -76,12 +77,12 @@ double ccsd_rpt(size_t o, size_t v, const double *d_ov, const double *f_ov,
  * d_ov[o=0,v=1], d_ov[o=0,v=2], and so forth. The tensors are expected to
  * be properly (anti-)symmetrized.
  *
- * The function returns CCSD(T) energy correction.
+ * The function returns coupled-cluster (T) energy correction.
  *
  * References:
  *   J. Chem. Phys. 98, 8718 (1993); http://dx.doi.org/10.1063/1.464480
  */
-double ccsd_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
+double cc_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv);
 
