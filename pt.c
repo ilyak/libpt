@@ -139,7 +139,7 @@ cc_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 {
 	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
 	if (ij == NULL)
-		err(1, "malloc ij");
+		err(1, "libpt malloc ij");
 	for (size_t i = 0, n = 0; i < o; i++)
 	for (size_t j = i+1; j < o; j++, n++) {
 		if (n % size == rank) {
@@ -156,7 +156,7 @@ cc_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	double *work = malloc(4*v*v*v*sizeof(double));
 	if (work == NULL)
-		err(1, "malloc work");
+		err(1, "libpt malloc work");
 	double *t3ax1 = work;
 	double *abc1 = work + 1*v*v*v;
 	double *abc2 = work + 2*v*v*v;
@@ -250,7 +250,7 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 {
 	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
 	if (ij == NULL)
-		err(1, "malloc ij");
+		err(1, "libpt malloc ij");
 	for (size_t i = 0, n = 0; i < o; i++)
 	for (size_t j = i+1; j < o; j++, n++) {
 		if (n % size == rank) {
@@ -275,7 +275,7 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	double *work = malloc(4*v*v*v*sizeof(double));
 	if (work == NULL)
-		err(1, "malloc work");
+		err(1, "libpt malloc work");
 	t3ax1 = work;
 	abc11 = work + 1*v*v*v;
 	abc13 = work + 2*v*v*v;
