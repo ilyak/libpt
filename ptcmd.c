@@ -268,8 +268,8 @@ main(int argc, char **argv)
 	}
 
 	if (rank == 0) {
-		time_t t = time(NULL);
-		printf("cc_pt: %s", ctime(&t));
+		time_t wall = time(NULL);
+		printf("cc_pt: %s", ctime(&wall));
 	}
 	if (is_rpt) {
 		e_pt = cc_rpt(o, v, d_ov, f_ov, t1, t2,
@@ -279,8 +279,8 @@ main(int argc, char **argv)
 		    i_oovo, i_oovv, i_ovvv);
 	}
 	if (rank == 0) {
-		time_t t = time(NULL);
-		printf("cc_pt: %s", ctime(&t));
+		time_t wall = time(NULL);
+		printf("cc_pt: %s", ctime(&wall));
 		printf("cc (t) energy: % .8lf\n", e_pt);
 	}
 	if (testpath) {
