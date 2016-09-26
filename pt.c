@@ -17,8 +17,8 @@
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h> /*XXX*/
-#include <time.h>
+//#include <stdio.h>
+//#include <time.h>
 
 #ifdef WITH_MPI
 #include <mpi.h>
@@ -380,17 +380,17 @@ cc_rpt(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *i_oovv, const double *i_ovvv)
 {
 	double e_pt1, e_pt2;
-	time_t wall;
+//	time_t wall;
 
 	if (o < 2 || v < 2)
 		return (0.0);
 
 	e_pt1 = cc_pt_aaaa(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
-	wall = time(NULL);
-	printf("aaaa %g\n", 2.0 * e_pt1);
-	printf("cc_rpt: %s", ctime(&wall));
+//	wall = time(NULL);
+//	printf("aaaa %g\n", 2.0 * e_pt1);
+//	printf("cc_rpt: %s", ctime(&wall));
 	e_pt2 = cc_pt_abab(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
-	printf("abab %g\n", 2.0 * e_pt2);
+//	printf("abab %g\n", 2.0 * e_pt2);
 
 	return 2.0 * (e_pt1 + e_pt2);
 }
