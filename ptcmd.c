@@ -214,6 +214,7 @@ main(int argc, char **argv)
 	double e_pt = 0.0, e_ref = 0.0;
 	double *d_ov, *f_ov, *t1, *t2, *i_oovv, *i_oovo, *i_ovvv;
 	const char *errstr, *testpath = NULL;
+	time_t wall;
 	int is_rpt = 1, rank = 0;
 	char ch;
 
@@ -267,10 +268,9 @@ main(int argc, char **argv)
 		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	}
 
-	if (rank == 0) {
-		time_t wall = time(NULL);
-		printf("cc_pt: %s", ctime(&wall));
-	}
+	if (rank == 0)
+		printf("starting calculation...\n");
+	wall = time(NULL);
 	if (is_rpt) {
 		e_pt = cc_rpt(o, v, d_ov, f_ov, t1, t2,
 		    i_oovo, i_oovv, i_ovvv);
@@ -278,9 +278,9 @@ main(int argc, char **argv)
 		e_pt = cc_upt(o, v, d_ov, f_ov, t1, t2,
 		    i_oovo, i_oovv, i_ovvv);
 	}
+	wall = time(NULL) - wall;
 	if (rank == 0) {
-		time_t wall = time(NULL);
-		printf("cc_pt: %s", ctime(&wall));
+		printf("done in %d sec\n", (int)wall);
 		printf("cc (t) energy: % .8lf\n", e_pt);
 	}
 	if (testpath) {
