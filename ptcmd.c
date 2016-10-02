@@ -215,8 +215,7 @@ main(int argc, char **argv)
 	double *d_ov, *f_ov, *t1, *t2, *i_oovv, *i_oovo, *i_ovvv;
 	const char *errstr, *testpath = NULL;
 	time_t wall;
-	int is_rpt = 1, rank = 0;
-	char ch;
+	int ch, is_rpt = 1, rank = 0;
 
 #ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
