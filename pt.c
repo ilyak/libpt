@@ -74,7 +74,7 @@ comp_t3a_abc_1a(size_t o, size_t v, size_t i, size_t j, size_t k,
 	const double *t2_p = &T2(i,j,0,0);
 	const double *i_ovvv_p = &i_ovvv[k*v*v*(v-1)/2];
 	int lda = v;
-	int ldb = v*(v-1)/2;
+	int ldb = v*(v-1)/2; /* for aaaa block with vv anti-symmetry */
 
 	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
@@ -89,7 +89,7 @@ comp_t3a_abc_1b(size_t o, size_t v, size_t i, size_t j, size_t k,
 	const double *t2_p = &T2(i,j,0,0);
 	const double *i_ovvv_p = &i_ovvv[k*v*v*v];
 	int lda = v;
-	int ldb = v*v;
+	int ldb = v*v; /* for abab block; no vv anti-symmetry */
 
 	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
