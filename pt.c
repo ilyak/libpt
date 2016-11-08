@@ -137,46 +137,46 @@ cc_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 #endif
 #pragma omp parallel
 {
-	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
-	if (ij == NULL)
+	size_t i, j, k, a, b, c, it, *ij, nij = 0;
+	const double *t2_aaaa = t2;
+	const double *i_oovo_aaaa = i_oovo;
+	const double *i_oovv_aaaa = i_oovv;
+	const double *i_ovvv_aaaa = i_ovvv;
+	double *work, *t3ax1, *abc1, *abc2, *abc3;
+
+	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
-	for (size_t i = 0, n = 0; i < o; i++)
-	for (size_t j = i+1; j < o; j++, n++) {
-		if (n % size == rank) {
+	for (i = 0, it = 0; i < o; i++)
+	for (j = i+1; j < o; j++, it++) {
+		if (it % size == rank) {
 			ij[2*nij+0] = i;
 			ij[2*nij+1] = j;
 			nij++;
 		}
 	}
 
-	const double *t2_aaaa = t2;
-	const double *i_oovo_aaaa = i_oovo;
-	const double *i_oovv_aaaa = i_oovv;
-	const double *i_ovvv_aaaa = i_ovvv;
-
-	double *work = malloc(4*v*v*v*sizeof(double));
-	if (work == NULL)
+	if ((work = malloc(4*v*v*v*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
-	double *t3ax1 = work;
-	double *abc1 = work + 1*v*v*v;
-	double *abc2 = work + 2*v*v*v;
-	double *abc3 = work + 3*v*v*v;
+	t3ax1 = work;
+	abc1 = work + 1*v*v*v;
+	abc2 = work + 2*v*v*v;
+	abc3 = work + 3*v*v*v;
 
 	/* aaaa spin-block */
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
-	for (size_t it = 0; it < nij; it++) {
-		size_t i = ij[2*it+0];
-		size_t j = ij[2*it+1];
-	for (size_t k = j+1; k < o; k++) {
+	for (it = 0; it < nij; it++) {
+		i = ij[2*it+0];
+		j = ij[2*it+1];
+	for (k = j+1; k < o; k++) {
 
 	memset(t3ax1, 0, v*v*v*sizeof(double));
 
 	comp_t3a_abc_1a(o,v,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
 	comp_t3a_abc_1a(o,v,i,k,j,abc2,t2_aaaa,i_ovvv_aaaa);
 	comp_t3a_abc_1a(o,v,k,j,i,abc3,t2_aaaa,i_ovvv_aaaa);
-	for (size_t a = 2; a < v; a++) {
-	for (size_t b = 1; b < a; b++) {
-	for (size_t c = 0; c < b; c++) {
+	for (a = 2; a < v; a++) {
+	for (b = 1; b < a; b++) {
+	for (c = 0; c < b; c++) {
 		t3ax1[a*v*v+b*v+c] +=
 +abc1[a+v*b*(b-1)/2+v*c] //+t3a_1(o,v,i,j,k,a,b,c,t2_aaaa,i_vvov_aaaa)
 -abc1[b+v*a*(a-1)/2+v*c] //-t3a_1(o,v,k,j,i,a,b,c,t2_aaaa,i_vvov_aaaa)
@@ -192,9 +192,9 @@ cc_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_2(o,v,i,j,k,abc1,t2_aaaa,i_oovo_aaaa);
 	comp_t3a_abc_2(o,v,j,i,k,abc2,t2_aaaa,i_oovo_aaaa);
 	comp_t3a_abc_2(o,v,k,j,i,abc3,t2_aaaa,i_oovo_aaaa);
-	for (size_t a = 2; a < v; a++) {
-	for (size_t b = 1; b < a; b++) {
-	for (size_t c = 0; c < b; c++) {
+	for (a = 2; a < v; a++) {
+	for (b = 1; b < a; b++) {
+	for (c = 0; c < b; c++) {
 		double t3ax, t3bx, dn;
 
 		t3ax1[a*v*v+b*v+c] +=
@@ -248,18 +248,7 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 #endif
 #pragma omp parallel
 {
-	size_t nij = 0, *ij = malloc(o*(o-1)*sizeof(size_t));
-	if (ij == NULL)
-		err(1, "libpt malloc ij");
-	for (size_t i = 0, n = 0; i < o; i++)
-	for (size_t j = i+1; j < o; j++, n++) {
-		if (n % size == rank) {
-			ij[2*nij+0] = i;
-			ij[2*nij+1] = j;
-			nij++;
-		}
-	}
-
+	size_t i, j, k, a, b, c, it, *ij, nij = 0;
 	const double *t2_aaaa = t2;
 	const double *t2_abab = t2 + o*o*v*v;
 	const double *i_ovvv_aaaa = i_ovvv;
@@ -268,13 +257,21 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	const double *i_oovo_abab = i_oovo + o*o*o*v;
 	const double *i_oovv_aaaa = i_oovv;
 	const double *i_oovv_abab = i_oovv + o*o*v*v;
+	double *work, *abc11, *abc13, *abc14, *abc17x, *abc18x;
+	double *abc21, *abc22, *abc23, *abc25, *abc27, *t3ax1;
 
-	double *abc11, *abc13, *abc14, *abc17x, *abc18x;
-	double *abc21, *abc22, *abc23, *abc25, *abc27;
-	double *t3ax1;
+	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
+		err(1, "libpt malloc ij");
+	for (i = 0, it = 0; i < o; i++)
+	for (j = i+1; j < o; j++, it++) {
+		if (it % size == rank) {
+			ij[2*nij+0] = i;
+			ij[2*nij+1] = j;
+			nij++;
+		}
+	}
 
-	double *work = malloc(4*v*v*v*sizeof(double));
-	if (work == NULL)
+	if ((work = malloc(4*v*v*v*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
 	t3ax1 = work;
 	abc11 = work + 1*v*v*v;
@@ -290,10 +287,10 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	/* abab spin-block */
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
-	for (size_t it = 0; it < nij; it++) {
-		size_t i = ij[2*it+0];
-		size_t j = ij[2*it+1];
-	for (size_t k = 0; k < o; k++) {
+	for (it = 0; it < nij; it++) {
+		i = ij[2*it+0];
+		j = ij[2*it+1];
+	for (k = 0; k < o; k++) {
 
 	memset(t3ax1, 0, v*v*v*sizeof(double));
 
@@ -303,9 +300,9 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_1b(o,v,j,k,i,abc14,t2_abab,i_ovvv_abab);
 //	comp_t3a_abc_1b(o,v,i,k,j,abc15,t2_abab,i_ovvv_abab);
 //	comp_t3a_abc_1b(o,v,j,k,i,abc16,t2_abab,i_ovvv_abab);
-	for (size_t a = 1; a < v; a++) {
-	for (size_t b = 0; b < a; b++) {
-	for (size_t c = 0; c < v; c++) {
+	for (a = 1; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < v; c++) {
 		t3ax1[a*v*v+b*v+c] +=
 -abc11[a+b*v+c*v*v] //-t3a_ijkabc_11h(o,v,i,j,k,a,c,b,t2_aaaa,i_vvov_abab)
 +abc11[b+a*v+c*v*v] //+t3a_ijkabc_11h(o,v,i,j,k,b,c,a,t2_aaaa,i_vvov_abab)
@@ -319,9 +316,9 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	comp_t3a_abc_1a(o,v,k,i,j,abc18x,t2_abab,i_ovvv_aaaa);
 	comp_t3a_abc_2(o,v,i,k,j,abc21,t2_aaaa,i_oovo_abab);
 	comp_t3a_abc_2(o,v,j,k,i,abc22,t2_aaaa,i_oovo_abab);
-	for (size_t a = 1; a < v; a++) {
-	for (size_t b = 0; b < a; b++) {
-	for (size_t c = 0; c < v; c++) {
+	for (a = 1; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < v; c++) {
 		t3ax1[a*v*v+b*v+c] +=
 -abc17x[c+v*a*(a-1)/2+v*b] //-ijkabc_11h(o,v,k,j,i,c,a,b,t2_abab,i_vvov_aaaa)
 +abc18x[c+v*a*(a-1)/2+v*b] //+ijkabc_11h(o,v,k,i,j,c,a,b,t2_abab,i_vvov_aaaa)
@@ -335,9 +332,9 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 //	comp_t3a_abc_2(o,v,j,i,k,abc26,t2_abab,i_oovo_abab);
 	comp_t3a_abc_2(o,v,k,j,i,abc27,t2_abab,i_oovo_aaaa);
 //	comp_t3a_abc_2(o,v,k,j,i,abc28,t2_abab,i_oovo_aaaa);
-	for (size_t a = 1; a < v; a++) {
-	for (size_t b = 0; b < a; b++) {
-	for (size_t c = 0; c < v; c++) {
+	for (a = 1; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < v; c++) {
 		double t3ax, t3bx, dn;
 
 		t3ax1[a*v*v+b*v+c] +=
