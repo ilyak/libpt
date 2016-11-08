@@ -1,18 +1,18 @@
 # gcc with Netlib BLAS and MPI on OpenBSD
 CC= mpicc
-CFLAGS= -std=c99 -Wall -Wextra -g -O3 -DWITH_MPI
+CFLAGS= -Wall -Wextra -g -O3 -DWITH_MPI
 LDFLAGS= -L/usr/local/lib
 LIBS= -lblas -lg2c -lm
 
 # gcc with Netlib BLAS on OpenBSD
 #CC= cc
-#CFLAGS= -std=c99 -Wall -Wextra -g -O3
+#CFLAGS= -Wall -Wextra -g -O3
 #LDFLAGS= -L/usr/local/lib
 #LIBS= -lblas -lg2c -lm
 
 # icc with MKL and MPI on Linux
 #CC= mpicc
-#CFLAGS= -std=c99 -Wall -Wextra -g -O3 -mkl=sequential -fopenmp -DWITH_MPI
+#CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp -DWITH_MPI
 #LDFLAGS=
 #LIBS=
 
