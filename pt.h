@@ -18,7 +18,6 @@
 #define LIBPT_PT_H
 
 #include <stddef.h>
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
