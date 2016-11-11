@@ -124,7 +124,7 @@ comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static double
-cc_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
+cc_pt_aaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv)
 {
@@ -162,7 +162,6 @@ cc_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	abc2 = work + 2*v*v*v;
 	abc3 = work + 3*v*v*v;
 
-	/* aaaa spin-block */
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
 	for (it = 0; it < nij; it++) {
 		i = ij[2*it+0];
@@ -235,7 +234,7 @@ cc_pt_aaaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 }
 
 static double
-cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
+cc_pt_aab(size_t o, size_t v, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv)
 {
@@ -285,7 +284,6 @@ cc_pt_abab(size_t o, size_t v, const double *d_ov, const double *f_ov,
 	abc25 = work + 2*v*v*v;
 	abc27 = work + 3*v*v*v;
 
-	/* abab spin-block */
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
 	for (it = 0; it < nij; it++) {
 		i = ij[2*it+0];
@@ -382,11 +380,11 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	if (oa < 2 || va < 2)
 		return (0.0);
 
-	e_pt1 = cc_pt_aaaa(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
 //	wall = time(NULL);
 //	printf("aaaa %g\n", 2.0 * e_pt1);
 //	printf("cc_rpt: %s", ctime(&wall));
-	e_pt2 = cc_pt_abab(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+	e_pt2 = cc_pt_aab(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
 //	printf("abab %g\n", 2.0 * e_pt2);
 
 	return 2.0 * (e_pt1 + e_pt2);
@@ -402,5 +400,5 @@ cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 
 	if (o < 2 || v < 2)
 		return (0.0);
-	return cc_pt_aaaa(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+	return cc_pt_aaa(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
 }
