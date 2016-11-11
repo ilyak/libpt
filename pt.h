@@ -61,8 +61,10 @@ double cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
  * input data.
  *
  * Arguments:
- *   o - size of full occupied space
- *   v - size of full virtual space
+ *   oa - size of alpha spin-block occupied space
+ *   ob - size of beta spin-block occupied space
+ *   va - size of alpha spin-block virtual space
+ *   vb - size of beta spin-block virtual space
  *   d_ov - Delta matrix (size o*v)
  *   f_ov - Fock matrix (size o*v)
  *   t1 - CCSD T1 amplitudes (size o*v)
