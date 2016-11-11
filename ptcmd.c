@@ -52,8 +52,8 @@ xmalloc(size_t size)
 }
 
 static void
-load_test_header(const char *testpath, size_t *o, size_t *v, int *is_rpt,
-    double *e_ref)
+load_test_header(const char *testpath, size_t *oa, size_t *ob,
+    size_t *va, size_t *vb, int *is_rpt, double *e_ref)
 {
 	FILE *fp;
 	char buf[16];
@@ -63,8 +63,15 @@ load_test_header(const char *testpath, size_t *o, size_t *v, int *is_rpt,
 	if (fscanf(fp, "%12s", buf) != 1)
 		errx(1, "error parsing test file header");
 	*is_rpt = strcmp(buf, "unrestricted") != 0;
-	if (fscanf(fp, "%zu %zu %lf", o, v, e_ref) != 3)
+	if (fscanf(fp, "%zu %zu %lf", oa, va, e_ref) != 3)
 		errx(1, "error parsing test file header");
+	if (*is_rpt) {
+		*ob = *oa;
+		*vb = *va;
+	} else {
+		*ob = 0;
+		*vb = 0;
+	}
 	fclose(fp);
 }
 
@@ -89,15 +96,23 @@ read_next_double(FILE *fp)
 }
 
 static void
-load_test_data(const char *testpath, size_t o, size_t v, int is_rpt,
-    double *d_ov, double *f_ov, double *t1, double *t2, double *i_oovo,
-    double *i_oovv, double *i_ovvv)
+load_test_data(const char *testpath, size_t oa, size_t ob,
+    size_t va, size_t vb, int is_rpt, double *d_ov, double *f_ov,
+    double *t1, double *t2, double *i_oovo, double *i_oovv, double *i_ovvv)
 {
 	FILE *fp;
-	size_t i;
+	size_t i, o, v;
 
 	if ((fp = fopen(testpath, "r")) == NULL)
 		err(1, "unable to open %s", testpath);
+
+	if (is_rpt) {
+		o = oa;
+		v = va;
+	} else {
+		o = oa + ob;
+		v = va + vb;
+	}
 
 	skip_line(fp);
 	skip_line(fp);
@@ -172,11 +187,19 @@ random_double(void)
 }
 
 static void
-load_random_data(size_t o, size_t v, int is_rpt, double *d_ov,
-    double *f_ov, double *t1, double *t2, double *i_oovo,
+load_random_data(size_t oa, size_t ob, size_t va, size_t vb, int is_rpt,
+    double *d_ov, double *f_ov, double *t1, double *t2, double *i_oovo,
     double *i_oovv, double *i_ovvv)
 {
-	size_t i, nsp = is_rpt ? 2 : 1;
+	size_t i, o, v, nsp = is_rpt ? 2 : 1;
+
+	if (is_rpt) {
+		o = oa;
+		v = va;
+	} else {
+		o = oa + ob;
+		v = va + vb;
+	}
 
 	for (i = 0; i < o*v; i++) {
 		d_ov[i] = random_double();
@@ -209,7 +232,7 @@ load_random_data(size_t o, size_t v, int is_rpt, double *d_ov,
 int
 main(int argc, char **argv)
 {
-	size_t o = 0, v = 0, nsp;
+	size_t oa = 0, ob = 0, va = 0, vb = 0;
 	double e_pt = 0.0, e_ref = 0.0;
 	double *d_ov, *f_ov, *t1, *t2, *i_oovv, *i_oovo, *i_ovvv;
 	const char *errstr, *testpath = NULL;
@@ -223,7 +246,7 @@ main(int argc, char **argv)
 	while ((ch = getopt(argc, argv, "o:t:uv:")) != -1) {
 		switch (ch) {
 		case 'o':
-			o = strtonum(optarg, 1, INT_MAX, &errstr);
+			oa = strtonum(optarg, 1, INT_MAX, &errstr);
 			if (errstr)
 				errx(1, "bad o value: %s", errstr);
 			break;
@@ -234,7 +257,7 @@ main(int argc, char **argv)
 			is_rpt = 0;
 			break;
 		case 'v':
-			v = strtonum(optarg, 1, INT_MAX, &errstr);
+			va = strtonum(optarg, 1, INT_MAX, &errstr);
 			if (errstr)
 				errx(1, "bad v value: %s", errstr);
 			break;
@@ -247,22 +270,33 @@ main(int argc, char **argv)
 	argc -= optind;
 
 	if (testpath)
-		load_test_header(testpath, &o, &v, &is_rpt, &e_ref);
-	nsp = is_rpt ? 2 : 1;
+		load_test_header(testpath, &oa, &ob, &va, &vb, &is_rpt, &e_ref);
 
-	d_ov = xmalloc(o*v*sizeof(double));
-	f_ov = xmalloc(o*v*sizeof(double));
-	t1 = xmalloc(o*v*sizeof(double));
-	t2 = xmalloc(nsp*o*o*v*v*sizeof(double));
-	i_oovo = xmalloc(nsp*o*o*o*v*sizeof(double));
-	i_oovv = xmalloc(nsp*o*o*v*v*sizeof(double));
-	i_ovvv = xmalloc(o*v*(v*(v-1)/2+(nsp-1)*v*v)*sizeof(double));
+	if (is_rpt) {
+		d_ov = xmalloc(oa*va*sizeof(double));
+		f_ov = xmalloc(oa*va*sizeof(double));
+		t1 = xmalloc(oa*va*sizeof(double));
+		t2 = xmalloc(2*oa*oa*va*va*sizeof(double));
+		i_oovo = xmalloc(2*oa*oa*oa*va*sizeof(double));
+		i_oovv = xmalloc(2*oa*oa*va*va*sizeof(double));
+		i_ovvv = xmalloc(oa*va*(va*(va-1)/2+va*va)*sizeof(double));
+	} else {
+		size_t o = oa + ob;
+		size_t v = va + vb;
+		d_ov = xmalloc(o*v*sizeof(double));
+		f_ov = xmalloc(o*v*sizeof(double));
+		t1 = xmalloc(o*v*sizeof(double));
+		t2 = xmalloc(o*o*v*v*sizeof(double));
+		i_oovo = xmalloc(o*o*o*v*sizeof(double));
+		i_oovv = xmalloc(o*o*v*v*sizeof(double));
+		i_ovvv = xmalloc(o*v*v*(v-1)/2*sizeof(double));
+	}
 
 	if (testpath) {
-		load_test_data(testpath, o, v, is_rpt, d_ov, f_ov,
+		load_test_data(testpath, oa, ob, va, vb, is_rpt, d_ov, f_ov,
 		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	} else {
-		load_random_data(o, v, is_rpt, d_ov, f_ov,
+		load_random_data(oa, ob, va, vb, is_rpt, d_ov, f_ov,
 		    t1, t2, i_oovo, i_oovv, i_ovvv);
 	}
 
@@ -270,10 +304,10 @@ main(int argc, char **argv)
 		printf("starting calculation...\n");
 	wall = time(NULL);
 	if (is_rpt) {
-		e_pt = cc_rpt(o, v, d_ov, f_ov, t1, t2,
+		e_pt = cc_rpt(oa, va, d_ov, f_ov, t1, t2,
 		    i_oovo, i_oovv, i_ovvv);
 	} else {
-		e_pt = cc_upt(o, v, d_ov, f_ov, t1, t2,
+		e_pt = cc_upt(oa, ob, va, vb, d_ov, f_ov, t1, t2,
 		    i_oovo, i_oovv, i_ovvv);
 	}
 	wall = time(NULL) - wall;

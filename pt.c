@@ -393,10 +393,13 @@ cc_rpt(size_t o, size_t v, const double *d_ov, const double *f_ov,
 }
 
 double
-cc_upt(size_t o, size_t v, const double *d_ov, const double *f_ov,
-    const double *t1, const double *t2, const double *i_oovo,
-    const double *i_oovv, const double *i_ovvv)
+cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
+    const double *f_ov, const double *t1, const double *t2,
+    const double *i_oovo, const double *i_oovv, const double *i_ovvv)
 {
+	size_t o = oa + ob;
+	size_t v = va + vb;
+
 	if (o < 2 || v < 2)
 		return (0.0);
 	return cc_pt_aaaa(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
