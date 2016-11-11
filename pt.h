@@ -29,8 +29,8 @@ extern "C" {
  * input data.
  *
  * Arguments:
- *   o - size of spin-block occupied space
- *   v - size of spin-block virtual space
+ *   oa - size of alpha=beta spin-block occupied space
+ *   va - size of alpha=beta spin-block virtual space
  *   d_ov - Delta matrix (size o*v)
  *   f_ov - Fock matrix (size o*v)
  *   t1 - CCSD T1 amplitudes (size o*v)
@@ -50,7 +50,7 @@ extern "C" {
  * References:
  *   J. Chem. Phys. 98, 8718 (1993); http://dx.doi.org/10.1063/1.464480
  */
-double cc_rpt(size_t o, size_t v, const double *d_ov, const double *f_ov,
+double cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv);
 
