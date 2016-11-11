@@ -125,8 +125,8 @@ comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
 
 static double
 cc_pt_aaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
-    const double *t1, const double *t2, const double *i_oovo,
-    const double *i_oovv, const double *i_ovvv)
+    const double *t1, const double *t2_aaaa, const double *i_oovo_aaaa,
+    const double *i_oovv_aaaa, const double *i_ovvv_aaaa)
 {
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
@@ -138,10 +138,6 @@ cc_pt_aaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 #pragma omp parallel
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	const double *t2_aaaa = t2;
-	const double *i_oovo_aaaa = i_oovo;
-	const double *i_oovv_aaaa = i_oovv;
-	const double *i_ovvv_aaaa = i_ovvv;
 	double *work, *t3ax1, *abc1, *abc2, *abc3;
 
 	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
