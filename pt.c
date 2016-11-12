@@ -230,9 +230,12 @@ cc_pt_aaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 }
 
 static double
-cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
-    const double *f_ov, const double *t1, const double *t2,
-    const double *i_oovo, const double *i_oovv, const double *i_ovvv)
+cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
+    const double *d_ov, const double *f_ov, const double *t1,
+    const double *t2_aaaa, const double *t2_abab,
+    const double *i_oovo_aaaa, const double *i_oovo_abab,
+    const double *i_oovv_aaaa, const double *i_oovv_abab,
+    const double *i_ovvv_aaaa, const double *i_ovvv_abab)
 {
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
@@ -244,14 +247,6 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 #pragma omp parallel
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	const double *t2_aaaa = t2;
-	const double *t2_abab = t2 + oa*oa*va*va;
-	const double *i_ovvv_aaaa = i_ovvv;
-	const double *i_ovvv_abab = i_ovvv + oa*va*va*(va-1)/2;
-	const double *i_oovo_aaaa = i_oovo;
-	const double *i_oovo_abab = i_oovo + oa*oa*oa*va;
-	const double *i_oovv_aaaa = i_oovv;
-	const double *i_oovv_abab = i_oovv + oa*oa*va*va;
 	double *work, *abc11, *abc13, *abc14, *abc17x, *abc18x;
 	double *abc21, *abc22, *abc23, *abc25, *abc27, *t3ax1;
 
@@ -372,16 +367,26 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 {
 	double e_pt1, e_pt2;
 //	time_t wall;
+	const double *t2_aaaa = t2;
+	const double *t2_abab = t2 + oa*oa*va*va;
+	const double *i_ovvv_aaaa = i_ovvv;
+	const double *i_ovvv_abab = i_ovvv + oa*va*va*(va-1)/2;
+	const double *i_oovo_aaaa = i_oovo;
+	const double *i_oovo_abab = i_oovo + oa*oa*oa*va;
+	const double *i_oovv_aaaa = i_oovv;
+	const double *i_oovv_abab = i_oovv + oa*oa*va*va;
 
 	if (oa < 2 || va < 2)
 		return (0.0);
 
-	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
+	     i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
 //	wall = time(NULL);
 //	printf("aaaa %g\n", 2.0 * e_pt1);
 //	printf("cc_rpt: %s", ctime(&wall));
-	e_pt2 = cc_pt_aab(oa, oa, va, va, d_ov, f_ov, t1, t2,
-	    i_oovo, i_oovv, i_ovvv);
+	e_pt2 = cc_pt_aab(oa, oa, va, va, d_ov, f_ov, t1,
+	    t2_aaaa, t2_abab, i_oovo_aaaa, i_oovo_abab,
+	    i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab);
 //	printf("abab %g\n", 2.0 * e_pt2);
 
 	return 2.0 * (e_pt1 + e_pt2);
@@ -398,4 +403,9 @@ cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 	if (o < 2 || v < 2)
 		return (0.0);
 	return cc_pt_aaa(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+
+	// e1 = cc_pt_aaa(aaaa);
+	// e2 = cc_pt_aaa(bbbb);
+	// e3 = cc_pt_aab(aaaa, abab);
+	// e4 = cc_pt_aab(bbbb, baba);
 }
