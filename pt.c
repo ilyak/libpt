@@ -300,11 +300,11 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 +abc27[b+c*va+a*va*va];//+t3a_ijkabc_21h(o,v,k,j,i,c,b,a,t2t_abab,i_oovo_aaaa)
 
 		t3bx =
-	+comp_t3b_ijkabc(oa,va,i,j,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
-	-comp_t3b_ijkabc(oa,va,i,j,k,b,a,c,t1,i_oovv_abab,f_ov,t2_abab)
-	-comp_t3b_ijkabc(oa,va,j,i,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
-	+comp_t3b_ijkabc(oa,va,j,i,k,b,a,c,t1,i_oovv_abab,f_ov,t2_abab)
-	+comp_t3b_ijkabc(oa,va,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
++comp_t3b_ijkabc(oa,va,i,j,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
+-comp_t3b_ijkabc(oa,va,i,j,k,b,a,c,t1,i_oovv_abab,f_ov,t2_abab)
+-comp_t3b_ijkabc(oa,va,j,i,k,a,b,c,t1,i_oovv_abab,f_ov,t2_abab)
++comp_t3b_ijkabc(oa,va,j,i,k,b,a,c,t1,i_oovv_abab,f_ov,t2_abab)
++comp_t3b_ijkabc(oa,va,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
 
 		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
 		t3ax = t3ax1[a*va*va+b*va+c];
