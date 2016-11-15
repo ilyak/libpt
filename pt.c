@@ -17,8 +17,6 @@
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <stdio.h>
-//#include <time.h>
 
 #ifdef WITH_MPI
 #include <mpi.h>
@@ -363,7 +361,6 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
     const double *i_oovv, const double *i_ovvv)
 {
 	double e_pt1, e_pt2;
-//	time_t wall;
 	const double *t2_aaaa = t2;
 	const double *t2_abab = t2 + oa*oa*va*va;
 	const double *i_ovvv_aaaa = i_ovvv;
@@ -378,13 +375,9 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 
 	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
 	     i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
-//	wall = time(NULL);
-//	printf("aaaa %g\n", 2.0 * e_pt1);
-//	printf("cc_rpt: %s", ctime(&wall));
 	e_pt2 = cc_pt_aab(oa, oa, va, va, d_ov, f_ov, t1,
 	    t2_aaaa, t2_abab, i_oovo_aaaa, i_oovo_abab,
 	    i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab);
-//	printf("abab %g\n", 2.0 * e_pt2);
 
 	return 2.0 * (e_pt1 + e_pt2);
 }
