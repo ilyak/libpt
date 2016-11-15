@@ -27,12 +27,12 @@
 //#define D_OV(i, a) d_ov[i*v+a]
 //#define F_OV(i, a) f_ov[i*v+a]
 //#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
-#define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
-#define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
+//#define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
+//#define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
 //#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
 //#define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
 //#define T1(i, a) t1[i*v+a]
-#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
+//#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
 //#define T2T(a, b, i, j) t2t[a*v*o*o+b*o*o+i*o+j]
 //#define T3AABC(i, j, k) t3a[0*o*o*o+i*o*o+j*o+k]
 //#define T3ACBA(i, j, k) t3a[1*o*o*o+i*o*o+j*o+k]
@@ -66,7 +66,7 @@ static void
 comp_t3a_abc_1a(size_t o, size_t v, size_t i, size_t j, size_t k,
     double *abc, const double *t2, const double *i_ovvv)
 {
-	const double *t2_p = &T2(i,j,0,0);
+	const double *t2_p = &t2[i*o*v*v+j*v*v];
 	const double *i_ovvv_p = &i_ovvv[k*v*v*(v-1)/2];
 	int lda = v;
 	int ldb = v*(v-1)/2; /* for aaaa block with vv anti-symmetry */
@@ -81,7 +81,7 @@ static void
 comp_t3a_abc_1b(size_t o, size_t v, size_t i, size_t j, size_t k,
     double *abc, const double *t2, const double *i_ovvv)
 {
-	const double *t2_p = &T2(i,j,0,0);
+	const double *t2_p = &t2[i*o*v*v+j*v*v];
 	const double *i_ovvv_p = &i_ovvv[k*v*v*v];
 	int lda = v;
 	int ldb = v*v; /* for abab block; no vv anti-symmetry */
@@ -96,8 +96,8 @@ static void
 comp_t3a_abc_2(size_t o, size_t v, size_t i, size_t j, size_t k,
     double *abc, const double *t2, const double *i_oovo)
 {
-	const double *t2_p = &T2(i,0,0,0);
-	const double *i_oovo_p = &I_OOVO(j,k,0,0);
+	const double *t2_p = &t2[i*o*v*v];
+	const double *i_oovo_p = &i_oovo[j*o*o*v+k*o*v];
 	int lda = v*v;
 	int ldb = o;
 
@@ -114,8 +114,10 @@ comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
 {
 	double t1_ia = t1[i*v+a];
 	double f_ov_ia = f_ov[i*v+a];
+	double t2_jkbc = t2[j*o*v*v+k*v*v+b*v+c];
+	double i_oovv_jkbc = i_oovv[j*o*v*v+k*v*v+b*v+c];
 
-	return t1_ia*I_OOVV(j,k,b,c) + f_ov_ia*T2(j,k,b,c);
+	return t1_ia*i_oovv_jkbc + f_ov_ia*t2_jkbc;
 }
 
 static double
