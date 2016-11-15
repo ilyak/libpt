@@ -374,7 +374,7 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		return (0.0);
 
 	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
-	     i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
+	    i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
 	e_pt2 = cc_pt_aab(oa, oa, va, va, d_ov, f_ov, t1,
 	    t2_aaaa, t2_abab, i_oovo_aaaa, i_oovo_abab,
 	    i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab);
