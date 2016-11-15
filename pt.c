@@ -24,32 +24,6 @@
 
 #include "pt.h"
 
-//#define D_OV(i, a) d_ov[i*v+a]
-//#define F_OV(i, a) f_ov[i*v+a]
-//#define I_OOOV(i, j, k, a) i_ooov[i*o*o*v+j*o*v+k*v+a]
-//#define I_OOVO(i, j, a, k) i_oovo[i*o*o*v+j*o*v+a*o+k]
-//#define I_OOVV(i, j, a, b) i_oovv[i*o*v*v+j*v*v+a*v+b]
-//#define I_OVVV(i, a, b, c) i_ovvv[i*v*v*v+a*v*v+b*v+c]
-//#define I_VVOV(b, c, i, a) i_vvov[b*v*o*v+c*o*v+i*v+a]
-//#define T1(i, a) t1[i*v+a]
-//#define T2(i, j, a, b) t2[i*o*v*v+j*v*v+a*v+b]
-//#define T2T(a, b, i, j) t2t[a*v*o*o+b*o*o+i*o+j]
-//#define T3AABC(i, j, k) t3a[0*o*o*o+i*o*o+j*o+k]
-//#define T3ACBA(i, j, k) t3a[1*o*o*o+i*o*o+j*o+k]
-//#define T3AACB(i, j, k) t3a[2*o*o*o+i*o*o+j*o+k]
-//#define T3BABC(i, j, k) t3b[0*o*o*o+i*o*o+j*o+k]
-//#define T3BBAC(i, j, k) t3b[1*o*o*o+i*o*o+j*o+k]
-//#define T3BCBA(i, j, k) t3b[2*o*o*o+i*o*o+j*o+k]
-//#define OVX(i, j, k) ovx[i*v*x+j*x+k]
-//#define VVX(i, j, k) vvx[i*v*x+j*x+k]
-//#define MOV(i, a) mov[i*v+a]
-//#define MOO1(i, j) moo1[i*o+j]
-//#define MOO2(i, j) moo2[i*o+j]
-//#define MOOO(i, j, k) mooo[i*o*o+j*o+k]
-//#define MVOO(a, i, j) mvoo[a*o*o+i*o+j]
-//#define MOX(i, j) mox[i*x+j]
-//#define MXV(i, j) mxv[i*v+j]
-
 void dgemm_(char *, char *, int *, int *, int *, double *, double *,
     int *, double *, int *, double *, double *, int *);
 
