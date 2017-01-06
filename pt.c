@@ -113,12 +113,13 @@ cc_pt_aaa(size_t o, size_t v, const double *d_ov, const double *f_ov,
 
 	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
-	for (i = 0, it = 0; i < o; i++)
-	for (j = i+1; j < o; j++, it++) {
-		if (it % size == rank) {
-			ij[2*nij+0] = i;
-			ij[2*nij+1] = j;
-			nij++;
+	for (i = 0, it = 0; i < o; i++) {
+		for (j = i+1; j < o; j++, it++) {
+			if (it % size == rank) {
+				ij[2*nij+0] = i;
+				ij[2*nij+1] = j;
+				nij++;
+			}
 		}
 	}
 
@@ -223,12 +224,13 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 
 	if ((ij = malloc(oa*(oa-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
-	for (i = 0, it = 0; i < oa; i++)
-	for (j = i+1; j < oa; j++, it++) {
-		if (it % size == rank) {
-			ij[2*nij+0] = i;
-			ij[2*nij+1] = j;
-			nij++;
+	for (i = 0, it = 0; i < oa; i++) {
+		for (j = i+1; j < oa; j++, it++) {
+			if (it % size == rank) {
+				ij[2*nij+0] = i;
+				ij[2*nij+1] = j;
+				nij++;
+			}
 		}
 	}
 
