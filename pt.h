@@ -29,16 +29,16 @@ extern "C" {
  * input data.
  *
  * Arguments:
- *   oa - size of alpha=beta spin-block occupied space
- *   va - size of alpha=beta spin-block virtual space
- *   d_ov - Delta matrix (size o*v)
- *   f_ov - Fock matrix (size o*v)
- *   t1 - CCSD T1 amplitudes (size o*v)
- *   t2 - CCSD T2 amplitudes, aaaa and abab blocks (size 2*o*o*v*v)
- *   i_oovo - OOOV integrals transposed, aaaa and abab blocks (size 2*o*o*o*v)
- *   i_oovv - OOVV integrals, aaaa and abab blocks (size 2*o*o*v*v)
+ *   oa - size of alpha (== beta) spin-block occupied space
+ *   va - size of alpha (== beta) spin-block virtual space
+ *   d_ov - Delta matrix (size oa*va)
+ *   f_ov - Fock matrix (size oa*va)
+ *   t1 - CCSD T1 amplitudes (size oa*va)
+ *   t2 - CCSD T2 amplitudes, aaaa/abab blocks (size 2*oa*oa*va*va)
+ *   i_oovo - OOOV integrals transposed, aaaa/abab blocks (size 2*oa*oa*oa*va)
+ *   i_oovv - OOVV integrals, aaaa/abab blocks (size 2*oa*oa*va*va)
  *   i_ovvv - OVVV integrals, aaaa block with vv symmetry followed by full
- *       abab block (size o*v*v*(v-1)/2+o*v*v*v)
+ *       abab block (total size oa*va*va*(va-1)/2+oa*va*va*va)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
