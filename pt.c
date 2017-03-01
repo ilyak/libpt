@@ -82,6 +82,22 @@ comp_t3a_abc_2(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static double
+i_jk_a_bc_ov_oovv(size_t o, size_t v, const double *ov, const double *oovv,
+    size_t i, size_t j, size_t k, size_t a, size_t b, size_t c)
+{
+	return
+	    +ov[i*v+a]*oovv[j*o*v*v+k*v*v+b*v+c]
+	    -ov[j*v+a]*oovv[i*o*v*v+k*v*v+b*v+c]
+	    -ov[k*v+a]*oovv[j*o*v*v+i*v*v+b*v+c]
+	    -ov[i*v+b]*oovv[j*o*v*v+k*v*v+a*v+c]
+	    +ov[j*v+b]*oovv[i*o*v*v+k*v*v+a*v+c]
+	    +ov[k*v+b]*oovv[j*o*v*v+i*v*v+a*v+c]
+	    -ov[i*v+c]*oovv[j*o*v*v+k*v*v+b*v+a]
+	    +ov[j*v+c]*oovv[i*o*v*v+k*v*v+b*v+a]
+	    +ov[k*v+c]*oovv[j*o*v*v+i*v*v+b*v+a];
+}
+
+static double
 comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
     size_t a, size_t b, size_t c, const double *t1, const double *i_oovv,
     const double *f_ov, const double *t2)
@@ -92,6 +108,21 @@ comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
 	double i_oovv_jkbc = i_oovv[j*o*v*v+k*v*v+b*v+c];
 
 	return t1_ia*i_oovv_jkbc + f_ov_ia*t2_jkbc;
+}
+
+static double
+permute_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
+    const double *abc3, size_t a, size_t b, size_t c)
+{
+	return +abc1[a*v*v+b*v+c]
+	       -abc1[b*v*v+a*v+c]
+	       -abc1[c*v*v+b*v+a]
+	       -abc2[a*v*v+b*v+c]
+	       +abc2[b*v*v+a*v+c]
+	       +abc2[c*v*v+b*v+a]
+	       -abc3[a*v*v+b*v+c]
+	       +abc3[b*v*v+a*v+c]
+	       +abc3[c*v*v+b*v+a];
 }
 
 static double
@@ -165,29 +196,12 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		double t3ax, t3bx, dn;
 
 		t3ax1[a*va*va+b*va+c] +=
-+abc1[b+a*va+c*va*va] //+t3a_2(oa,va,i,j,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
--abc1[c+a*va+b*va*va] //-t3a_2(oa,va,j,i,k,a,b,c,t2t_aaaa,i_oovo_aaaa)
--abc1[b+c*va+a*va*va] //-t3a_2(oa,va,k,j,i,a,b,c,t2t_aaaa,i_oovo_aaaa)
--abc2[b+a*va+c*va*va] //-t3a_2(oa,va,i,j,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
-+abc2[c+a*va+b*va*va] //+t3a_2(oa,va,j,i,k,a,c,b,t2t_aaaa,i_oovo_aaaa)
-+abc2[b+c*va+a*va*va] //+t3a_2(oa,va,k,j,i,a,c,b,t2t_aaaa,i_oovo_aaaa)
--abc3[b+a*va+c*va*va] //-t3a_2(oa,va,i,j,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
-+abc3[c+a*va+b*va*va] //+t3a_2(oa,va,j,i,k,c,b,a,t2t_aaaa,i_oovo_aaaa)
-+abc3[b+c*va+a*va*va];//+t3a_2(oa,va,k,j,i,c,b,a,t2t_aaaa,i_oovo_aaaa)
-
-		t3bx =
-+comp_t3b_ijkabc(oa,va,i,j,k,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
--comp_t3b_ijkabc(oa,va,j,i,k,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
--comp_t3b_ijkabc(oa,va,k,j,i,a,b,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
--comp_t3b_ijkabc(oa,va,i,j,k,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
-+comp_t3b_ijkabc(oa,va,j,i,k,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
-+comp_t3b_ijkabc(oa,va,k,j,i,b,a,c,t1,i_oovv_aaaa,f_ov,t2_aaaa)
--comp_t3b_ijkabc(oa,va,i,j,k,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa)
-+comp_t3b_ijkabc(oa,va,j,i,k,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa)
-+comp_t3b_ijkabc(oa,va,k,j,i,c,b,a,t1,i_oovv_aaaa,f_ov,t2_aaaa);
+		    permute_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
 
 		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
 		t3ax = t3ax1[a*va*va+b*va+c];
+		t3bx = +i_jk_a_bc_ov_oovv(oa,va,t1,i_oovv_aaaa,i,j,k,a,b,c)
+		       +i_jk_a_bc_ov_oovv(oa,va,f_ov,t2_aaaa,i,j,k,a,b,c);
 		e_pt += t3ax * (t3ax-t3bx) / dn;
 	}}}
 	}}
@@ -366,4 +380,117 @@ cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 	// e2 = cc_pt_aaa(bbbb);
 	// e3 = cc_pt_aab(aaaa, abab);
 	// e4 = cc_pt_aab(bbbb, baba);
+}
+
+double
+cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
+    const double *l1, const double *t2, const double *l2,
+    const double *i_oovv, const double *i1_ovov, const double *i2_oovo,
+    const double *i3_ovvv, const double *i4_oooo, const double *i6_oovo,
+    const double *i7_ovvv)
+{
+	double e_pt = 0.0;
+	int rank = 0, size = 1;
+
+#ifdef WITH_MPI
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+#endif
+#pragma omp parallel
+{
+	size_t i, j, k, a, b, c, it, *ij, nij = 0;
+	double *work, *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3;
+
+	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
+		err(1, "libpt malloc ij");
+	for (i = 0, it = 0; i < o; i++) {
+		for (j = i+1; j < o; j++, it++) {
+			if (it % size == rank) {
+				ij[2*nij+0] = i;
+				ij[2*nij+1] = j;
+				nij++;
+			}
+		}
+	}
+
+	if ((work = malloc(5*v*v*v*sizeof(double))) == NULL)
+		err(1, "libpt malloc work");
+	sigvvvl = work;
+	sigvvvr = work + v*v*v;
+	abc1 = work + 2*v*v*v;
+	abc2 = work + 3*v*v*v;
+	abc3 = work + 4*v*v*v;
+
+#pragma omp for reduction(+:e_pt) schedule(dynamic)
+	for (it = 0; it < nij; it++) {
+		i = ij[2*it+0];
+		j = ij[2*it+1];
+	for (k = j+1; k < o; k++) {
+
+	comp_t3a_abc_1b(o,v,i,j,k,abc1,l2,i7_ovvv);
+	comp_t3a_abc_1b(o,v,i,k,j,abc2,l2,i7_ovvv);
+	comp_t3a_abc_1b(o,v,j,k,i,abc3,l2,i7_ovvv);
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < b; c++) {
+		sigvvvl[a*v*v+b*v+c] +=
+		    permute_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+	}}}
+
+	comp_t3a_abc_2(o,v,i,j,k,abc1,l2,i6_oovo);
+	comp_t3a_abc_2(o,v,i,k,j,abc2,l2,i6_oovo);
+	comp_t3a_abc_2(o,v,j,k,i,abc3,l2,i6_oovo);
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < b; c++) {
+		sigvvvl[a*v*v+b*v+c] +=
+		    permute_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+	}}}
+
+	comp_t3a_abc_1b(o,v,i,j,k,abc1,t2,i3_ovvv);
+	comp_t3a_abc_1b(o,v,i,k,j,abc2,t2,i3_ovvv);
+	comp_t3a_abc_1b(o,v,j,k,i,abc3,t2,i3_ovvv);
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < b; c++) {
+		sigvvvr[a*v*v+b*v+c] +=
+		    permute_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+	}}}
+
+	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2_oovo);
+	comp_t3a_abc_2(o,v,i,k,j,abc2,t2,i2_oovo);
+	comp_t3a_abc_2(o,v,j,k,i,abc3,t2,i2_oovo);
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < b; c++) {
+		sigvvvr[a*v*v+b*v+c] +=
+		    permute_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+	}}}
+
+	gemm('T', 'T', v, v*v, v, 1.0, &t2[0], v, &f_ov[0], v*v, 1.0,
+	    sigvvvr, v);
+	gemm('T', 'T', v, v*v, v, 1.0, &t2[0], v, &f_ov[0], v*v, 1.0,
+	    sigvvvr, v);
+
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < b; c++) {
+		double l1t;
+		double dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
+		double sigvvvl1 = sigvvvl[a*v*v+b*v+c];
+		double sigvvvr1 = sigvvvr[a*v*v+b*v+c];
+
+		l1t = +i_jk_a_bc_ov_oovv(o,v,l1,i_oovv,i,j,k,a,b,c)
+		      +i_jk_a_bc_ov_oovv(o,v,f_ov,l2,i,j,k,a,b,c);
+		e_pt += (sigvvvl1+l1t) * sigvvvr1 / dn;
+	}}}
+	}}
+	free(ij);
+	free(work);
+}
+#ifdef WITH_MPI
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
+	    MPI_SUM, MPI_COMM_WORLD);
+#endif
+	return (e_pt);
 }
