@@ -85,16 +85,15 @@ static double
 i_jk_a_bc_ov_oovv(size_t o, size_t v, const double *ov, const double *oovv,
     size_t i, size_t j, size_t k, size_t a, size_t b, size_t c)
 {
-	return
-	    +ov[i*v+a]*oovv[j*o*v*v+k*v*v+b*v+c]
-	    -ov[j*v+a]*oovv[i*o*v*v+k*v*v+b*v+c]
-	    -ov[k*v+a]*oovv[j*o*v*v+i*v*v+b*v+c]
-	    -ov[i*v+b]*oovv[j*o*v*v+k*v*v+a*v+c]
-	    +ov[j*v+b]*oovv[i*o*v*v+k*v*v+a*v+c]
-	    +ov[k*v+b]*oovv[j*o*v*v+i*v*v+a*v+c]
-	    -ov[i*v+c]*oovv[j*o*v*v+k*v*v+b*v+a]
-	    +ov[j*v+c]*oovv[i*o*v*v+k*v*v+b*v+a]
-	    +ov[k*v+c]*oovv[j*o*v*v+i*v*v+b*v+a];
+	return +ov[i*v+a]*oovv[j*o*v*v+k*v*v+b*v+c]
+	       -ov[j*v+a]*oovv[i*o*v*v+k*v*v+b*v+c]
+	       -ov[k*v+a]*oovv[j*o*v*v+i*v*v+b*v+c]
+	       -ov[i*v+b]*oovv[j*o*v*v+k*v*v+a*v+c]
+	       +ov[j*v+b]*oovv[i*o*v*v+k*v*v+a*v+c]
+	       +ov[k*v+b]*oovv[j*o*v*v+i*v*v+a*v+c]
+	       -ov[i*v+c]*oovv[j*o*v*v+k*v*v+b*v+a]
+	       +ov[j*v+c]*oovv[i*o*v*v+k*v*v+b*v+a]
+	       +ov[k*v+c]*oovv[j*o*v*v+i*v*v+b*v+a];
 }
 
 static double
@@ -111,7 +110,7 @@ comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static double
-permute_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
+asymm_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
     const double *abc3, size_t a, size_t b, size_t c)
 {
 	return +abc1[a*v*v+b*v+c]
@@ -123,6 +122,16 @@ permute_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
 	       -abc3[a*v*v+b*v+c]
 	       +abc3[b*v*v+a*v+c]
 	       +abc3[c*v*v+b*v+a];
+}
+
+static void
+comp_t2_t2_fov(size_t o, size_t v, size_t i, size_t j, size_t k,
+    double *abc, double *tov, const double *t2, const double *fov)
+{
+	gemm('N', 'N', v, o, v, 1.0, &t2[i*o*v*v+j*v*v], v*v,
+	    &fov[0], v, 0, tov, v);
+	gemm('N', 'N', v*v, v, o, 1.0, &t2[k*o*v*v], v,
+	    &tov[0], v, 0, abc, v*v);
 }
 
 static double
@@ -196,7 +205,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		double t3ax, t3bx, dn;
 
 		t3ax1[a*va*va+b*va+c] +=
-		    permute_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
+		    asymm_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
 
 		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
 		t3ax = t3ax1[a*va*va+b*va+c];
@@ -399,7 +408,7 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 #pragma omp parallel
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	double *work, *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3;
+	double *work, *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3, *tov;
 
 	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
@@ -413,13 +422,14 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 		}
 	}
 
-	if ((work = malloc(5*v*v*v*sizeof(double))) == NULL)
+	if ((work = malloc((5*v*v*v+o*v)*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
 	sigvvvl = work;
 	sigvvvr = work + v*v*v;
 	abc1 = work + 2*v*v*v;
 	abc2 = work + 3*v*v*v;
 	abc3 = work + 4*v*v*v;
+	tov = work + 5*v*v*v;
 
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
 	for (it = 0; it < nij; it++) {
@@ -434,7 +444,7 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		sigvvvl[a*v*v+b*v+c] +=
-		    permute_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
 	comp_t3a_abc_2(o,v,i,j,k,abc1,l2,i6_oovo);
@@ -444,7 +454,7 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		sigvvvl[a*v*v+b*v+c] +=
-		    permute_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
 	comp_t3a_abc_1b(o,v,i,j,k,abc1,t2,i3_ovvv);
@@ -454,7 +464,7 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		sigvvvr[a*v*v+b*v+c] +=
-		    permute_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
 	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2_oovo);
@@ -464,13 +474,18 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		sigvvvr[a*v*v+b*v+c] +=
-		    permute_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	gemm('T', 'T', v, v*v, v, 1.0, &t2[0], v, &f_ov[0], v*v, 1.0,
-	    sigvvvr, v);
-	gemm('T', 'T', v, v*v, v, 1.0, &t2[0], v, &f_ov[0], v*v, 1.0,
-	    sigvvvr, v);
+	comp_t2_t2_fov(o,v,i,j,k,abc1,tov,t2,f_ov);
+	comp_t2_t2_fov(o,v,k,j,i,abc2,tov,t2,f_ov);
+	comp_t2_t2_fov(o,v,i,k,j,abc3,tov,t2,f_ov);
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < b; c++) {
+		sigvvvr[a*v*v+b*v+c] +=
+		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+	}}}
 
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
