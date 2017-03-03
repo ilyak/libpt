@@ -18,11 +18,11 @@ LIBS= -lblas -lg2c -lm
 
 all: testpt testft
 
-testpt: pt.o testpt.o strtonum.o
-	$(CC) -o $@ $(CFLAGS) $> $(LDFLAGS) $(LIBS)
+testpt: pt.o testpt.o
+	$(CC) -o $@ $(CFLAGS) pt.o testpt.o $(LDFLAGS) $(LIBS)
 
 testft: pt.o testft.o
-	$(CC) -o $@ $(CFLAGS) $> $(LDFLAGS) $(LIBS)
+	$(CC) -o $@ $(CFLAGS) pt.o testft.o $(LDFLAGS) $(LIBS)
 
 check: testpt testft
 	@echo rpt01 && ./testpt -t tests/rpt01.dat && echo success
