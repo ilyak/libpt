@@ -124,6 +124,21 @@ asymm_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
 	       +abc3[c*v*v+b*v+a];
 }
 
+static double
+asymm_ijk_ab_c(size_t v, const double *abc1, const double *abc2,
+    const double *abc3, size_t a, size_t b, size_t c)
+{
+	return +abc1[a*v*v+b*v+c]
+	       -abc1[a*v*v+c*v+b]
+	       -abc1[c*v*v+b*v+a]
+	       -abc2[a*v*v+b*v+c]
+	       +abc2[a*v*v+c*v+b]
+	       +abc2[c*v*v+b*v+a]
+	       -abc3[a*v*v+b*v+c]
+	       +abc3[a*v*v+c*v+b]
+	       +abc3[c*v*v+b*v+a];
+}
+
 static void
 comp_t2_t2_fov(size_t o, size_t v, size_t i, size_t j, size_t k,
     double *abc, double *tov, const double *t2, const double *fov)
@@ -393,9 +408,8 @@ cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 
 double
 cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
-    const double *l1, const double *t2, const double *l2,
-    const double *i_oovv, const double *i1_ovov, const double *i2_oovo,
-    const double *i3_ovvv, const double *i4_oooo, const double *i6_oovo,
+    const double *l1, const double *t2, const double *l2, const double *i_oovv,
+    const double *i2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv)
 {
 	double e_pt = 0.0;
@@ -422,7 +436,7 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 		}
 	}
 
-	if ((work = malloc((5*v*v*v+o*v)*sizeof(double))) == NULL)
+	if ((work = malloc((5*v*v*v+o*v)*sizeof(*work))) == NULL)
 		err(1, "libpt malloc work");
 	sigvvvl = work;
 	sigvvvr = work + v*v*v;
@@ -437,9 +451,12 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 		j = ij[2*it+1];
 	for (k = j+1; k < o; k++) {
 
+	memset(sigvvvl, 0, v*v*v*sizeof(*sigvvvl));
+	memset(sigvvvr, 0, v*v*v*sizeof(*sigvvvr));
+
 	comp_t3a_abc_1b(o,v,i,j,k,abc1,l2,i7_ovvv);
-	comp_t3a_abc_1b(o,v,i,k,j,abc2,l2,i7_ovvv);
-	comp_t3a_abc_1b(o,v,j,k,i,abc3,l2,i7_ovvv);
+	comp_t3a_abc_1b(o,v,k,j,i,abc2,l2,i7_ovvv);
+	comp_t3a_abc_1b(o,v,i,k,j,abc3,l2,i7_ovvv);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
@@ -448,18 +465,18 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	}}}
 
 	comp_t3a_abc_2(o,v,i,j,k,abc1,l2,i6_oovo);
-	comp_t3a_abc_2(o,v,i,k,j,abc2,l2,i6_oovo);
-	comp_t3a_abc_2(o,v,j,k,i,abc3,l2,i6_oovo);
+	comp_t3a_abc_2(o,v,j,i,k,abc2,l2,i6_oovo);
+	comp_t3a_abc_2(o,v,k,j,i,abc3,l2,i6_oovo);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		sigvvvl[a*v*v+b*v+c] +=
+		sigvvvl[a*v*v+b*v+c] -=
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
 	comp_t3a_abc_1b(o,v,i,j,k,abc1,t2,i3_ovvv);
-	comp_t3a_abc_1b(o,v,i,k,j,abc2,t2,i3_ovvv);
-	comp_t3a_abc_1b(o,v,j,k,i,abc3,t2,i3_ovvv);
+	comp_t3a_abc_1b(o,v,k,j,i,abc2,t2,i3_ovvv);
+	comp_t3a_abc_1b(o,v,i,k,j,abc3,t2,i3_ovvv);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
@@ -468,12 +485,12 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	}}}
 
 	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2_oovo);
-	comp_t3a_abc_2(o,v,i,k,j,abc2,t2,i2_oovo);
-	comp_t3a_abc_2(o,v,j,k,i,abc3,t2,i2_oovo);
+	comp_t3a_abc_2(o,v,j,i,k,abc2,t2,i2_oovo);
+	comp_t3a_abc_2(o,v,k,j,i,abc3,t2,i2_oovo);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		sigvvvr[a*v*v+b*v+c] +=
+		sigvvvr[a*v*v+b*v+c] -=
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
@@ -483,21 +500,16 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
+		double l1t, sigvvvl1, sigvvvr1;
+		double dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
+
 		sigvvvr[a*v*v+b*v+c] +=
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
-	}}}
-
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < b; c++) {
-		double l1t;
-		double dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
-		double sigvvvl1 = sigvvvl[a*v*v+b*v+c];
-		double sigvvvr1 = sigvvvr[a*v*v+b*v+c];
-
 		l1t = +i_jk_a_bc_ov_oovv(o,v,l1,i_oovv,i,j,k,a,b,c)
 		      +i_jk_a_bc_ov_oovv(o,v,f_ov,l2,i,j,k,a,b,c);
-		e_pt += (sigvvvl1+l1t) * sigvvvr1 / dn;
+		sigvvvl1 = sigvvvl[a*v*v+b*v+c];
+		sigvvvr1 = sigvvvr[a*v*v+b*v+c];
+		e_pt += (sigvvvl1 + l1t) * sigvvvr1 / dn;
 	}}}
 	}}
 	free(ij);
