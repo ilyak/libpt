@@ -16,43 +16,43 @@ LIBS= -lblas -lg2c -lm
 #LDFLAGS=
 #LIBS=
 
-ALL_O= pt.o ptcmd.o strtonum.o
-RM= rm -f
+all: testpt testft
 
-all: pt
+testpt: pt.o testpt.o strtonum.o
+	$(CC) -o $@ $(CFLAGS) $> $(LDFLAGS) $(LIBS)
 
-pt: $(ALL_O)
-	$(CC) -o $@ $(CFLAGS) $(ALL_O) $(LDFLAGS) $(LIBS)
+testft: pt.o testft.o
+	$(CC) -o $@ $(CFLAGS) $> $(LDFLAGS) $(LIBS)
 
-check: pt
-	@echo rpt01 && ./pt -t tests/rpt01.dat && echo success
-	@echo rpt02 && ./pt -t tests/rpt02.dat && echo success
-	@echo rpt03 && ./pt -t tests/rpt03.dat && echo success
-	@echo rpt04 && ./pt -t tests/rpt04.dat && echo success
-	@echo rpt05 && ./pt -t tests/rpt05.dat && echo success
-	@echo rpt06 && ./pt -t tests/rpt06.dat && echo success
-	@echo rpt07 && ./pt -t tests/rpt07.dat && echo success
-	@echo rpt08 && ./pt -t tests/rpt08.dat && echo success
-	@echo rpt09 && ./pt -t tests/rpt09.dat && echo success
-	@echo upt01 && ./pt -t tests/upt01.dat && echo success
-	@echo upt02 && ./pt -t tests/upt02.dat && echo success
-	@echo upt03 && ./pt -t tests/upt03.dat && echo success
+check: testpt testft
+	@echo rpt01 && ./testpt -t tests/rpt01.dat && echo success
+	@echo rpt02 && ./testpt -t tests/rpt02.dat && echo success
+	@echo rpt03 && ./testpt -t tests/rpt03.dat && echo success
+	@echo rpt04 && ./testpt -t tests/rpt04.dat && echo success
+	@echo rpt05 && ./testpt -t tests/rpt05.dat && echo success
+	@echo rpt06 && ./testpt -t tests/rpt06.dat && echo success
+	@echo rpt07 && ./testpt -t tests/rpt07.dat && echo success
+	@echo rpt08 && ./testpt -t tests/rpt08.dat && echo success
+	@echo rpt09 && ./testpt -t tests/rpt09.dat && echo success
+	@echo upt01 && ./testpt -t tests/upt01.dat && echo success
+	@echo upt02 && ./testpt -t tests/upt02.dat && echo success
+	@echo upt03 && ./testpt -t tests/upt03.dat && echo success
 
-checkmpi: pt
-	@echo rpt01 && mpirun -np 2 ./pt -t tests/rpt01.dat && echo success
-	@echo rpt02 && mpirun -np 3 ./pt -t tests/rpt02.dat && echo success
-	@echo rpt03 && mpirun -np 4 ./pt -t tests/rpt03.dat && echo success
-	@echo rpt04 && mpirun -np 3 ./pt -t tests/rpt04.dat && echo success
-	@echo rpt05 && mpirun -np 1 ./pt -t tests/rpt05.dat && echo success
-	@echo rpt06 && mpirun -np 2 ./pt -t tests/rpt06.dat && echo success
-	@echo rpt07 && mpirun -np 4 ./pt -t tests/rpt07.dat && echo success
-	@echo rpt08 && mpirun -np 3 ./pt -t tests/rpt08.dat && echo success
-	@echo rpt09 && mpirun -np 2 ./pt -t tests/rpt09.dat && echo success
-	@echo upt01 && mpirun -np 3 ./pt -t tests/upt01.dat && echo success
-	@echo upt02 && mpirun -np 4 ./pt -t tests/upt02.dat && echo success
-	@echo upt03 && mpirun -np 3 ./pt -t tests/upt03.dat && echo success
+checkmpi: testpt testft
+	@echo rpt01 && mpirun -np 2 ./testpt -t tests/rpt01.dat && echo success
+	@echo rpt02 && mpirun -np 3 ./testpt -t tests/rpt02.dat && echo success
+	@echo rpt03 && mpirun -np 4 ./testpt -t tests/rpt03.dat && echo success
+	@echo rpt04 && mpirun -np 3 ./testpt -t tests/rpt04.dat && echo success
+	@echo rpt05 && mpirun -np 1 ./testpt -t tests/rpt05.dat && echo success
+	@echo rpt06 && mpirun -np 2 ./testpt -t tests/rpt06.dat && echo success
+	@echo rpt07 && mpirun -np 4 ./testpt -t tests/rpt07.dat && echo success
+	@echo rpt08 && mpirun -np 3 ./testpt -t tests/rpt08.dat && echo success
+	@echo rpt09 && mpirun -np 2 ./testpt -t tests/rpt09.dat && echo success
+	@echo upt01 && mpirun -np 3 ./testpt -t tests/upt01.dat && echo success
+	@echo upt02 && mpirun -np 4 ./testpt -t tests/upt02.dat && echo success
+	@echo upt03 && mpirun -np 3 ./testpt -t tests/upt03.dat && echo success
 
 clean:
-	$(RM) $(ALL_O) pt gmon.out *.core *.log
+	rm -f testpt testft gmon.out *.core *.log *.o
 
-.PHONY: all check clean
+.PHONY: all check checkmpi clean
