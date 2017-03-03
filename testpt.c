@@ -32,8 +32,6 @@
 
 #define EPSILON 1.0e-8
 
-long long strtonum(const char *, long long, long long, const char **);
-
 static void
 usage(void)
 {
@@ -235,8 +233,9 @@ main(int argc, char **argv)
 	size_t oa = 0, ob = 0, va = 0, vb = 0;
 	double e_pt = 0.0, e_ref = 0.0;
 	double *d_ov, *f_ov, *t1, *t2, *i_oovv, *i_oovo, *i_ovvv;
-	const char *errstr, *testpath = NULL;
+	const char *testpath = NULL;
 	time_t wall;
+	long num;
 	int ch, is_rpt = 1, rank = 0;
 
 #ifdef WITH_MPI
@@ -246,9 +245,10 @@ main(int argc, char **argv)
 	while ((ch = getopt(argc, argv, "o:t:uv:")) != -1) {
 		switch (ch) {
 		case 'o':
-			oa = strtonum(optarg, 1, INT_MAX, &errstr);
-			if (errstr)
-				errx(1, "bad o value: %s", errstr);
+			num = strtol(optarg, NULL, 10);
+			if (num < 1)
+				err(1, "bad o value");
+			oa = ob = (size_t)num;
 			break;
 		case 't':
 			testpath = optarg;
@@ -257,9 +257,10 @@ main(int argc, char **argv)
 			is_rpt = 0;
 			break;
 		case 'v':
-			va = strtonum(optarg, 1, INT_MAX, &errstr);
-			if (errstr)
-				errx(1, "bad v value: %s", errstr);
+			num = strtol(optarg, NULL, 10);
+			if (num < 1)
+				err(1, "bad v value");
+			va = vb = (size_t)num;
 			break;
 		default:
 			usage();
