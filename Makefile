@@ -1,12 +1,12 @@
-# gcc with Netlib BLAS and MPI on OpenBSD
-CC= mpicc
-CFLAGS= -Wall -Wextra -g -O3 -DWITH_MPI
+# gcc with Netlib BLAS on OpenBSD
+CC= cc
+CFLAGS= -Wall -Wextra -g -O3
 LDFLAGS= -L/usr/local/lib
 LIBS= -lblas -lg2c -lm
 
-# gcc with Netlib BLAS on OpenBSD
-#CC= cc
-#CFLAGS= -Wall -Wextra -g -O3
+# gcc with Netlib BLAS and MPI on OpenBSD
+#CC= mpicc
+#CFLAGS= -Wall -Wextra -g -O3 -DWITH_MPI
 #LDFLAGS= -L/usr/local/lib
 #LIBS= -lblas -lg2c -lm
 
