@@ -42,13 +42,11 @@ comp_t3a_abc_1a(size_t o, size_t v, size_t i, size_t j, size_t k,
 {
 	const double *t2_p = &t2[i*o*v*v+j*v*v];
 	const double *i_ovvv_p = &i_ovvv[k*v*v*(v-1)/2];
-	int lda = v;
-	int ldb = v*(v-1)/2; /* for aaaa block with vv anti-symmetry */
 
 	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
-	gemm('T', 'T', v, v*(v-1)/2, v, 1.0, t2_p, lda,
-	    i_ovvv_p, ldb, 0, abc, v);
+	gemm('T', 'T', v, v*(v-1)/2, v, 1.0, t2_p, v,
+	    i_ovvv_p, v*(v-1)/2, 0, abc, v);
 }
 
 static void
@@ -57,13 +55,11 @@ comp_t3a_abc_1b(size_t o, size_t v, size_t i, size_t j, size_t k,
 {
 	const double *t2_p = &t2[i*o*v*v+j*v*v];
 	const double *i_ovvv_p = &i_ovvv[k*v*v*v];
-	int lda = v;
-	int ldb = v*v; /* for abab block; no vv anti-symmetry */
 
 	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
-	gemm('T', 'T', v, v*v, v, 1.0, t2_p, lda,
-	    i_ovvv_p, ldb, 0, abc, v);
+	gemm('T', 'T', v, v*v, v, 1.0, t2_p, v,
+	    i_ovvv_p, v*v, 0, abc, v);
 }
 
 static void
@@ -72,13 +68,11 @@ comp_t3a_abc_2(size_t o, size_t v, size_t i, size_t j, size_t k,
 {
 	const double *t2_p = &t2[i*o*v*v];
 	const double *i_oovo_p = &i_oovo[j*o*o*v+k*o*v];
-	int lda = v*v;
-	int ldb = o;
 
 	/* t3a2(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_oovo(j,k,c,l)) */
 
-	gemm('N', 'N', v*v, v, o, 1.0, t2_p, lda,
-	    i_oovo_p, ldb, 0, abc, v*v);
+	gemm('N', 'N', v*v, v, o, 1.0, t2_p, v*v,
+	    i_oovo_p, o, 0, abc, v*v);
 }
 
 static double
