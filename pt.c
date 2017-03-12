@@ -46,7 +46,7 @@ comp_t3a_abc_1a(size_t o, size_t v, size_t i, size_t j, size_t k,
 	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
 	gemm('T', 'T', v, v*(v-1)/2, v, 1.0, t2_p, v,
-	    i_ovvv_p, v*(v-1)/2, 0, abc, v);
+	    i_ovvv_p, v*(v-1)/2, 0.0, abc, v);
 }
 
 static void
@@ -59,7 +59,7 @@ comp_t3a_abc_1b(size_t o, size_t v, size_t i, size_t j, size_t k,
 	/* t3a1(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
 	gemm('T', 'T', v, v*v, v, 1.0, t2_p, v,
-	    i_ovvv_p, v*v, 0, abc, v);
+	    i_ovvv_p, v*v, 0.0, abc, v);
 }
 
 static void
@@ -72,7 +72,7 @@ comp_t3a_abc_2(size_t o, size_t v, size_t i, size_t j, size_t k,
 	/* t3a2(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_oovo(j,k,c,l)) */
 
 	gemm('N', 'N', v*v, v, o, 1.0, t2_p, v*v,
-	    i_oovo_p, o, 0, abc, v*v);
+	    i_oovo_p, o, 0.0, abc, v*v);
 }
 
 static double
@@ -138,9 +138,9 @@ comp_t2_t2_fov(size_t o, size_t v, size_t i, size_t j, size_t k,
     double *abc, double *tov, const double *t2, const double *fov)
 {
 	gemm('N', 'N', v, o, v, 1.0, &t2[i*o*v*v+j*v*v], v*v,
-	    &fov[0], v, 0, tov, v);
+	    &fov[0], v, 0.0, tov, v);
 	gemm('N', 'N', v*v, v, o, 1.0, &t2[k*o*v*v], v,
-	    &tov[0], v, 0, abc, v*v);
+	    &tov[0], v, 0.0, abc, v*v);
 }
 
 static double
