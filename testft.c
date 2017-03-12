@@ -1,7 +1,11 @@
-#include <err.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <err.h>
+
+#ifdef WITH_MPI
+#include <mpi.h>
+#endif
 
 #include "pt.h"
 
@@ -15,8 +19,82 @@ read_test_header(FILE *fp, size_t *o, size_t *v, double *e_ref)
 }
 
 static void
-read_test_data(FILE *fp)
+skip_line(FILE *fp)
 {
+	int ch;
+
+	while ((ch = fgetc(fp)) != '\n')
+		if (ch == EOF)
+			errx(1, "unexpected end of file");
+}
+
+static double
+read_next_double(FILE *fp)
+{
+	double el;
+
+	if ((fscanf(fp, "%lf", &el)) != 1)
+		errx(1, "error parsing test file data");
+	return (el);
+}
+
+static void
+read_test_data(FILE *fp, size_t o, size_t v, double *f_ov, double *d_ov,
+    double *l1, double *t2, double *l2, double *i_oovv, double *i2_oovo,
+    double *i3_ovvv, double *i6_oovo, double *i7_ovvv)
+{
+	size_t i;
+
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*v; i++) {
+		f_ov[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*v; i++) {
+		d_ov[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*v; i++) {
+		l1[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		t2[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		l2[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		i_oovv[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*o; i++) {
+		i2_oovo[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*v*v*v; i++) {
+		i3_ovvv[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*o; i++) {
+		i6_oovo[i] = read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*v*v*v; i++) {
+		i7_ovvv[i] = read_next_double(fp);
+	}
 }
 
 int
@@ -49,7 +127,8 @@ main(int argc, char **argv)
 	i6_oovo = i_oovv + o*v*v*v;
 	i7_ovvv = i_oovv + o*o*o*v;
 
-	read_test_data(fp);
+	read_test_data(fp, o, v, f_ov, d_ov, l1, t2, l2, i_oovv,
+	    i2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	fclose(fp);
 
 	e_ft = cc_ft(o, v, f_ov, d_ov, l1, t2, l2, i_oovv,
