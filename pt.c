@@ -161,7 +161,9 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
+#ifdef _OPENMP
 #pragma omp parallel
+#endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
 	double *work, *t3ax1, *abc1, *abc2, *abc3;
@@ -185,7 +187,9 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	abc2 = work + 2*va*va*va;
 	abc3 = work + 3*va*va*va;
 
+#ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
+#endif
 	for (it = 0; it < nij; it++) {
 		i = ij[2*it+0];
 		j = ij[2*it+1];
@@ -254,7 +258,9 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
+#ifdef _OPENMP
 #pragma omp parallel
+#endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
 	double *work, *abc11, *abc13, *abc14, *abc17x, *abc18x;
@@ -286,7 +292,9 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 	abc25 = work + 2*va*va*va;
 	abc27 = work + 3*va*va*va;
 
+#ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
+#endif
 	for (it = 0; it < nij; it++) {
 		i = ij[2*it+0];
 		j = ij[2*it+1];
@@ -419,7 +427,9 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
+#ifdef _OPENMP
 #pragma omp parallel
+#endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
 	double *work, *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3, *tov;
@@ -445,7 +455,9 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 	abc3 = work + 4*v*v*v;
 	tov = work + 5*v*v*v;
 
+#ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
+#endif
 	for (it = 0; it < nij; it++) {
 		i = ij[2*it+0];
 		j = ij[2*it+1];
