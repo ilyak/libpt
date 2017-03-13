@@ -440,7 +440,7 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		}
 	}
 
-	if ((work = malloc((5*v*v*v+o*v)*sizeof(*work))) == NULL)
+	if ((work = malloc(5*v*v*v*sizeof(*work))) == NULL)
 		err(1, "libpt malloc work");
 	sigvvvl = work;
 	sigvvvr = work + v*v*v;
