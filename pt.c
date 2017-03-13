@@ -409,7 +409,7 @@ cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 }
 
 double
-cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
+cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
     const double *l1, const double *t2, const double *l2, const double *i_oovv,
     const double *i2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv)
@@ -500,9 +500,9 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	comp_t2_t2_fov(o,v,i,j,k,abc1,tov,t2,f_ov);
-	comp_t2_t2_fov(o,v,k,j,i,abc2,tov,t2,f_ov);
-	comp_t2_t2_fov(o,v,i,k,j,abc3,tov,t2,f_ov);
+	comp_t2_t2_fov(o,v,i,j,k,abc1,tov,t2,f2_ov);
+	comp_t2_t2_fov(o,v,k,j,i,abc2,tov,t2,f2_ov);
+	comp_t2_t2_fov(o,v,i,k,j,abc3,tov,t2,f2_ov);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
@@ -512,7 +512,7 @@ cc_ft(size_t o, size_t v, const double *f_ov, const double *d_ov,
 		sigvvvr[a*v*v+b*v+c] +=
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 		l1t = +i_jk_a_bc_ov_oovv(o,v,l1,i_oovv,i,j,k,a,b,c)
-		      +i_jk_a_bc_ov_oovv(o,v,f_ov,l2,i,j,k,a,b,c);
+		      +i_jk_a_bc_ov_oovv(o,v,f2_ov,l2,i,j,k,a,b,c);
 		sigvvvl1 = sigvvvl[a*v*v+b*v+c];
 		sigvvvr1 = sigvvvr[a*v*v+b*v+c];
 		e_pt += (sigvvvl1 + l1t) * sigvvvr1 / dn;

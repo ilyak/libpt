@@ -39,7 +39,7 @@ read_next_double(FILE *fp)
 }
 
 static void
-read_test_data(FILE *fp, size_t o, size_t v, double *f_ov, double *d_ov,
+read_test_data(FILE *fp, size_t o, size_t v, double *d_ov, double *f2_ov,
     double *l1, double *t2, double *l2, double *i_oovv, double *i2_oovo,
     double *i3_ovvv, double *i6_oovo, double *i7_ovvv)
 {
@@ -48,12 +48,12 @@ read_test_data(FILE *fp, size_t o, size_t v, double *f_ov, double *d_ov,
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*v; i++) {
-		f_ov[i] = read_next_double(fp);
+		d_ov[i] = read_next_double(fp);
 	}
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*v; i++) {
-		d_ov[i] = read_next_double(fp);
+		f2_ov[i] = read_next_double(fp);
 	}
 	skip_line(fp);
 	skip_line(fp);
@@ -101,7 +101,7 @@ int
 main(int argc, char **argv)
 {
 	FILE *fp;
-	double e_ft, e_ref, *f_ov, *d_ov, *l1, *t2, *l2, *i_oovv;
+	double e_ft, e_ref, *d_ov, *f2_ov, *l1, *t2, *l2, *i_oovv;
 	double *i2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
 	size_t o, v, size;
 
@@ -115,10 +115,10 @@ main(int argc, char **argv)
 	read_test_header(fp, &o, &v, &e_ref);
 
 	size = 3*o*v+3*o*o*v*v+2*o*o*o*v+2*o*v*v*v;
-	if ((f_ov = malloc(size * sizeof(double))) == NULL)
+	if ((d_ov = malloc(size * sizeof(double))) == NULL)
 		err(1, "malloc");
-	d_ov = f_ov + o*v;
-	l1 = d_ov + o*v;
+	f2_ov = d_ov + o*v;
+	l1 = f2_ov + o*v;
 	t2 = l1 + o*v;
 	l2 = t2 + o*o*v*v;
 	i_oovv = l2 + o*o*v*v;
@@ -127,14 +127,14 @@ main(int argc, char **argv)
 	i6_oovo = i_oovv + o*v*v*v;
 	i7_ovvv = i_oovv + o*o*o*v;
 
-	read_test_data(fp, o, v, f_ov, d_ov, l1, t2, l2, i_oovv,
+	read_test_data(fp, o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
 	    i2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	fclose(fp);
 
-	e_ft = cc_ft(o, v, f_ov, d_ov, l1, t2, l2, i_oovv,
+	e_ft = cc_ft(o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
 	    i2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 
-	free(f_ov);
+	free(d_ov);
 #ifdef WITH_MPI
 	MPI_Finalize();
 #endif
