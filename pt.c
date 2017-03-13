@@ -133,15 +133,15 @@ asymm_ijk_ab_c(size_t v, const double *abc1, const double *abc2,
 	       +abc3[c*v*v+b*v+a];
 }
 
-static void
-comp_t2_t2_fov(size_t o, size_t v, size_t i, size_t j, size_t k,
-    double *abc, double *tov, const double *t2, const double *fov)
-{
-	gemm('N', 'N', v, o, v, 1.0, &t2[i*o*v*v+j*v*v], v*v,
-	    &fov[0], v, 0.0, tov, v);
-	gemm('N', 'N', v*v, v, o, 1.0, &t2[k*o*v*v], v,
-	    &tov[0], v, 0.0, abc, v*v);
-}
+//static void
+//comp_t2_t2_fov(size_t o, size_t v, size_t i, size_t j, size_t k,
+//    double *abc, double *tov, const double *t2, const double *fov)
+//{
+//	gemm('N', 'N', v, o, v, 1.0, &t2[i*o*v*v+j*v*v], v*v,
+//	    &fov[0], v, 0.0, tov, v);
+//	gemm('N', 'N', v*v, v, o, 1.0, &t2[k*o*v*v], v,
+//	    &tov[0], v, 0.0, abc, v*v);
+//}
 
 static double
 cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
@@ -411,7 +411,7 @@ cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 double
 cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
     const double *l1, const double *t2, const double *l2, const double *i_oovv,
-    const double *i2_oovo, const double *i3_ovvv, const double *i6_oovo,
+    const double *i2t2f2, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv)
 {
 	double e_pt = 0.0;
@@ -426,7 +426,7 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	double *work, *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3, *tov;
+	double *work, *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3;
 
 	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
@@ -447,7 +447,6 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 	abc1 = work + 2*v*v*v;
 	abc2 = work + 3*v*v*v;
 	abc3 = work + 4*v*v*v;
-	tov = work + 5*v*v*v;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -490,9 +489,9 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2_oovo);
-	comp_t3a_abc_2(o,v,j,i,k,abc2,t2,i2_oovo);
-	comp_t3a_abc_2(o,v,k,j,i,abc3,t2,i2_oovo);
+	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2t2f2);
+	comp_t3a_abc_2(o,v,j,i,k,abc2,t2,i2t2f2);
+	comp_t3a_abc_2(o,v,k,j,i,abc3,t2,i2t2f2);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
@@ -500,17 +499,17 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	comp_t2_t2_fov(o,v,i,j,k,abc1,tov,t2,f2_ov);
-	comp_t2_t2_fov(o,v,k,j,i,abc2,tov,t2,f2_ov);
-	comp_t2_t2_fov(o,v,i,k,j,abc3,tov,t2,f2_ov);
+//	comp_t2_t2_fov(o,v,i,j,k,abc1,tov,t2,f2_ov);
+//	comp_t2_t2_fov(o,v,k,j,i,abc2,tov,t2,f2_ov);
+//	comp_t2_t2_fov(o,v,i,k,j,abc3,tov,t2,f2_ov);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		double l1t, sigvvvl1, sigvvvr1;
 		double dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 
-		sigvvvr[a*v*v+b*v+c] +=
-		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+//		sigvvvr[a*v*v+b*v+c] +=
+//		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 		l1t = +i_jk_a_bc_ov_oovv(o,v,l1,i_oovv,i,j,k,a,b,c)
 		      +i_jk_a_bc_ov_oovv(o,v,f2_ov,l2,i,j,k,a,b,c);
 		sigvvvl1 = sigvvvl[a*v*v+b*v+c];

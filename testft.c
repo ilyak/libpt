@@ -40,7 +40,7 @@ read_next_double(FILE *fp)
 
 static void
 read_test_data(FILE *fp, size_t o, size_t v, double *d_ov, double *f2_ov,
-    double *l1, double *t2, double *l2, double *i_oovv, double *i2_oovo,
+    double *l1, double *t2, double *l2, double *i_oovv, double *i2t2f2,
     double *i3_ovvv, double *i6_oovo, double *i7_ovvv)
 {
 	size_t i;
@@ -78,7 +78,7 @@ read_test_data(FILE *fp, size_t o, size_t v, double *d_ov, double *f2_ov,
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*o*v*o; i++) {
-		i2_oovo[i] = read_next_double(fp);
+		i2t2f2[i] = read_next_double(fp);
 	}
 	skip_line(fp);
 	skip_line(fp);
@@ -101,8 +101,8 @@ int
 main(int argc, char **argv)
 {
 	FILE *fp;
-	double e_ft, e_ref, *d_ov, *f2_ov, *l1, *t2, *l2, *i_oovv;
-	double *i2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
+	double e_ft, e_ref, *d_ov, *f2_ov, *l1, *t2, *l2;
+	double *i_oovv, *i2t2f2, *i3_ovvv, *i6_oovo, *i7_ovvv;
 	size_t o, v, size;
 
 #ifdef WITH_MPI
@@ -122,17 +122,17 @@ main(int argc, char **argv)
 	t2 = l1 + o*v;
 	l2 = t2 + o*o*v*v;
 	i_oovv = l2 + o*o*v*v;
-	i2_oovo = i_oovv + o*o*v*v;
+	i2t2f2 = i_oovv + o*o*v*v;
 	i3_ovvv = i_oovv + o*o*o*v;
 	i6_oovo = i_oovv + o*v*v*v;
 	i7_ovvv = i_oovv + o*o*o*v;
 
 	read_test_data(fp, o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
-	    i2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
+	    i2t2f2, i3_ovvv, i6_oovo, i7_ovvv);
 	fclose(fp);
 
 	e_ft = cc_ft(o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
-	    i2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
+	    i2t2f2, i3_ovvv, i6_oovo, i7_ovvv);
 
 	free(d_ov);
 #ifdef WITH_MPI
