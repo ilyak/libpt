@@ -411,7 +411,7 @@ cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 double
 cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
     const double *l1, const double *t2, const double *l2, const double *i_oovv,
-    const double *i2_t2f2_ooov, const double *i3_ovvv, const double *i6_oovo,
+    const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv)
 {
 	double e_pt = 0.0;
@@ -489,9 +489,9 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2_t2f2_ooov);
-	comp_t3a_abc_2(o,v,j,i,k,abc2,t2,i2_t2f2_ooov);
-	comp_t3a_abc_2(o,v,k,j,i,abc3,t2,i2_t2f2_ooov);
+	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2_t2f2_oovo);
+	comp_t3a_abc_2(o,v,j,i,k,abc2,t2,i2_t2f2_oovo);
+	comp_t3a_abc_2(o,v,k,j,i,abc3,t2,i2_t2f2_oovo);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
