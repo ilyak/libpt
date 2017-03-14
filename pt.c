@@ -118,20 +118,20 @@ asymm_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
 	       +abc3[c*v*v+b*v+a];
 }
 
-static double
-asymm_ijk_ab_c(size_t v, const double *abc1, const double *abc2,
-    const double *abc3, size_t a, size_t b, size_t c)
-{
-	return +abc1[a*v*v+b*v+c]
-	       -abc1[a*v*v+c*v+b]
-	       -abc1[c*v*v+b*v+a]
-	       -abc2[a*v*v+b*v+c]
-	       +abc2[a*v*v+c*v+b]
-	       +abc2[c*v*v+b*v+a]
-	       -abc3[a*v*v+b*v+c]
-	       +abc3[a*v*v+c*v+b]
-	       +abc3[c*v*v+b*v+a];
-}
+//static double
+//asymm_ijk_ab_c(size_t v, const double *abc1, const double *abc2,
+//    const double *abc3, size_t a, size_t b, size_t c)
+//{
+//	return +abc1[a*v*v+b*v+c]
+//	       -abc1[a*v*v+c*v+b]
+//	       -abc1[c*v*v+b*v+a]
+//	       -abc2[a*v*v+b*v+c]
+//	       +abc2[a*v*v+c*v+b]
+//	       +abc2[c*v*v+b*v+a]
+//	       -abc3[a*v*v+b*v+c]
+//	       +abc3[a*v*v+c*v+b]
+//	       +abc3[c*v*v+b*v+a];
+//}
 
 //static void
 //comp_t2_t2_fov(size_t o, size_t v, size_t i, size_t j, size_t k,
@@ -411,7 +411,7 @@ cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
 double
 cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
     const double *l1, const double *t2, const double *l2, const double *i_oovv,
-    const double *i2t2f2, const double *i3_ovvv, const double *i6_oovo,
+    const double *i2_t2f2_ooov, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv)
 {
 	double e_pt = 0.0;
@@ -489,9 +489,9 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2t2f2);
-	comp_t3a_abc_2(o,v,j,i,k,abc2,t2,i2t2f2);
-	comp_t3a_abc_2(o,v,k,j,i,abc3,t2,i2t2f2);
+	comp_t3a_abc_2(o,v,i,j,k,abc1,t2,i2_t2f2_ooov);
+	comp_t3a_abc_2(o,v,j,i,k,abc2,t2,i2_t2f2_ooov);
+	comp_t3a_abc_2(o,v,k,j,i,abc3,t2,i2_t2f2_ooov);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
@@ -508,8 +508,6 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		double l1t, sigvvvl1, sigvvvr1;
 		double dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 
-//		sigvvvr[a*v*v+b*v+c] +=
-//		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 		l1t = +i_jk_a_bc_ov_oovv(o,v,l1,i_oovv,i,j,k,a,b,c)
 		      +i_jk_a_bc_ov_oovv(o,v,f2_ov,l2,i,j,k,a,b,c);
 		sigvvvl1 = sigvvvl[a*v*v+b*v+c];
