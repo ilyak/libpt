@@ -160,7 +160,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	double *work, *t3ax1, *abc1, *abc2, *abc3;
+	double *t3ax1, *abc1, *abc2, *abc3;
 
 	if ((ij = malloc(oa*(oa-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
@@ -174,12 +174,11 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		}
 	}
 
-	if ((work = malloc(4*va*va*va*sizeof(double))) == NULL)
+	if ((t3ax1 = malloc(4*va*va*va*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
-	t3ax1 = work;
-	abc1 = work + 1*va*va*va;
-	abc2 = work + 2*va*va*va;
-	abc3 = work + 3*va*va*va;
+	abc1 = t3ax1 + 1*va*va*va;
+	abc2 = t3ax1 + 2*va*va*va;
+	abc3 = t3ax1 + 3*va*va*va;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -228,7 +227,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	}}}
 	}}
 	free(ij);
-	free(work);
+	free(t3ax1);
 }
 #ifdef WITH_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
@@ -257,7 +256,7 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	double *work, *abc11, *abc13, *abc14, *abc17x, *abc18x;
+	double *abc11, *abc13, *abc14, *abc17x, *abc18x;
 	double *abc21, *abc22, *abc23, *abc25, *abc27, *t3ax1;
 
 	if ((ij = malloc(oa*(oa-1)*sizeof(size_t))) == NULL)
@@ -272,19 +271,18 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 		}
 	}
 
-	if ((work = malloc(4*va*va*va*sizeof(double))) == NULL)
+	if ((t3ax1 = malloc(4*va*va*va*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
-	t3ax1 = work;
-	abc11 = work + 1*va*va*va;
-	abc13 = work + 2*va*va*va;
-	abc14 = work + 3*va*va*va;
-	abc17x = work + 1*va*va*va;
-	abc18x = work + 1*va*va*va + va*va*(va-1)/2;
-	abc21 = work + 2*va*va*va;
-	abc22 = work + 3*va*va*va;
-	abc23 = work + 1*va*va*va;
-	abc25 = work + 2*va*va*va;
-	abc27 = work + 3*va*va*va;
+	abc11 = t3ax1 + 1*va*va*va;
+	abc13 = t3ax1 + 2*va*va*va;
+	abc14 = t3ax1 + 3*va*va*va;
+	abc17x = t3ax1 + 1*va*va*va;
+	abc18x = t3ax1 + 1*va*va*va + va*va*(va-1)/2;
+	abc21 = t3ax1 + 2*va*va*va;
+	abc22 = t3ax1 + 3*va*va*va;
+	abc23 = t3ax1 + 1*va*va*va;
+	abc25 = t3ax1 + 2*va*va*va;
+	abc27 = t3ax1 + 3*va*va*va;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -354,7 +352,7 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 	}}}
 	}}
 	free(ij);
-	free(work);
+	free(t3ax1);
 }
 #ifdef WITH_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
@@ -426,7 +424,7 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	double *work, *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3;
+	double *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3;
 
 	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
@@ -440,13 +438,12 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		}
 	}
 
-	if ((work = malloc(5*v*v*v*sizeof(*work))) == NULL)
+	if ((sigvvvl = malloc(5*v*v*v*sizeof(*sigvvvl))) == NULL)
 		err(1, "libpt malloc work");
-	sigvvvl = work;
-	sigvvvr = work + v*v*v;
-	abc1 = work + 2*v*v*v;
-	abc2 = work + 3*v*v*v;
-	abc3 = work + 4*v*v*v;
+	sigvvvr = sigvvvl + v*v*v;
+	abc1 = sigvvvl + 2*v*v*v;
+	abc2 = sigvvvl + 3*v*v*v;
+	abc3 = sigvvvl + 4*v*v*v;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -516,7 +513,7 @@ cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 	}}}
 	}}
 	free(ij);
-	free(work);
+	free(sigvvvl);
 }
 #ifdef WITH_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
