@@ -88,7 +88,7 @@ read_next_double(FILE *fp)
 {
 	double el;
 
-	if ((fscanf(fp, "%lf", &el)) != 1)
+	if (fscanf(fp, "%lf", &el) != 1)
 		errx(1, "error parsing test file data");
 	return (el);
 }
