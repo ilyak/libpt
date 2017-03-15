@@ -118,12 +118,14 @@ int
 main(int argc, char **argv)
 {
 	FILE *fp;
-	double e_ft, e_ref, *d_ov, *f2_ov, *l1, *t2, *l2;
+	double e_cmp, e_ref, *d_ov, *f2_ov, *l1, *t2, *l2;
 	double *i_oovv, *i2_t2f2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
 	size_t o, v, size;
+	int rank = 0;
 
 #ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
 	if (argc < 2)
 		errx(1, "specify test file");
@@ -148,14 +150,15 @@ main(int argc, char **argv)
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	fclose(fp);
 
-	e_ft = cc_gft(o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
+	e_cmp = cc_gft(o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
-	printf("(fT) energy: %.8lf\n", e_ft);
-	printf("(fT) ref:    %.8lf\n", e_ref);
-
+	if (rank == 0) {
+		printf("cc_gft energy: %.8lf\n", e_cmp);
+		printf("cc_gft ref:    %.8lf\n", e_ref);
+	}
 	free(d_ov);
 #ifdef WITH_MPI
 	MPI_Finalize();
 #endif
-	return (fabs(e_ft - e_ref) < EPSILON ? 0 : 1);
+	return (fabs(e_cmp - e_ref) < EPSILON ? 0 : 1);
 }
