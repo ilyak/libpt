@@ -37,6 +37,9 @@ check: testpt testft
 	@echo upt01 && ./testpt -t tests/upt01.dat && echo success
 	@echo upt02 && ./testpt -t tests/upt02.dat && echo success
 	@echo upt03 && ./testpt -t tests/upt03.dat && echo success
+	@echo gft01 && ./testft tests/gft01.dat && echo success
+	@echo gft02 && ./testft tests/gft02.dat && echo success
+	@echo gft03 && ./testft tests/gft03.dat && echo success
 
 checkmpi: testpt testft
 	@echo rpt01 && mpirun -np 2 ./testpt -t tests/rpt01.dat && echo success
