@@ -87,7 +87,7 @@ double cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
     const double *f_ov, const double *t1, const double *t2,
     const double *i_oovo, const double *i_oovv, const double *i_ovvv);
 
-double cc_ft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
+double cc_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
     const double *l1, const double *t2, const double *l2, const double *i_oovv,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv);

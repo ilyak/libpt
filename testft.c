@@ -148,7 +148,7 @@ main(int argc, char **argv)
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	fclose(fp);
 
-	e_ft = cc_ft(o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
+	e_ft = cc_gft(o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	printf("(fT) energy: %.8lf\n", e_ft);
 	printf("(fT) ref:    %.8lf\n", e_ref);
