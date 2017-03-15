@@ -16,15 +16,15 @@ LIBS= -lblas -lg2c -lm
 #LDFLAGS=
 #LIBS=
 
-all: testpt testft
+all: testpt testgft
 
 testpt: pt.o testpt.o
 	$(CC) -o $@ $(CFLAGS) pt.o testpt.o $(LDFLAGS) $(LIBS)
 
-testft: pt.o testft.o
-	$(CC) -o $@ $(CFLAGS) pt.o testft.o $(LDFLAGS) $(LIBS)
+testgft: pt.o testgft.o
+	$(CC) -o $@ $(CFLAGS) pt.o testgft.o $(LDFLAGS) $(LIBS)
 
-check: testpt testft
+check: testpt testgft
 	@echo rpt01 && ./testpt -t tests/rpt01.dat && echo success
 	@echo rpt02 && ./testpt -t tests/rpt02.dat && echo success
 	@echo rpt03 && ./testpt -t tests/rpt03.dat && echo success
@@ -37,11 +37,11 @@ check: testpt testft
 	@echo upt01 && ./testpt -t tests/upt01.dat && echo success
 	@echo upt02 && ./testpt -t tests/upt02.dat && echo success
 	@echo upt03 && ./testpt -t tests/upt03.dat && echo success
-	@echo gft01 && ./testft tests/gft01.dat && echo success
-	@echo gft02 && ./testft tests/gft02.dat && echo success
-	@echo gft03 && ./testft tests/gft03.dat && echo success
+	@echo gft01 && ./testgft tests/gft01.dat && echo success
+	@echo gft02 && ./testgft tests/gft02.dat && echo success
+	@echo gft03 && ./testgft tests/gft03.dat && echo success
 
-checkmpi: testpt testft
+checkmpi: testpt testgft
 	@echo rpt01 && mpirun -np 2 ./testpt -t tests/rpt01.dat && echo success
 	@echo rpt02 && mpirun -np 3 ./testpt -t tests/rpt02.dat && echo success
 	@echo rpt03 && mpirun -np 4 ./testpt -t tests/rpt03.dat && echo success
@@ -54,8 +54,11 @@ checkmpi: testpt testft
 	@echo upt01 && mpirun -np 3 ./testpt -t tests/upt01.dat && echo success
 	@echo upt02 && mpirun -np 4 ./testpt -t tests/upt02.dat && echo success
 	@echo upt03 && mpirun -np 3 ./testpt -t tests/upt03.dat && echo success
+	@echo gft01 && mpirun -np 3 ./testgft tests/gft01.dat && echo success
+	@echo gft02 && mpirun -np 2 ./testgft tests/gft02.dat && echo success
+	@echo gft03 && mpirun -np 1 ./testgft tests/gft03.dat && echo success
 
 clean:
-	rm -f testpt testft gmon.out *.core *.log *.o
+	rm -f testpt testgft gmon.out *.core *.log *.o
 
 .PHONY: all check checkmpi clean
