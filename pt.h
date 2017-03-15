@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-/* Compute coupled-cluster (T) energy correction in parallel.
+/* Compute closed-shell coupled-cluster (T) energy correction in parallel.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
