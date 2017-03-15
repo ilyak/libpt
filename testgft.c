@@ -133,7 +133,7 @@ main(int argc, char **argv)
 		err(1, "fopen");
 	read_test_header(fp, &o, &v, &e_ref);
 
-	size = 3*o*v+3*o*o*v*v+2*o*o*o*v+2*o*v*v*v;
+	size = 3*o*v + 3*o*o*v*v + 2*o*o*o*v + 2*o*v*v*v;
 	if ((d_ov = malloc(size * sizeof(double))) == NULL)
 		err(1, "malloc");
 	f2_ov = d_ov + o*v;
