@@ -132,8 +132,8 @@ main(int argc, char **argv)
 
 	e_cmp = cc_upt(o, 0, v, 0, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
 	if (rank == 0) {
-		printf("cc_upt energy: %.8lf\n", e_cmp);
-		printf("cc_upt ref:    %.8lf\n", e_ref);
+		printf("cc_upt energy: % .8lf\n", e_cmp);
+		printf("cc_upt ref:    % .8lf\n", e_ref);
 	}
 	free(d_ov);
 #ifdef WITH_MPI

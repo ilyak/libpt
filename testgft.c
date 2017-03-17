@@ -153,8 +153,8 @@ main(int argc, char **argv)
 	e_cmp = cc_gft(o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	if (rank == 0) {
-		printf("cc_gft energy: %.8lf\n", e_cmp);
-		printf("cc_gft ref:    %.8lf\n", e_ref);
+		printf("cc_gft energy: % .8lf\n", e_cmp);
+		printf("cc_gft ref:    % .8lf\n", e_ref);
 	}
 	free(d_ov);
 #ifdef WITH_MPI
