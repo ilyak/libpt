@@ -134,6 +134,21 @@ asymm_ijk_ab_c(size_t v, const double *abc1, const double *abc2,
 }
 
 static double
+asymm_ijk_ab_c_half(size_t v, const double *abc1, const double *abc2,
+    const double *abc3, size_t a, size_t b, size_t c)
+{
+	return +abc1[a*(a-1)/2*v+b*v+c]
+	       -abc1[a*(a-1)/2*v+c*v+b]
+	       +abc1[b*(b-1)/2*v+c*v+a]
+	       -abc2[a*(a-1)/2*v+b*v+c]
+	       +abc2[a*(a-1)/2*v+c*v+b]
+	       -abc2[b*(b-1)/2*v+c*v+a]
+	       -abc3[a*(a-1)/2*v+b*v+c]
+	       +abc3[a*(a-1)/2*v+c*v+b]
+	       -abc3[b*(b-1)/2*v+c*v+a];
+}
+
+static double
 cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2_aaaa, const double *i_oovo_aaaa,
     const double *i_oovv_aaaa, const double *i_ovvv_aaaa)
@@ -187,15 +202,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	for (b = 1; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		t3ax1[a*va*va+b*va+c] +=
-		    +abc1[a+va*b*(b-1)/2+va*c]
-		    -abc1[b+va*a*(a-1)/2+va*c]
-		    +abc1[c+va*a*(a-1)/2+va*b]
-		    -abc2[a+va*b*(b-1)/2+va*c]
-		    +abc2[b+va*a*(a-1)/2+va*c]
-		    -abc2[c+va*a*(a-1)/2+va*b]
-		    -abc3[a+va*b*(b-1)/2+va*c]
-		    +abc3[b+va*a*(a-1)/2+va*c]
-		    -abc3[c+va*a*(a-1)/2+va*b];
+		    asymm_ijk_ab_c_half(va,abc1,abc2,abc3,a,b,c);
 	}}}
 
 	t2_i_oovo(oa,va,i,j,k,abc1,t2_aaaa,i_oovo_aaaa);
