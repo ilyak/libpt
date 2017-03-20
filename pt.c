@@ -196,8 +196,8 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	t2_i_ovvv_half(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
 	t2_i_ovvv_half(oa,va,i,k,j,abc2,t2_aaaa,i_ovvv_aaaa);
 	t2_i_ovvv_half(oa,va,k,j,i,abc3,t2_aaaa,i_ovvv_aaaa);
-	for (a = 2; a < va; a++) {
-	for (b = 1; b < a; b++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		t3ax1[a*va*va+b*va+c] =
 		    asymm_ijk_ab_c_half(va,abc1,abc2,abc3,a,b,c);
@@ -206,8 +206,8 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	t2_i_oovo(oa,va,i,j,k,abc1,t2_aaaa,i_oovo_aaaa);
 	t2_i_oovo(oa,va,j,i,k,abc2,t2_aaaa,i_oovo_aaaa);
 	t2_i_oovo(oa,va,k,j,i,abc3,t2_aaaa,i_oovo_aaaa);
-	for (a = 2; a < va; a++) {
-	for (b = 1; b < a; b++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		double t3ax, t3bx, dn;
 
@@ -283,7 +283,7 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 	t2_i_ovvv(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_abab);
 	t2_i_ovvv(oa,va,i,k,j,abc2,t2_abab,i_ovvv_abab);
 	t2_i_ovvv(oa,va,j,k,i,abc3,t2_abab,i_ovvv_abab);
-	for (a = 1; a < va; a++) {
+	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
 		t3ax1[a*va*va+b*va+c] =
@@ -299,7 +299,7 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 	t2_i_ovvv_half(oa,va,k,i,j,abc12,t2_abab,i_ovvv_aaaa);
 	t2_i_oovo(oa,va,i,k,j,abc2,t2_aaaa,i_oovo_abab);
 	t2_i_oovo(oa,va,j,k,i,abc3,t2_aaaa,i_oovo_abab);
-	for (a = 1; a < va; a++) {
+	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
 		t3ax1[a*va*va+b*va+c] +=
@@ -312,7 +312,7 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 	t2_i_oovo(oa,va,i,j,k,abc1,t2_abab,i_oovo_abab);
 	t2_i_oovo(oa,va,j,i,k,abc2,t2_abab,i_oovo_abab);
 	t2_i_oovo(oa,va,k,j,i,abc3,t2_abab,i_oovo_aaaa);
-	for (a = 1; a < va; a++) {
+	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
 		double t3ax, t3bx, dn;
