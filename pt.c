@@ -486,15 +486,10 @@ cc_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		sigvvvr[a*v*v+b*v+c] +=
-		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
-	}}}
-
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < b; c++) {
 		double dn, l1t, sigvvvl1, sigvvvr1;
 
+		sigvvvr[a*v*v+b*v+c] +=
+		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		l1t = +i_jk_a_bc_ov_oovv(o,v,l1,i_oovv,i,j,k,a,b,c)
 		      +i_jk_a_bc_ov_oovv(o,v,f2_ov,l2,i,j,k,a,b,c);
