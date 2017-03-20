@@ -193,15 +193,13 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		j = ij[2*it+1];
 	for (k = j+1; k < oa; k++) {
 
-	memset(t3ax1, 0, va*va*va*sizeof(double));
-
 	t2_i_ovvv_half(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
 	t2_i_ovvv_half(oa,va,i,k,j,abc2,t2_aaaa,i_ovvv_aaaa);
 	t2_i_ovvv_half(oa,va,k,j,i,abc3,t2_aaaa,i_ovvv_aaaa);
 	for (a = 2; a < va; a++) {
 	for (b = 1; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		t3ax1[a*va*va+b*va+c] +=
+		t3ax1[a*va*va+b*va+c] =
 		    asymm_ijk_ab_c_half(va,abc1,abc2,abc3,a,b,c);
 	}}}
 
@@ -282,15 +280,13 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 		j = ij[2*it+1];
 	for (k = 0; k < ob; k++) {
 
-	memset(t3ax1, 0, va*va*va*sizeof(double));
-
 	t2_i_ovvv(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_abab);
 	t2_i_ovvv(oa,va,i,k,j,abc2,t2_abab,i_ovvv_abab);
 	t2_i_ovvv(oa,va,j,k,i,abc3,t2_abab,i_ovvv_abab);
 	for (a = 1; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
-		t3ax1[a*va*va+b*va+c] +=
+		t3ax1[a*va*va+b*va+c] =
 		    -abc1[a+b*va+c*va*va]
 		    +abc1[b+a*va+c*va*va]
 		    -abc2[a+c*va+b*va*va]
