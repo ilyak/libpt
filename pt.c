@@ -215,7 +215,6 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 
 		t3ax1[a*va*va+b*va+c] +=
 		    asymm_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
-
 		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
 		t3ax = t3ax1[a*va*va+b*va+c];
 		t3bx = +i_jk_a_bc_ov_oovv(oa,va,t1,i_oovv_aaaa,i,j,k,a,b,c)
@@ -328,25 +327,22 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 	for (c = 0; c < vb; c++) {
 		double t3ax, t3bx, dn;
 
-		t3ax1[a*va*va+b*va+c] +=
-		    -abc23[c+a*va+b*va*va]
-		    +abc23[c+b*va+a*va*va]
-		    -abc25[c+b*va+a*va*va]
-		    +abc25[c+a*va+b*va*va]
-		    -abc27[a+c*va+b*va*va]
-		    +abc27[b+c*va+a*va*va];
-		t3bx =
-		    +comp_t3b_ijkabc(oa,va,i,j,k,a,b,c,
-			t1,i_oovv_abab,f_ov,t2_abab)
-		    -comp_t3b_ijkabc(oa,va,i,j,k,b,a,c,
-			t1,i_oovv_abab,f_ov,t2_abab)
-		    -comp_t3b_ijkabc(oa,va,j,i,k,a,b,c,
-			t1,i_oovv_abab,f_ov,t2_abab)
-		    +comp_t3b_ijkabc(oa,va,j,i,k,b,a,c,
-			t1,i_oovv_abab,f_ov,t2_abab)
-		    +comp_t3b_ijkabc(oa,va,k,j,i,c,b,a,
-			t1,i_oovv_aaaa,f_ov,t2_aaaa);
-
+		t3ax1[a*va*va+b*va+c] += -abc23[c+a*va+b*va*va]
+					 +abc23[c+b*va+a*va*va]
+					 -abc25[c+b*va+a*va*va]
+					 +abc25[c+a*va+b*va*va]
+					 -abc27[a+c*va+b*va*va]
+					 +abc27[b+c*va+a*va*va];
+		t3bx = +comp_t3b_ijkabc(oa,va,i,j,k,a,b,c,
+			   t1,i_oovv_abab,f_ov,t2_abab)
+		       -comp_t3b_ijkabc(oa,va,i,j,k,b,a,c,
+			   t1,i_oovv_abab,f_ov,t2_abab)
+		       -comp_t3b_ijkabc(oa,va,j,i,k,a,b,c,
+			   t1,i_oovv_abab,f_ov,t2_abab)
+		       +comp_t3b_ijkabc(oa,va,j,i,k,b,a,c,
+			   t1,i_oovv_abab,f_ov,t2_abab)
+		       +comp_t3b_ijkabc(oa,va,k,j,i,c,b,a,
+			   t1,i_oovv_aaaa,f_ov,t2_aaaa);
 		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
 		t3ax = t3ax1[a*va*va+b*va+c];
 		e_pt += t3ax * (t3ax-t3bx) / dn;
@@ -497,9 +493,9 @@ cc_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		double l1t, sigvvvl1, sigvvvr1;
-		double dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
+		double dn, l1t, sigvvvl1, sigvvvr1;
 
+		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
 		l1t = +i_jk_a_bc_ov_oovv(o,v,l1,i_oovv,i,j,k,a,b,c)
 		      +i_jk_a_bc_ov_oovv(o,v,f2_ov,l2,i,j,k,a,b,c);
 		sigvvvl1 = sigvvvl[a*v*v+b*v+c];
