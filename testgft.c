@@ -99,7 +99,7 @@ read_test_data(FILE *fp, size_t o, size_t v, double *d_ov, double *f2_ov,
 	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o*v*v*v; i++) {
+	for (i = 0; i < o*v*v*(v-1)/2; i++) {
 		i3_ovvv[i] = read_next_double(fp);
 	}
 	skip_line(fp);
@@ -109,7 +109,7 @@ read_test_data(FILE *fp, size_t o, size_t v, double *d_ov, double *f2_ov,
 	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o*v*v*v; i++) {
+	for (i = 0; i < o*v*v*(v-1)/2; i++) {
 		i7_ovvv[i] = read_next_double(fp);
 	}
 }
@@ -133,7 +133,7 @@ main(int argc, char **argv)
 		err(1, "fopen");
 	read_test_header(fp, &o, &v, &e_ref);
 
-	size = 3*o*v + 3*o*o*v*v + 2*o*o*o*v + 2*o*v*v*v;
+	size = 3*o*v + 3*o*o*v*v + 2*o*o*o*v + 2*o*v*v*(v-1)/2;
 	if ((d_ov = malloc(size * sizeof(double))) == NULL)
 		err(1, "malloc");
 	f2_ov = d_ov + o*v;
@@ -143,7 +143,7 @@ main(int argc, char **argv)
 	i_oovv = l2 + o*o*v*v;
 	i2_t2f2_oovo = i_oovv + o*o*v*v;
 	i3_ovvv = i2_t2f2_oovo + o*o*o*v;
-	i6_oovo = i3_ovvv + o*v*v*v;
+	i6_oovo = i3_ovvv + o*v*v*(v-1)/2;
 	i7_ovvv = i6_oovo + o*o*o*v;
 
 	read_test_data(fp, o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,

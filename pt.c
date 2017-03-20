@@ -118,20 +118,20 @@ asymm_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
 	       +abc3[c*v*v+b*v+a];
 }
 
-static double
-asymm_ijk_ab_c(size_t v, const double *abc1, const double *abc2,
-    const double *abc3, size_t a, size_t b, size_t c)
-{
-	return +abc1[a*v*v+b*v+c]
-	       -abc1[a*v*v+c*v+b]
-	       -abc1[c*v*v+b*v+a]
-	       -abc2[a*v*v+b*v+c]
-	       +abc2[a*v*v+c*v+b]
-	       +abc2[c*v*v+b*v+a]
-	       -abc3[a*v*v+b*v+c]
-	       +abc3[a*v*v+c*v+b]
-	       +abc3[c*v*v+b*v+a];
-}
+//static double
+//asymm_ijk_ab_c(size_t v, const double *abc1, const double *abc2,
+//    const double *abc3, size_t a, size_t b, size_t c)
+//{
+//	return +abc1[a*v*v+b*v+c]
+//	       -abc1[a*v*v+c*v+b]
+//	       -abc1[c*v*v+b*v+a]
+//	       -abc2[a*v*v+b*v+c]
+//	       +abc2[a*v*v+c*v+b]
+//	       +abc2[c*v*v+b*v+a]
+//	       -abc3[a*v*v+b*v+c]
+//	       +abc3[a*v*v+c*v+b]
+//	       +abc3[c*v*v+b*v+a];
+//}
 
 static double
 asymm_ijk_ab_c_half(size_t v, const double *abc1, const double *abc2,
@@ -450,14 +450,14 @@ cc_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		j = ij[2*it+1];
 	for (k = j+1; k < o; k++) {
 
-	t2_i_ovvv(o,v,i,j,k,abc1,l2,i7_ovvv);
-	t2_i_ovvv(o,v,k,j,i,abc2,l2,i7_ovvv);
-	t2_i_ovvv(o,v,i,k,j,abc3,l2,i7_ovvv);
+	t2_i_ovvv_half(o,v,i,j,k,abc1,l2,i7_ovvv);
+	t2_i_ovvv_half(o,v,k,j,i,abc2,l2,i7_ovvv);
+	t2_i_ovvv_half(o,v,i,k,j,abc3,l2,i7_ovvv);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		sigvvvl[a*v*v+b*v+c] =
-		    asymm_ijk_ab_c(v,abc1,abc2,abc3,a,b,c);
+		    asymm_ijk_ab_c_half(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
 	t2_i_oovo(o,v,i,j,k,abc1,l2,i6_oovo);
@@ -470,14 +470,14 @@ cc_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	t2_i_ovvv(o,v,i,j,k,abc1,t2,i3_ovvv);
-	t2_i_ovvv(o,v,k,j,i,abc2,t2,i3_ovvv);
-	t2_i_ovvv(o,v,i,k,j,abc3,t2,i3_ovvv);
+	t2_i_ovvv_half(o,v,i,j,k,abc1,t2,i3_ovvv);
+	t2_i_ovvv_half(o,v,k,j,i,abc2,t2,i3_ovvv);
+	t2_i_ovvv_half(o,v,i,k,j,abc3,t2,i3_ovvv);
 	for (a = 0; a < v; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		sigvvvr[a*v*v+b*v+c] =
-		    asymm_ijk_ab_c(v,abc1,abc2,abc3,a,b,c);
+		    asymm_ijk_ab_c_half(v,abc1,abc2,abc3,a,b,c);
 	}}}
 
 	t2_i_oovo(o,v,i,j,k,abc1,t2,i2_t2f2_oovo);
