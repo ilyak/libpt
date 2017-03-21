@@ -1,10 +1,9 @@
 # libpt
 
-Libpt is a fast hybrid MPI/OpenMP parallel implementation of the
-coupled-cluster (T) energy correction for clusters of computers and SMP
-systems. Due to hybrid design the code efficiently uses RAM by sharing data
-within a single node while using message-passing only for inter-node
-communication.
+Libpt is a fast MPI/OpenMP parallel implementation of the coupled-cluster (T)
+and (fT) energy corrections for clusters of computers and SMP systems. Due to
+hybrid parallel design the code efficiently uses RAM by sharing data within a
+single node while using message-passing only for inter-node communication.
 
 To use libpt in your project, include `pt.h` header and add `pt.c` to the list
 of project source files. OpenMP is enabled automatically when appropriate
