@@ -311,7 +311,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 }
 
 static double
-cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
+cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
     const double *d_ov_aa, const double *d_ov_bb,
     const double *f_ov_aa, const double *f_ov_bb,
     const double *t1_aa, const double *t1_bb,
@@ -451,7 +451,7 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 
 	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
 	    i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
-	e_pt2 = cc_pt_aab(oa, oa, va, va, d_ov, d_ov, f_ov, f_ov, t1, t1,
+	e_pt2 = cc_pt_aab(oa, va, oa, va, d_ov, d_ov, f_ov, f_ov, t1, t1,
 	    t2_aaaa, t2_abab, t2_abab, i_oovo_aaaa, i_oovo_abab, i_oovo_abab,
 	    i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab, i_ovvv_abab);
 
@@ -463,17 +463,52 @@ cc_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *f_ov, const double *t1, const double *t2,
     const double *i_oovo, const double *i_oovv, const double *i_ovvv)
 {
-	size_t o = oa + ob;
-	size_t v = va + vb;
+	double e_pt1, e_pt2, e_pt3, e_pt4;
+	const double *d_ov_aa = d_ov;
+	const double *d_ov_bb = d_ov_aa + oa*va;
+	const double *f_ov_aa = f_ov;
+	const double *f_ov_bb = f_ov_aa + oa*va;
+	const double *t1_aa = t1;
+	const double *t1_bb = t1_aa + oa*va;
 
-	if (o < 2 || v < 2)
-		return (0.0);
-	return cc_pt_aaa(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+	const double *t2_aaaa = t2;
+	const double *t2_abab = t2_aaaa + oa*oa*va*va;
+	const double *t2_bbbb = t2_abab + oa*ob*va*vb;
+	const double *t2_baba = t2_bbbb + ob*ob*vb*vb;
 
-	// e1 = cc_pt_aaa(aaaa);
-	// e2 = cc_pt_aaa(bbbb);
-	// e3 = cc_pt_aab(aaaa, abab);
-	// e4 = cc_pt_aab(bbbb, baba);
+	const double *i_ovvv_aaaa = i_ovvv;
+	const double *i_ovvv_abab = i_ovvv_aaaa + oa*va*va*(va-1)/2;
+	const double *i_ovvv_bbbb = i_ovvv_abab + oa*vb*va*vb;
+	const double *i_ovvv_baba = i_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
+
+	const double *i_oovo_aaaa = i_oovo;
+	const double *i_oovo_abab = i_oovo_aaaa + oa*oa*va*oa;
+	const double *i_oovo_bbbb = i_oovo_abab + oa*ob*va*ob;
+	const double *i_oovo_baba = i_oovo_bbbb + ob*ob*vb*ob;
+
+	const double *i_oovv_aaaa = i_oovv;
+	const double *i_oovv_abab = i_oovv_aaaa + oa*oa*va*va;
+	const double *i_oovv_bbbb = i_oovv_abab + oa*ob*va*vb;
+	const double *i_oovv_baba = i_oovv_bbbb + ob*ob*vb*vb;
+
+	/* aaaaaa */
+	e_pt1 = cc_pt_aaa(oa, va, d_ov_aa, f_ov_aa, t1_aa, t2_aaaa,
+	    i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
+	/* bbbbbb */
+	e_pt2 = cc_pt_aaa(ob, vb, d_ov_bb, f_ov_bb, t1_bb, t2_bbbb,
+	    i_oovo_bbbb, i_oovv_bbbb, i_ovvv_bbbb);
+	/* aabaab */
+	e_pt3 = cc_pt_aab(oa, va, ob, vb, d_ov_aa, d_ov_bb, f_ov_aa, f_ov_bb,
+	    t1_aa, t1_bb, t2_aaaa, t2_abab, t2_baba, i_oovo_aaaa, i_oovo_abab,
+	    i_oovo_baba, i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab,
+	    i_ovvv_baba);
+	/* bbabba */
+	e_pt4 = cc_pt_aab(ob, vb, oa, va, d_ov_bb, d_ov_aa, f_ov_bb, f_ov_aa,
+	    t1_bb, t1_aa, t2_bbbb, t2_baba, t2_abab, i_oovo_bbbb, i_oovo_baba,
+	    i_oovo_abab, i_oovv_bbbb, i_oovv_baba, i_ovvv_bbbb, i_ovvv_baba,
+	    i_ovvv_abab);
+
+	return (e_pt1 + e_pt2 + e_pt3 + e_pt4);
 }
 
 double
