@@ -62,8 +62,8 @@ double cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
  *
  * Arguments:
  *   oa - size of alpha spin-block occupied space
- *   ob - size of beta spin-block occupied space
  *   va - size of alpha spin-block virtual space
+ *   ob - size of beta spin-block occupied space
  *   vb - size of beta spin-block virtual space
  *   d_ov - Delta matrix (size o*v)
  *   f_ov - Fock matrix (size o*v)
@@ -83,7 +83,7 @@ double cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
  * References:
  *   J. Chem. Phys. 98, 8718 (1993); http://dx.doi.org/10.1063/1.464480
  */
-double cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
+double cc_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *f_ov, const double *t1, const double *t2,
     const double *i_oovo, const double *i_oovv, const double *i_ovvv);
 

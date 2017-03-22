@@ -395,7 +395,7 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 }
 
 double
-cc_upt(size_t oa, size_t ob, size_t va, size_t vb, const double *d_ov,
+cc_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *f_ov, const double *t1, const double *t2,
     const double *i_oovo, const double *i_oovv, const double *i_ovvv)
 {
