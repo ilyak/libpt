@@ -232,11 +232,14 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 
 static double
 cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
-    const double *d_ov, const double *f_ov, const double *t1,
-    const double *t2_aaaa, const double *t2_abab,
+    const double *d_ov_aa, const double *d_ov_bb,
+    const double *f_ov_aa, const double *f_ov_bb,
+    const double *t1_aa, const double *t1_bb,
+    const double *t2_aaaa, const double *t2_abab, const double *t2_baba,
     const double *i_oovo_aaaa, const double *i_oovo_abab,
-    const double *i_oovv_aaaa, const double *i_oovv_abab,
-    const double *i_ovvv_aaaa, const double *i_ovvv_abab)
+    const double *i_oovo_baba, const double *i_oovv_aaaa,
+    const double *i_oovv_abab, const double *i_ovvv_aaaa,
+    const double *i_ovvv_abab, const double *i_ovvv_baba)
 {
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
@@ -264,13 +267,13 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 		}
 	}
 
-	if ((t3ax1 = malloc(4*va*va*va*sizeof(double))) == NULL)
+	if ((t3ax1 = malloc(4*va*va*vb*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
-	abc1 = t3ax1 + 1*va*va*va;
-	abc2 = t3ax1 + 2*va*va*va;
-	abc3 = t3ax1 + 3*va*va*va;
-	abc11 = t3ax1 + 1*va*va*va;
-	abc12 = t3ax1 + 1*va*va*va + va*va*(va-1)/2;
+	abc1 = t3ax1 + 1*va*va*vb;
+	abc2 = t3ax1 + 2*va*va*vb;
+	abc3 = t3ax1 + 3*va*va*vb;
+	abc11 = t3ax1 + 1*va*va*vb;
+	abc12 = t3ax1 + 1*va*va*vb + vb*va*(va-1)/2;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -280,61 +283,61 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 		j = ij[2*it+1];
 	for (k = 0; k < ob; k++) {
 
-	t2_i_ovvv(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_abab);
+	t2_i_ovvv(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_baba);
 	t2_i_ovvv(oa,va,i,k,j,abc2,t2_abab,i_ovvv_abab);
 	t2_i_ovvv(oa,va,j,k,i,abc3,t2_abab,i_ovvv_abab);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
-		t3ax1[a*va*va+b*va+c] =
+		t3ax1[a*va*vb+b*vb+c] =
 		    -abc1[a+b*va+c*va*va]
 		    +abc1[b+a*va+c*va*va]
-		    -abc2[a+c*va+b*va*va]
-		    +abc2[b+c*va+a*va*va]
-		    +abc3[a+c*va+b*va*va]
-		    -abc3[b+c*va+a*va*va];
+		    -abc2[a+c*va+b*va*vb]
+		    +abc2[b+c*va+a*va*vb]
+		    +abc3[a+c*va+b*va*vb]
+		    -abc3[b+c*va+a*va*vb];
 	}}}
 
-	t2_i_ovvv_half(oa,va,k,j,i,abc11,t2_abab,i_ovvv_aaaa);
-	t2_i_ovvv_half(oa,va,k,i,j,abc12,t2_abab,i_ovvv_aaaa);
-	t2_i_oovo(oa,va,i,k,j,abc2,t2_aaaa,i_oovo_abab);
-	t2_i_oovo(oa,va,j,k,i,abc3,t2_aaaa,i_oovo_abab);
+	t2_i_ovvv_half(oa,va,k,j,i,abc11,t2_baba,i_ovvv_aaaa);
+	t2_i_ovvv_half(oa,va,k,i,j,abc12,t2_baba,i_ovvv_aaaa);
+	t2_i_oovo(oa,va,i,k,j,abc2,t2_aaaa,i_oovo_baba);
+	t2_i_oovo(oa,va,j,k,i,abc3,t2_aaaa,i_oovo_baba);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
-		t3ax1[a*va*va+b*va+c] +=
-		    -abc11[c+va*a*(a-1)/2+va*b]
-		    +abc12[c+va*a*(a-1)/2+va*b]
+		t3ax1[a*va*vb+b*vb+c] +=
+		    -abc11[c+vb*a*(a-1)/2+vb*b]
+		    +abc12[c+vb*a*(a-1)/2+vb*b]
 		    -abc2[b+a*va+c*va*va]
 		    +abc3[b+a*va+c*va*va];
 	}}}
 
 	t2_i_oovo(oa,va,i,j,k,abc1,t2_abab,i_oovo_abab);
 	t2_i_oovo(oa,va,j,i,k,abc2,t2_abab,i_oovo_abab);
-	t2_i_oovo(oa,va,k,j,i,abc3,t2_abab,i_oovo_aaaa);
+	t2_i_oovo(oa,va,k,j,i,abc3,t2_baba,i_oovo_aaaa);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
 		double t3ax, t3bx, dn;
 
-		t3ax1[a*va*va+b*va+c] += -abc1[c+a*va+b*va*va]
-					 +abc1[c+b*va+a*va*va]
-					 -abc2[c+b*va+a*va*va]
-					 +abc2[c+a*va+b*va*va]
-					 -abc3[a+c*va+b*va*va]
-					 +abc3[b+c*va+a*va*va];
+		t3ax1[a*va*vb+b*vb+c] += -abc1[c+a*vb+b*vb*va]
+					 +abc1[c+b*vb+a*vb*va]
+					 -abc2[c+b*vb+a*vb*va]
+					 +abc2[c+a*vb+b*vb*va]
+					 -abc3[a+c*va+b*va*vb]
+					 +abc3[b+c*va+a*va*vb];
 		t3bx = +comp_t3b_ijkabc(oa,va,i,j,k,a,b,c,
-			   t1,i_oovv_abab,f_ov,t2_abab)
+			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
 		       -comp_t3b_ijkabc(oa,va,i,j,k,b,a,c,
-			   t1,i_oovv_abab,f_ov,t2_abab)
+			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
 		       -comp_t3b_ijkabc(oa,va,j,i,k,a,b,c,
-			   t1,i_oovv_abab,f_ov,t2_abab)
+			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
 		       +comp_t3b_ijkabc(oa,va,j,i,k,b,a,c,
-			   t1,i_oovv_abab,f_ov,t2_abab)
+			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
 		       +comp_t3b_ijkabc(oa,va,k,j,i,c,b,a,
-			   t1,i_oovv_aaaa,f_ov,t2_aaaa);
-		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
-		t3ax = t3ax1[a*va*va+b*va+c];
+			   t1_bb,i_oovv_aaaa,f_ov_bb,t2_aaaa);
+		dn = d_ov_aa[i*va+a] + d_ov_aa[j*va+b] + d_ov_bb[k*vb+c];
+		t3ax = t3ax1[a*va*vb+b*vb+c];
 		e_pt += t3ax * (t3ax-t3bx) / dn;
 	}}}
 	}}
@@ -368,9 +371,9 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 
 	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
 	    i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
-	e_pt2 = cc_pt_aab(oa, oa, va, va, d_ov, f_ov, t1,
-	    t2_aaaa, t2_abab, i_oovo_aaaa, i_oovo_abab,
-	    i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab);
+	e_pt2 = cc_pt_aab(oa, oa, va, va, d_ov, d_ov, f_ov, f_ov, t1, t1,
+	    t2_aaaa, t2_abab, t2_abab, i_oovo_aaaa, i_oovo_abab, i_oovo_abab,
+	    i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab, i_ovvv_abab);
 
 	return 2.0 * (e_pt1 + e_pt2);
 }
