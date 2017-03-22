@@ -50,16 +50,35 @@ t2_i_ovvv_half(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static void
-t2_i_ovvv(size_t o, size_t v, size_t i, size_t j, size_t k,
-    double *abc, const double *t2, const double *i_ovvv)
+t2_aaaa_i_ovvv_baba(size_t oa, size_t va, size_t ob, size_t vb,
+    size_t i, size_t j, size_t k, double *abc, const double *t2,
+    const double *i_ovvv)
 {
-	const double *t2_p = &t2[i*o*v*v+j*v*v];
-	const double *i_ovvv_p = &i_ovvv[k*v*v*v];
+	const double *t2_p = &t2[i*oa*va*va+j*va*va];
+	const double *i_ovvv_p = &i_ovvv[k*va*vb*va];
+
+	(void)ob; /* unused */
 
 	/* out(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
-	gemm('T', 'T', v, v*v, v, 1.0, t2_p, v,
-	    i_ovvv_p, v*v, 0.0, abc, v);
+	gemm('T', 'T', va, va*vb, va, 1.0, t2_p, va,
+	    i_ovvv_p, va*vb, 0.0, abc, va);
+}
+
+static void
+t2_abab_i_ovvv_abab(size_t oa, size_t va, size_t ob, size_t vb,
+    size_t i, size_t j, size_t k, double *abc, const double *t2,
+    const double *i_ovvv)
+{
+	const double *t2_p = &t2[i*ob*va*vb+j*va*vb];
+	const double *i_ovvv_p = &i_ovvv[k*vb*va*vb];
+
+	(void)oa; /* unused */
+
+	/* out(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
+
+	gemm('T', 'T', vb, va*vb, vb, 1.0, t2_p, vb,
+	    i_ovvv_p, va*vb, 0.0, abc, vb);
 }
 
 static void
@@ -91,16 +110,13 @@ i_jk_a_bc_ov_oovv(size_t o, size_t v, const double *ov, const double *oovv,
 }
 
 static double
-comp_t3b_ijkabc(size_t o, size_t v, size_t i, size_t j, size_t k,
-    size_t a, size_t b, size_t c, const double *t1, const double *i_oovv,
-    const double *f_ov, const double *t2)
+comp_t3b_ijkabc(size_t v1, size_t o2, size_t v2a, size_t v2b,
+    size_t i, size_t j, size_t k, size_t a, size_t b, size_t c,
+    const double *t1, const double *i_oovv, const double *f_ov,
+    const double *t2)
 {
-	double t1_ia = t1[i*v+a];
-	double f_ov_ia = f_ov[i*v+a];
-	double t2_jkbc = t2[j*o*v*v+k*v*v+b*v+c];
-	double i_oovv_jkbc = i_oovv[j*o*v*v+k*v*v+b*v+c];
-
-	return t1_ia*i_oovv_jkbc + f_ov_ia*t2_jkbc;
+	return t1[i*v1+a] * i_oovv[j*o2*v2a*v2b+k*v2a*v2b+b*v2b+c] +
+	       f_ov[i*v1+a] * t2[j*o2*v2a*v2b+k*v2a*v2b+b*v2b+c];
 }
 
 static double
@@ -283,9 +299,9 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 		j = ij[2*it+1];
 	for (k = 0; k < ob; k++) {
 
-	t2_i_ovvv(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_baba);
-	t2_i_ovvv(oa,va,i,k,j,abc2,t2_abab,i_ovvv_abab);
-	t2_i_ovvv(oa,va,j,k,i,abc3,t2_abab,i_ovvv_abab);
+	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,t2_aaaa,i_ovvv_baba);
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc2,t2_abab,i_ovvv_abab);
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc3,t2_abab,i_ovvv_abab);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
@@ -326,15 +342,15 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 					 +abc2[c+a*vb+b*vb*va]
 					 -abc3[a+c*va+b*va*vb]
 					 +abc3[b+c*va+a*va*vb];
-		t3bx = +comp_t3b_ijkabc(oa,va,i,j,k,a,b,c,
+		t3bx = +comp_t3b_ijkabc(va,ob,va,vb,i,j,k,a,b,c,
 			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
-		       -comp_t3b_ijkabc(oa,va,i,j,k,b,a,c,
+		       -comp_t3b_ijkabc(va,ob,va,vb,i,j,k,b,a,c,
 			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
-		       -comp_t3b_ijkabc(oa,va,j,i,k,a,b,c,
+		       -comp_t3b_ijkabc(va,ob,va,vb,j,i,k,a,b,c,
 			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
-		       +comp_t3b_ijkabc(oa,va,j,i,k,b,a,c,
+		       +comp_t3b_ijkabc(va,ob,va,vb,j,i,k,b,a,c,
 			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
-		       +comp_t3b_ijkabc(oa,va,k,j,i,c,b,a,
+		       +comp_t3b_ijkabc(vb,oa,va,va,k,j,i,c,b,a,
 			   t1_bb,i_oovv_aaaa,f_ov_bb,t2_aaaa);
 		dn = d_ov_aa[i*va+a] + d_ov_aa[j*va+b] + d_ov_bb[k*vb+c];
 		t3ax = t3ax1[a*va*vb+b*vb+c];
