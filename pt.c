@@ -50,6 +50,22 @@ t2_i_ovvv_half(size_t o, size_t v, size_t i, size_t j, size_t k,
 }
 
 static void
+t2_baba_i_ovvv_aaaa_half(size_t oa, size_t va, size_t ob, size_t vb,
+    size_t i, size_t j, size_t k, double *abc, const double *t2,
+    const double *i_ovvv)
+{
+	const double *t2_p = &t2[i*oa*vb*va+j*vb*va];
+	const double *i_ovvv_p = &i_ovvv[k*va*va*(va-1)/2];
+
+	(void)ob; /* unused */
+
+	/* out(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
+
+	gemm('T', 'T', vb, va*(va-1)/2, va, 1.0, t2_p, va,
+	    i_ovvv_p, va*(va-1)/2, 0.0, abc, vb);
+}
+
+static void
 t2_aaaa_i_ovvv_baba(size_t oa, size_t va, size_t ob, size_t vb,
     size_t i, size_t j, size_t k, double *abc, const double *t2,
     const double *i_ovvv)
@@ -92,6 +108,54 @@ t2_i_oovo(size_t o, size_t v, size_t i, size_t j, size_t k,
 
 	gemm('N', 'N', v*v, v, o, 1.0, t2_p, v*v,
 	    i_oovo_p, o, 0.0, abc, v*v);
+}
+
+static void
+t2_aaaa_i_oovo_baba(size_t oa, size_t va, size_t ob, size_t vb,
+    size_t i, size_t j, size_t k, double *abc, const double *t2,
+    const double *i_oovo)
+{
+	const double *t2_p = &t2[i*oa*va*va];
+	const double *i_oovo_p = &i_oovo[j*oa*vb*oa+k*vb*oa];
+
+	(void)ob; /* unused */
+
+	/* out(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_oovo(j,k,c,l)) */
+
+	gemm('N', 'N', va*va, vb, oa, 1.0, t2_p, va*va,
+	    i_oovo_p, oa, 0.0, abc, va*va);
+}
+
+static void
+t2_abab_i_oovo_abab(size_t oa, size_t va, size_t ob, size_t vb,
+    size_t i, size_t j, size_t k, double *abc, const double *t2,
+    const double *i_oovo)
+{
+	const double *t2_p = &t2[i*ob*va*vb];
+	const double *i_oovo_p = &i_oovo[j*ob*va*ob+k*va*ob];
+
+	(void)oa; /* unused */
+
+	/* out(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_oovo(j,k,c,l)) */
+
+	gemm('N', 'N', va*vb, va, ob, 1.0, t2_p, va*vb,
+	    i_oovo_p, ob, 0.0, abc, va*vb);
+}
+
+static void
+t2_baba_i_oovo_aaaa(size_t oa, size_t va, size_t ob, size_t vb,
+    size_t i, size_t j, size_t k, double *abc, const double *t2,
+    const double *i_oovo)
+{
+	const double *t2_p = &t2[i*oa*vb*va];
+	const double *i_oovo_p = &i_oovo[j*oa*va*oa+k*va*oa];
+
+	(void)ob; /* unused */
+
+	/* out(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_oovo(j,k,c,l)) */
+
+	gemm('N', 'N', va*vb, va, oa, 1.0, t2_p, va*vb,
+	    i_oovo_p, oa, 0.0, abc, va*vb);
 }
 
 static double
@@ -314,10 +378,10 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 		    -abc3[b+c*va+a*va*vb];
 	}}}
 
-	t2_i_ovvv_half(oa,va,k,j,i,abc11,t2_baba,i_ovvv_aaaa);
-	t2_i_ovvv_half(oa,va,k,i,j,abc12,t2_baba,i_ovvv_aaaa);
-	t2_i_oovo(oa,va,i,k,j,abc2,t2_aaaa,i_oovo_baba);
-	t2_i_oovo(oa,va,j,k,i,abc3,t2_aaaa,i_oovo_baba);
+	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,j,i,abc11,t2_baba,i_ovvv_aaaa);
+	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,i,j,abc12,t2_baba,i_ovvv_aaaa);
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc2,t2_aaaa,i_oovo_baba);
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc3,t2_aaaa,i_oovo_baba);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
@@ -328,9 +392,9 @@ cc_pt_aab(size_t oa, size_t ob, size_t va, size_t vb,
 		    +abc3[b+a*va+c*va*va];
 	}}}
 
-	t2_i_oovo(oa,va,i,j,k,abc1,t2_abab,i_oovo_abab);
-	t2_i_oovo(oa,va,j,i,k,abc2,t2_abab,i_oovo_abab);
-	t2_i_oovo(oa,va,k,j,i,abc3,t2_baba,i_oovo_aaaa);
+	t2_abab_i_oovo_abab(oa,va,ob,vb,i,j,k,abc1,t2_abab,i_oovo_abab);
+	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc2,t2_abab,i_oovo_abab);
+	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc3,t2_baba,i_oovo_aaaa);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
