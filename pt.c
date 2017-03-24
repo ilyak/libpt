@@ -476,11 +476,6 @@ cc_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	const double *t2_bbbb = t2_abab + oa*ob*va*vb;
 	const double *t2_baba = t2_bbbb + ob*ob*vb*vb;
 
-	const double *i_ovvv_aaaa = i_ovvv;
-	const double *i_ovvv_abab = i_ovvv_aaaa + oa*va*va*(va-1)/2;
-	const double *i_ovvv_bbbb = i_ovvv_abab + oa*vb*va*vb;
-	const double *i_ovvv_baba = i_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
-
 	const double *i_oovo_aaaa = i_oovo;
 	const double *i_oovo_abab = i_oovo_aaaa + oa*oa*va*oa;
 	const double *i_oovo_bbbb = i_oovo_abab + oa*ob*va*ob;
@@ -490,6 +485,11 @@ cc_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	const double *i_oovv_abab = i_oovv_aaaa + oa*oa*va*va;
 	const double *i_oovv_bbbb = i_oovv_abab + oa*ob*va*vb;
 	const double *i_oovv_baba = i_oovv_bbbb + ob*ob*vb*vb;
+
+	const double *i_ovvv_aaaa = i_ovvv;
+	const double *i_ovvv_abab = i_ovvv_aaaa + oa*va*va*(va-1)/2;
+	const double *i_ovvv_bbbb = i_ovvv_abab + oa*vb*va*vb;
+	const double *i_ovvv_baba = i_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
 
 	/* aaaaaa */
 	e_pt1 = cc_pt_aaa(oa, va, d_ov_aa, f_ov_aa, t1_aa, t2_aaaa,
