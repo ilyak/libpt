@@ -93,8 +93,8 @@ t2_abab_i_ovvv_abab(size_t oa, size_t va, size_t ob, size_t vb,
 
 	/* out(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
-	gemm('T', 'T', vb, va*vb, vb, 1.0, t2_p, vb,
-	    i_ovvv_p, va*vb, 0.0, abc, vb);
+	gemm('T', 'T', va, va*vb, vb, 1.0, t2_p, vb,
+	    i_ovvv_p, va*vb, 0.0, abc, va);
 }
 
 static void
