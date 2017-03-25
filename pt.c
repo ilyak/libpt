@@ -446,9 +446,6 @@ cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	const double *i_oovv_aaaa = i_oovv;
 	const double *i_oovv_abab = i_oovv + oa*oa*va*va;
 
-	if (oa < 2 || va < 2)
-		return (0.0);
-
 	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
 	    i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
 	e_pt2 = cc_pt_aab(oa, va, oa, va, d_ov, d_ov, f_ov, f_ov, t1, t1,
