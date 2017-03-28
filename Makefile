@@ -43,9 +43,12 @@ check: testrpt testupt testrft testuft
 	@echo upt01 && ./testupt tests/upt01.dat && echo success
 	@echo upt02 && ./testupt tests/upt02.dat && echo success
 	@echo upt03 && ./testupt tests/upt03.dat && echo success
-	@echo gft01 && ./testuft tests/gft01.dat && echo success
-	@echo gft02 && ./testuft tests/gft02.dat && echo success
-	@echo gft03 && ./testuft tests/gft03.dat && echo success
+	@echo rft01 && ./testrft tests/rft01.dat && echo success
+	@echo rft02 && ./testrft tests/rft02.dat && echo success
+	@echo rft03 && ./testrft tests/rft03.dat && echo success
+	@echo uft01 && ./testuft tests/uft01.dat && echo success
+	@echo uft02 && ./testuft tests/uft02.dat && echo success
+	@echo uft03 && ./testuft tests/uft03.dat && echo success
 
 checkmpi: testrpt testupt testrft testuft
 	@echo rpt01 && mpirun -np 2 ./testrpt tests/rpt01.dat && echo success
@@ -60,9 +63,12 @@ checkmpi: testrpt testupt testrft testuft
 	@echo upt01 && mpirun -np 3 ./testupt tests/upt01.dat && echo success
 	@echo upt02 && mpirun -np 4 ./testupt tests/upt02.dat && echo success
 	@echo upt03 && mpirun -np 3 ./testupt tests/upt03.dat && echo success
-	@echo gft01 && mpirun -np 3 ./testuft tests/gft01.dat && echo success
-	@echo gft02 && mpirun -np 2 ./testuft tests/gft02.dat && echo success
-	@echo gft03 && mpirun -np 1 ./testuft tests/gft03.dat && echo success
+	@echo rft01 && mpirun -np 3 ./testrft tests/rft01.dat && echo success
+	@echo rft02 && mpirun -np 2 ./testrft tests/rft02.dat && echo success
+	@echo rft03 && mpirun -np 1 ./testrft tests/rft03.dat && echo success
+	@echo uft01 && mpirun -np 3 ./testuft tests/uft01.dat && echo success
+	@echo uft02 && mpirun -np 2 ./testuft tests/uft02.dat && echo success
+	@echo uft03 && mpirun -np 3 ./testuft tests/uft03.dat && echo success
 
 clean:
 	rm -f testrpt testupt testrft testuft gmon.out *.core *.log *.o
