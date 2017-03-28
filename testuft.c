@@ -424,7 +424,7 @@ main(int argc, char **argv)
 	    ob*vb*vb*(vb-1)/2;
 	if ((d_ov = malloc(d_ov_sz * sizeof(double))) == NULL)
 		err(1, "malloc");
-	if ((f2_ov = malloc(d_ov_sz * sizeof(double))) == NULL)
+	if ((f2_ov = malloc(f2_ov_sz * sizeof(double))) == NULL)
 		err(1, "malloc");
 	if ((l1 = malloc(l1_sz * sizeof(double))) == NULL)
 		err(1, "malloc");
