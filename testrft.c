@@ -56,12 +56,285 @@ read_next_double(FILE *fp)
 }
 
 static void
-read_test_data(FILE *fp, size_t o, size_t v, double *d_ov, double *f2_ov,
+read_test_data(FILE *fp, size_t oa, size_t va, double *d_ov, double *f2_ov,
     double *l1, double *t2, double *l2, double *i_oovv, double *i2_t2f2_oovo,
     double *i3_ovvv, double *i6_oovo, double *i7_ovvv)
 {
-	size_t i;
+	size_t i, j, k, a, b, c;
+	size_t ob = oa, vb = va, o = 2*oa, v = 2*va;
+	size_t x = o > v ? o : v;
+	double *tmp;
 
+	if ((tmp = malloc(x*x*x*x*sizeof(*tmp))) == NULL)
+		err(1, "malloc");
+
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa; i++) {
+		for (j = 0; j < va; j++)
+			*d_ov++ = read_next_double(fp);
+		for (j = 0; j < vb; j++)
+			read_next_double(fp);
+	}
+	for (i = 0; i < ob; i++) {
+		for (j = 0; j < va; j++)
+			read_next_double(fp);
+		for (j = 0; j < vb; j++)
+			/* *d_ov++ = */read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa; i++) {
+		for (j = 0; j < va; j++)
+			*f2_ov++ = read_next_double(fp);
+		for (j = 0; j < vb; j++)
+			read_next_double(fp);
+	}
+	for (i = 0; i < ob; i++) {
+		for (j = 0; j < va; j++)
+			read_next_double(fp);
+		for (j = 0; j < vb; j++)
+			/* *f2_ov++ = */read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa; i++) {
+		for (j = 0; j < va; j++)
+			*l1++ = read_next_double(fp);
+		for (j = 0; j < vb; j++)
+			read_next_double(fp);
+	}
+	for (i = 0; i < ob; i++) {
+		for (j = 0; j < va; j++)
+			read_next_double(fp);
+		for (j = 0; j < vb; j++)
+			/* *l1++ = */read_next_double(fp);
+	}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		tmp[i] = read_next_double(fp);
+	}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < oa; j++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < va; b++) {
+		*t2++ = tmp[i*o*v*v+j*v*v+a*v+b];
+	}}}}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < ob; j++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < vb; b++) {
+		*t2++ = tmp[i*o*v*v+(j+oa)*v*v+a*v+(b+va)];
+	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < ob; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (b = 0; b < vb; b++) {
+//		*t2++ = tmp[(i+oa)*o*v*v+(j+oa)*v*v+(a+va)*v+(b+va)];
+//	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < oa; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (b = 0; b < va; b++) {
+//		*t2++ = tmp[(i+oa)*o*v*v+j*v*v+(a+va)*v+b];
+//	}}}}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		tmp[i] = read_next_double(fp);
+	}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < oa; j++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < va; b++) {
+		*l2++ = tmp[i*o*v*v+j*v*v+a*v+b];
+	}}}}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < ob; j++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < vb; b++) {
+		*l2++ = tmp[i*o*v*v+(j+oa)*v*v+a*v+(b+va)];
+	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < ob; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (b = 0; b < vb; b++) {
+//		*l2++ = tmp[(i+oa)*o*v*v+(j+oa)*v*v+(a+va)*v+(b+va)];
+//	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < oa; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (b = 0; b < va; b++) {
+//		*l2++ = tmp[(i+oa)*o*v*v+j*v*v+(a+va)*v+b];
+//	}}}}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*v; i++) {
+		tmp[i] = read_next_double(fp);
+	}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < oa; j++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < va; b++) {
+		*i_oovv++ = tmp[i*o*v*v+j*v*v+a*v+b];
+	}}}}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < ob; j++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < vb; b++) {
+		*i_oovv++ = tmp[i*o*v*v+(j+oa)*v*v+a*v+(b+va)];
+	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < ob; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (b = 0; b < vb; b++) {
+//		*i_oovv++ = tmp[(i+oa)*o*v*v+(j+oa)*v*v+(a+va)*v+(b+va)];
+//	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < oa; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (b = 0; b < va; b++) {
+//		*i_oovv++ = tmp[(i+oa)*o*v*v+j*v*v+(a+va)*v+b];
+//	}}}}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*o; i++) {
+		tmp[i] = read_next_double(fp);
+	}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < oa; j++) {
+	for (a = 0; a < va; a++) {
+	for (k = 0; k < oa; k++) {
+		*i2_t2f2_oovo++ = tmp[i*o*v*o+j*v*o+a*o+k];
+	}}}}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < ob; j++) {
+	for (a = 0; a < va; a++) {
+	for (k = 0; k < ob; k++) {
+		*i2_t2f2_oovo++ = tmp[i*o*v*o+(j+oa)*v*o+a*o+(k+oa)];
+	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < ob; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (k = 0; k < ob; k++) {
+//		*i2_t2f2_oovo++ = tmp[(i+oa)*o*v*o+(j+oa)*v*o+(a+va)*o+(k+oa)];
+//	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < oa; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (k = 0; k < oa; k++) {
+//		*i2_t2f2_oovo++ = tmp[(i+oa)*o*v*o+j*v*o+(a+va)*o+k];
+//	}}}}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < b; c++) {
+		double t = read_next_double(fp);
+		tmp[i*v*v*v+a*v*v+b*v+c] = t;
+		tmp[i*v*v*v+a*v*v+c*v+b] = -t;
+	}}}}
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+		tmp[i*v*v*v+a*v*v+b*v+b] = 0;
+	}}}
+	for (i = 0; i < oa; i++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < va; b++) {
+	for (c = 0; c < b; c++) {
+		*i3_ovvv++ = tmp[i*v*v*v+a*v*v+b*v+c];
+	}}}}
+	for (i = 0; i < oa; i++) {
+	for (a = 0; a < vb; a++) {
+	for (b = 0; b < va; b++) {
+	for (c = 0; c < vb; c++) {
+		*i3_ovvv++ = tmp[i*v*v*v+(a+va)*v*v+b*v+(c+va)];
+	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (a = 0; a < vb; a++) {
+//	for (b = 0; b < vb; b++) {
+//	for (c = 0; c < b; c++) {
+//		*i3_ovvv++ = tmp[(i+oa)*v*v*v+(a+va)*v*v+(b+va)*v+(c+va)];
+//	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (a = 0; a < va; a++) {
+//	for (b = 0; b < vb; b++) {
+//	for (c = 0; c < va; c++) {
+//		*i3_ovvv++ = tmp[(i+oa)*v*v*v+a*v*v+(b+va)*v+c];
+//	}}}}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o*o*v*o; i++) {
+		tmp[i] = read_next_double(fp);
+	}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < oa; j++) {
+	for (a = 0; a < va; a++) {
+	for (k = 0; k < oa; k++) {
+		*i6_oovo++ = tmp[i*o*v*o+j*v*o+a*o+k];
+	}}}}
+	for (i = 0; i < oa; i++) {
+	for (j = 0; j < ob; j++) {
+	for (a = 0; a < va; a++) {
+	for (k = 0; k < ob; k++) {
+		*i6_oovo++ = tmp[i*o*v*o+(j+oa)*v*o+a*o+(k+oa)];
+	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < ob; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (k = 0; k < ob; k++) {
+//		*i6_oovo++ = tmp[(i+oa)*o*v*o+(j+oa)*v*o+(a+va)*o+(k+oa)];
+//	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (j = 0; j < oa; j++) {
+//	for (a = 0; a < vb; a++) {
+//	for (k = 0; k < oa; k++) {
+//		*i6_oovo++ = tmp[(i+oa)*o*v*o+j*v*o+(a+va)*o+k];
+//	}}}}
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+	for (c = 0; c < b; c++) {
+		double t = read_next_double(fp);
+		tmp[i*v*v*v+a*v*v+b*v+c] = t;
+		tmp[i*v*v*v+a*v*v+c*v+b] = -t;
+	}}}}
+	for (i = 0; i < o; i++) {
+	for (a = 0; a < v; a++) {
+	for (b = 0; b < v; b++) {
+		tmp[i*v*v*v+a*v*v+b*v+b] = 0;
+	}}}
+	for (i = 0; i < oa; i++) {
+	for (a = 0; a < va; a++) {
+	for (b = 0; b < va; b++) {
+	for (c = 0; c < b; c++) {
+		*i7_ovvv++ = tmp[i*v*v*v+a*v*v+b*v+c];
+	}}}}
+	for (i = 0; i < oa; i++) {
+	for (a = 0; a < vb; a++) {
+	for (b = 0; b < va; b++) {
+	for (c = 0; c < vb; c++) {
+		*i7_ovvv++ = tmp[i*v*v*v+(a+va)*v*v+b*v+(c+va)];
+	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (a = 0; a < vb; a++) {
+//	for (b = 0; b < vb; b++) {
+//	for (c = 0; c < b; c++) {
+//		*i7_ovvv++ = tmp[(i+oa)*v*v*v+(a+va)*v*v+(b+va)*v+(c+va)];
+//	}}}}
+//	for (i = 0; i < ob; i++) {
+//	for (a = 0; a < va; a++) {
+//	for (b = 0; b < vb; b++) {
+//	for (c = 0; c < va; c++) {
+//		*i7_ovvv++ = tmp[(i+oa)*v*v*v+a*v*v+(b+va)*v+c];
+//	}}}}
+	free(tmp);
+/*
 	skip_line(fp);
 	skip_line(fp);
 	for (i = 0; i < o*v; i++) {
@@ -112,6 +385,7 @@ read_test_data(FILE *fp, size_t o, size_t v, double *d_ov, double *f2_ov,
 	for (i = 0; i < o*v*v*(v-1)/2; i++) {
 		i7_ovvv[i] = read_next_double(fp);
 	}
+*/
 }
 
 int
@@ -133,18 +407,18 @@ main(int argc, char **argv)
 		err(1, "fopen");
 	read_test_header(fp, &o, &v, &e_ref);
 
-	size = 3*o*v + 3*o*o*v*v + 2*o*o*o*v + 2*o*v*v*(v-1)/2;
+	size = 3*o*v + 6*o*o*v*v + 4*o*o*o*v + 2*o*v*v*v + 2*o*v*v*(v-1)/2;
 	if ((d_ov = malloc(size * sizeof(double))) == NULL)
 		err(1, "malloc");
 	f2_ov = d_ov + o*v;
 	l1 = f2_ov + o*v;
 	t2 = l1 + o*v;
-	l2 = t2 + o*o*v*v;
-	i_oovv = l2 + o*o*v*v;
-	i2_t2f2_oovo = i_oovv + o*o*v*v;
-	i3_ovvv = i2_t2f2_oovo + o*o*o*v;
-	i6_oovo = i3_ovvv + o*v*v*(v-1)/2;
-	i7_ovvv = i6_oovo + o*o*o*v;
+	l2 = t2 + 2*o*o*v*v;
+	i_oovv = l2 + 2*o*o*v*v;
+	i2_t2f2_oovo = i_oovv + 2*o*o*v*v;
+	i3_ovvv = i2_t2f2_oovo + 2*o*o*o*v;
+	i6_oovo = i3_ovvv + o*v*v*(v-1)/2 + o*v*v*v;
+	i7_ovvv = i6_oovo + 2*o*o*o*v;
 
 	read_test_data(fp, o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
