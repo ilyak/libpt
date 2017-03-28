@@ -50,7 +50,7 @@ extern "C" {
  * References:
  *   J. Chem. Phys. 98, 8718 (1993); http://dx.doi.org/10.1063/1.464480
  */
-double cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
+double libpt_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv);
 
@@ -83,7 +83,7 @@ double cc_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
  * References:
  *   J. Chem. Phys. 98, 8718 (1993); http://dx.doi.org/10.1063/1.464480
  */
-double cc_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
+double libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *f_ov, const double *t1, const double *t2,
     const double *i_oovo, const double *i_oovv, const double *i_ovvv);
 
@@ -111,7 +111,7 @@ double cc_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
  * References:
  *   J. Chem. Phys. 129, 194105 (2008); http://dx.doi.org/10.1063/1.3013087
  */
-double cc_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
+double libpt_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
     const double *l1, const double *t2, const double *l2, const double *i_oovv,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv);

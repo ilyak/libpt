@@ -409,11 +409,11 @@ main(int argc, char **argv)
 	    i_oovv, i_ovvv);
 	fclose(fp);
 
-	e_cmp = cc_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2, i_oovo,
+	e_cmp = libpt_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2, i_oovo,
 	    i_oovv, i_ovvv);
 	if (rank == 0) {
-		printf("cc_upt energy: % .8lf\n", e_cmp);
-		printf("cc_upt ref:    % .8lf\n", e_ref);
+		printf("upt energy: % .8lf\n", e_cmp);
+		printf("upt ref:    % .8lf\n", e_ref);
 	}
 	free(d_ov);
 	free(f_ov);

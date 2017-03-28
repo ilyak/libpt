@@ -150,10 +150,10 @@ main(int argc, char **argv)
 	read_test_data(fp, o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
 	fclose(fp);
 
-	e_cmp = cc_rpt(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+	e_cmp = libpt_rpt(o, v, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
 	if (rank == 0) {
-		printf("cc_rpt energy: % .8lf\n", e_cmp);
-		printf("cc_rpt ref:    % .8lf\n", e_ref);
+		printf("rpt energy: % .8lf\n", e_cmp);
+		printf("rpt ref:    % .8lf\n", e_ref);
 	}
 	free(d_ov);
 #ifdef WITH_MPI
