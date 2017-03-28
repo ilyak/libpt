@@ -150,11 +150,11 @@ main(int argc, char **argv)
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	fclose(fp);
 
-	e_cmp = libpt_gft(o, v, d_ov, f2_ov, l1, t2, l2, i_oovv,
+	e_cmp = libpt_uft(o, v, 0, 0, d_ov, f2_ov, l1, t2, l2, i_oovv,
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	if (rank == 0) {
-		printf("gft energy: % .8lf\n", e_cmp);
-		printf("gft ref:    % .8lf\n", e_ref);
+		printf("uft energy: % .8lf\n", e_cmp);
+		printf("uft ref:    % .8lf\n", e_ref);
 	}
 	free(d_ov);
 #ifdef WITH_MPI

@@ -16,7 +16,7 @@ LIBS= -lblas -lg2c -lm
 #LDFLAGS=
 #LIBS=
 
-all: testrpt testupt testgft
+all: testrpt testupt testrft testuft
 
 testrpt: pt.o testrpt.o
 	$(CC) -o $@ $(CFLAGS) pt.o testrpt.o $(LDFLAGS) $(LIBS)
@@ -24,10 +24,13 @@ testrpt: pt.o testrpt.o
 testupt: pt.o testupt.o
 	$(CC) -o $@ $(CFLAGS) pt.o testupt.o $(LDFLAGS) $(LIBS)
 
-testgft: pt.o testgft.o
-	$(CC) -o $@ $(CFLAGS) pt.o testgft.o $(LDFLAGS) $(LIBS)
+testrft: pt.o testrft.o
+	$(CC) -o $@ $(CFLAGS) pt.o testrft.o $(LDFLAGS) $(LIBS)
 
-check: testrpt testupt testgft
+testuft: pt.o testuft.o
+	$(CC) -o $@ $(CFLAGS) pt.o testuft.o $(LDFLAGS) $(LIBS)
+
+check: testrpt testupt testrft testuft
 	@echo rpt01 && ./testrpt tests/rpt01.dat && echo success
 	@echo rpt02 && ./testrpt tests/rpt02.dat && echo success
 	@echo rpt03 && ./testrpt tests/rpt03.dat && echo success
@@ -40,11 +43,11 @@ check: testrpt testupt testgft
 	@echo upt01 && ./testupt tests/upt01.dat && echo success
 	@echo upt02 && ./testupt tests/upt02.dat && echo success
 	@echo upt03 && ./testupt tests/upt03.dat && echo success
-	@echo gft01 && ./testgft tests/gft01.dat && echo success
-	@echo gft02 && ./testgft tests/gft02.dat && echo success
-	@echo gft03 && ./testgft tests/gft03.dat && echo success
+	@echo gft01 && ./testuft tests/gft01.dat && echo success
+	@echo gft02 && ./testuft tests/gft02.dat && echo success
+	@echo gft03 && ./testuft tests/gft03.dat && echo success
 
-checkmpi: testrpt testupt testgft
+checkmpi: testrpt testupt testrft testuft
 	@echo rpt01 && mpirun -np 2 ./testrpt tests/rpt01.dat && echo success
 	@echo rpt02 && mpirun -np 3 ./testrpt tests/rpt02.dat && echo success
 	@echo rpt03 && mpirun -np 4 ./testrpt tests/rpt03.dat && echo success
@@ -57,11 +60,11 @@ checkmpi: testrpt testupt testgft
 	@echo upt01 && mpirun -np 3 ./testupt tests/upt01.dat && echo success
 	@echo upt02 && mpirun -np 4 ./testupt tests/upt02.dat && echo success
 	@echo upt03 && mpirun -np 3 ./testupt tests/upt03.dat && echo success
-	@echo gft01 && mpirun -np 3 ./testgft tests/gft01.dat && echo success
-	@echo gft02 && mpirun -np 2 ./testgft tests/gft02.dat && echo success
-	@echo gft03 && mpirun -np 1 ./testgft tests/gft03.dat && echo success
+	@echo gft01 && mpirun -np 3 ./testuft tests/gft01.dat && echo success
+	@echo gft02 && mpirun -np 2 ./testuft tests/gft02.dat && echo success
+	@echo gft03 && mpirun -np 1 ./testuft tests/gft03.dat && echo success
 
 clean:
-	rm -f testrpt testupt testgft gmon.out *.core *.log *.o
+	rm -f testrpt testupt testrft testuft gmon.out *.core *.log *.o
 
 .PHONY: all check checkmpi clean

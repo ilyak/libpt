@@ -111,10 +111,39 @@ double libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
  * References:
  *   J. Chem. Phys. 129, 194105 (2008); http://dx.doi.org/10.1063/1.3013087
  */
-double libpt_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
+double libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
     const double *l1, const double *t2, const double *l2, const double *i_oovv,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv);
+
+/* Compute coupled-cluster (fT) ground state energy correction in parallel for
+ * the restricted and unrestricted cases.
+ *
+ * This routine is MPI/OpenMP parallel. All MPI processes must receive same
+ * input data.
+ *
+ * o - size of the occupied space
+ * v - size of the virtual space
+ *
+ * See the reference paper for the description of the intermediates passed to
+ * this function as arguments.
+ *
+ * i3_ovvv and i7_ovvv should be stored with symmetry (size o*v*v*(v-1)/2)
+ *
+ * All arrays should be arranged contiguously in memory by last index first.
+ * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
+ * d_ov[o=0,v=1], d_ov[o=0,v=2], and so forth. The tensors are expected to
+ * be properly (anti-)symmetrized.
+ *
+ * The function returns the coupled-cluster (fT) energy correction.
+ *
+ * References:
+ *   J. Chem. Phys. 129, 194105 (2008); http://dx.doi.org/10.1063/1.3013087
+ */
+double libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
+    const double *f2_ov, const double *l1, const double *t2, const double *l2,
+    const double *i_oovv, const double *i2_t2f2_oovo, const double *i3_ovvv,
+    const double *i6_oovo, const double *i7_ovvv);
 
 #ifdef __cplusplus
 } /* extern "C" */

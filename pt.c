@@ -508,8 +508,8 @@ libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	return (e_pt1 + e_pt2 + e_pt3 + e_pt4);
 }
 
-double
-libpt_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
+static double
+cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
     const double *l1, const double *t2, const double *l2, const double *i_oovv,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv)
@@ -528,10 +528,10 @@ libpt_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
 	double *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3;
 
-	if ((ij = malloc(o*(o-1)*sizeof(size_t))) == NULL)
+	if ((ij = malloc(oa*(oa-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
-	for (i = 0, it = 0; i < o; i++) {
-		for (j = i+1; j < o; j++, it++) {
+	for (i = 0, it = 0; i < oa; i++) {
+		for (j = i+1; j < oa; j++, it++) {
 			if ((int)it % size == rank) {
 				ij[2*nij+0] = i;
 				ij[2*nij+1] = j;
@@ -540,12 +540,12 @@ libpt_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 		}
 	}
 
-	if ((sigvvvl = malloc(5*v*v*v*sizeof(*sigvvvl))) == NULL)
+	if ((sigvvvl = malloc(5*va*va*va*sizeof(*sigvvvl))) == NULL)
 		err(1, "libpt malloc work");
-	sigvvvr = sigvvvl + v*v*v;
-	abc1 = sigvvvl + 2*v*v*v;
-	abc2 = sigvvvl + 3*v*v*v;
-	abc3 = sigvvvl + 4*v*v*v;
+	sigvvvr = sigvvvl + va*va*va;
+	abc1 = sigvvvl + 2*va*va*va;
+	abc2 = sigvvvl + 3*va*va*va;
+	abc3 = sigvvvl + 4*va*va*va;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -553,53 +553,53 @@ libpt_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 	for (it = 0; it < nij; it++) {
 		i = ij[2*it+0];
 		j = ij[2*it+1];
-	for (k = j+1; k < o; k++) {
+	for (k = j+1; k < oa; k++) {
 
-	t2_i_ovvv_half(o,v,i,j,k,abc1,l2,i7_ovvv);
-	t2_i_ovvv_half(o,v,k,j,i,abc2,l2,i7_ovvv);
-	t2_i_ovvv_half(o,v,i,k,j,abc3,l2,i7_ovvv);
-	for (a = 0; a < v; a++) {
+	t2_i_ovvv_half(oa,va,i,j,k,abc1,l2,i7_ovvv);
+	t2_i_ovvv_half(oa,va,k,j,i,abc2,l2,i7_ovvv);
+	t2_i_ovvv_half(oa,va,i,k,j,abc3,l2,i7_ovvv);
+	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		sigvvvl[a*v*v+b*v+c] =
-		    asymm_ijk_ab_c_half(v,abc1,abc2,abc3,a,b,c);
+		sigvvvl[a*va*va+b*va+c] =
+		    asymm_ijk_ab_c_half(va,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	t2_i_oovo(o,v,i,j,k,abc1,l2,i6_oovo);
-	t2_i_oovo(o,v,j,i,k,abc2,l2,i6_oovo);
-	t2_i_oovo(o,v,k,j,i,abc3,l2,i6_oovo);
-	for (a = 0; a < v; a++) {
+	t2_i_oovo(oa,va,i,j,k,abc1,l2,i6_oovo);
+	t2_i_oovo(oa,va,j,i,k,abc2,l2,i6_oovo);
+	t2_i_oovo(oa,va,k,j,i,abc3,l2,i6_oovo);
+	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		sigvvvl[a*v*v+b*v+c] +=
-		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
+		sigvvvl[a*va*va+b*va+c] +=
+		    asymm_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	t2_i_ovvv_half(o,v,i,j,k,abc1,t2,i3_ovvv);
-	t2_i_ovvv_half(o,v,k,j,i,abc2,t2,i3_ovvv);
-	t2_i_ovvv_half(o,v,i,k,j,abc3,t2,i3_ovvv);
-	for (a = 0; a < v; a++) {
+	t2_i_ovvv_half(oa,va,i,j,k,abc1,t2,i3_ovvv);
+	t2_i_ovvv_half(oa,va,k,j,i,abc2,t2,i3_ovvv);
+	t2_i_ovvv_half(oa,va,i,k,j,abc3,t2,i3_ovvv);
+	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		sigvvvr[a*v*v+b*v+c] =
-		    asymm_ijk_ab_c_half(v,abc1,abc2,abc3,a,b,c);
+		sigvvvr[a*va*va+b*va+c] =
+		    asymm_ijk_ab_c_half(va,abc1,abc2,abc3,a,b,c);
 	}}}
 
-	t2_i_oovo(o,v,i,j,k,abc1,t2,i2_t2f2_oovo);
-	t2_i_oovo(o,v,j,i,k,abc2,t2,i2_t2f2_oovo);
-	t2_i_oovo(o,v,k,j,i,abc3,t2,i2_t2f2_oovo);
-	for (a = 0; a < v; a++) {
+	t2_i_oovo(oa,va,i,j,k,abc1,t2,i2_t2f2_oovo);
+	t2_i_oovo(oa,va,j,i,k,abc2,t2,i2_t2f2_oovo);
+	t2_i_oovo(oa,va,k,j,i,abc3,t2,i2_t2f2_oovo);
+	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		double dn, l1t, sigvvvl1, sigvvvr1;
 
-		sigvvvr[a*v*v+b*v+c] +=
-		    asymm_ijk_a_bc(v,abc1,abc2,abc3,a,b,c);
-		dn = d_ov[i*v+a] + d_ov[j*v+b] + d_ov[k*v+c];
-		l1t = +i_jk_a_bc_ov_oovv(o,v,l1,i_oovv,i,j,k,a,b,c)
-		      +i_jk_a_bc_ov_oovv(o,v,f2_ov,l2,i,j,k,a,b,c);
-		sigvvvl1 = sigvvvl[a*v*v+b*v+c];
-		sigvvvr1 = sigvvvr[a*v*v+b*v+c];
+		sigvvvr[a*va*va+b*va+c] +=
+		    asymm_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
+		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
+		l1t = +i_jk_a_bc_ov_oovv(oa,va,l1,i_oovv,i,j,k,a,b,c)
+		      +i_jk_a_bc_ov_oovv(oa,va,f2_ov,l2,i,j,k,a,b,c);
+		sigvvvl1 = sigvvvl[a*va*va+b*va+c];
+		sigvvvr1 = sigvvvr[a*va*va+b*va+c];
 		e_pt += (sigvvvl1 - l1t) * sigvvvr1 / dn;
 	}}}
 	}}
@@ -611,4 +611,26 @@ libpt_gft(size_t o, size_t v, const double *d_ov, const double *f2_ov,
 	    MPI_SUM, MPI_COMM_WORLD);
 #endif
 	return (e_pt);
+}
+
+double
+libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
+    const double *l1, const double *t2, const double *l2, const double *i_oovv,
+    const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
+    const double *i7_ovvv)
+{
+	return cc_ft_aaa(oa, va, d_ov, f2_ov, l1, t2, l2, i_oovv,
+	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
+}
+
+double
+libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
+    const double *f2_ov, const double *l1, const double *t2, const double *l2,
+    const double *i_oovv, const double *i2_t2f2_oovo, const double *i3_ovvv,
+    const double *i6_oovo, const double *i7_ovvv)
+{
+	(void)ob;
+	(void)vb;
+	return cc_ft_aaa(oa, va, d_ov, f2_ov, l1, t2, l2, i_oovv,
+	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 }
