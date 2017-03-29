@@ -336,58 +336,6 @@ read_test_data(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
 		*i7_ovvv++ = tmp[(i+oa)*v*v*v+a*v*v+(b+va)*v+c];
 	}}}}
 	free(tmp);
-/*
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*v; i++) {
-		d_ov[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*v; i++) {
-		f2_ov[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*v; i++) {
-		l1[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*o*v*v; i++) {
-		t2[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*o*v*v; i++) {
-		l2[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*o*v*v; i++) {
-		i_oovv[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*o*v*o; i++) {
-		i2_t2f2_oovo[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*v*v*(v-1)/2; i++) {
-		i3_ovvv[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*o*v*o; i++) {
-		i6_oovo[i] = read_next_double(fp);
-	}
-	skip_line(fp);
-	skip_line(fp);
-	for (i = 0; i < o*v*v*(v-1)/2; i++) {
-		i7_ovvv[i] = read_next_double(fp);
-	}
-*/
 }
 
 int
