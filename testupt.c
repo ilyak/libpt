@@ -394,16 +394,6 @@ main(int argc, char **argv)
 		err(1, "malloc");
 	if ((i_ovvv = malloc(i_ovvv_sz * sizeof(double))) == NULL)
 		err(1, "malloc");
-//	size = d_ov_sz + f_ov_sz + t1_sz + t2_sz +
-//	    i_oovo_sz + i_oovv_sz + i_ovvv_sz;
-//	if ((d_ov = malloc(size * sizeof(double))) == NULL)
-//		err(1, "malloc");
-//	f_ov = d_ov + d_ov_sz;
-//	t1 = f_ov + f_ov_sz;
-//	t2 = t1 + t1_sz;
-//	i_oovo = t2 + t2_sz;
-//	i_oovv = i_oovo + i_oovo_sz;
-//	i_ovvv = i_oovv + i_oovv_sz;
 
 	read_test_data(fp, oa, va, ob, vb, d_ov, f_ov, t1, t2, i_oovo,
 	    i_oovv, i_ovvv);
