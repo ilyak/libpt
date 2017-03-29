@@ -198,21 +198,6 @@ asymm_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
 	       +abc3[c*v*v+b*v+a];
 }
 
-//static double
-//asymm_ijk_ab_c(size_t v, const double *abc1, const double *abc2,
-//    const double *abc3, size_t a, size_t b, size_t c)
-//{
-//	return +abc1[a*v*v+b*v+c]
-//	       -abc1[a*v*v+c*v+b]
-//	       -abc1[c*v*v+b*v+a]
-//	       -abc2[a*v*v+b*v+c]
-//	       +abc2[a*v*v+c*v+b]
-//	       +abc2[c*v*v+b*v+a]
-//	       -abc3[a*v*v+b*v+c]
-//	       +abc3[a*v*v+c*v+b]
-//	       +abc3[c*v*v+b*v+a];
-//}
-
 static double
 asymm_ijk_ab_c_half(size_t v, const double *abc1, const double *abc2,
     const double *abc3, size_t a, size_t b, size_t c)
