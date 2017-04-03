@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-/* Compute closed-shell coupled-cluster (T) energy correction in parallel.
+/* Compute coupled-cluster (T) energy correction for the restricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
@@ -57,8 +57,7 @@ double libpt_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv);
 
-/* Compute coupled-cluster (T) energy correction in parallel for the
- * unrestricted case.
+/* Compute coupled-cluster (T) energy correction for the unrestricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
@@ -94,8 +93,8 @@ double libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *f_ov, const double *t1, const double *t2,
     const double *i_oovo, const double *i_oovv, const double *i_ovvv);
 
-/* Compute coupled-cluster (fT) ground state energy correction in parallel for
- * the restricted and unrestricted cases.
+/* Compute coupled-cluster (fT) ground state energy correction for
+ * the restricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
@@ -122,8 +121,8 @@ double libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv);
 
-/* Compute coupled-cluster (fT) ground state energy correction in parallel for
- * the restricted and unrestricted cases.
+/* Compute coupled-cluster (fT) ground state energy correction for
+ * the unrestricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
