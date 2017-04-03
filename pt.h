@@ -34,11 +34,14 @@ extern "C" {
  *   d_ov - Delta matrix (size oa*va)
  *   f_ov - Fock matrix (size oa*va)
  *   t1 - CCSD T1 amplitudes (size oa*va)
- *   t2 - CCSD T2 amplitudes, aaaa/abab blocks (size 2*oa*oa*va*va)
- *   i_oovo - OOOV integrals transposed, aaaa/abab blocks (size 2*oa*oa*oa*va)
- *   i_oovv - OOVV integrals, aaaa/abab blocks (size 2*oa*oa*va*va)
+ *   t2 - CCSD T2 amplitudes, aaaa/abab blocks
+ *     (size oa*oa*va*va + oa*oa*va*va)
+ *   i_oovo - OOVO integrals, aaaa/abab blocks
+ *     (size oa*oa*va*oa + oa*oa*va*oa)
+ *   i_oovv - OOVV integrals, aaaa/abab blocks
+ *     (size oa*oa*va*va + oa*oa*va*va)
  *   i_ovvv - OVVV integrals, aaaa block with vv symmetry followed by full
- *       abab block (total size oa*va*va*(va-1)/2+oa*va*va*va)
+ *     abab block (size oa*va*va*(va-1)/2 + oa*va*va*va)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
@@ -65,13 +68,17 @@ double libpt_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
  *   va - size of alpha spin-block virtual space
  *   ob - size of beta spin-block occupied space
  *   vb - size of beta spin-block virtual space
- *   d_ov - Delta matrix (size o*v)
- *   f_ov - Fock matrix (size o*v)
- *   t1 - CCSD T1 amplitudes (size o*v)
- *   t2 - CCSD T2 amplitudes (size o*o*v*v)
- *   i_oovo - OOOV integrals transposed (size o*o*o*v)
- *   i_oovv - OOVV integrals (size o*o*v*v)
- *   i_ovvv - OVVV integrals with vv symmetry (size o*v*v*(v-1)/2)
+ *   d_ov - Delta matrix (size oa*va + ob*vb)
+ *   f_ov - Fock matrix (size oa*va + ob*vb)
+ *   t1 - CCSD T1 amplitudes (size oa*va + ob*vb)
+ *   t2 - CCSD T2 amplitudes aaaa/abab/bbbb/baba spin-blocks
+ *     (size oa*oa*va*va + oa*ob*va*vb + ob*ob*vb*vb + ob*oa*vb*va)
+ *   i_oovo - OOVO integrals aaaa/abab/bbbb/baba spin-blocks
+ *     (size oa*oa*va*oa + oa*ob*va*ob + ob*ob*vb*ob + ob*oa*vb*oa)
+ *   i_oovv - OOVV integrals aaaa/abab/bbbb/baba spin-blocks
+ *     (size oa*oa*va*va + oa*ob*va*vb + ob*ob*vb*vb + ob*oa*vb*va)
+ *   i_ovvv - OVVV integrals aaaa/abab/bbbb/baba spin-blocks
+ *     (size oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*vb*vb*(vb-1)/2 + ob*va*vb*va)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
@@ -93,13 +100,12 @@ double libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
  *
- * o - size of the occupied space
- * v - size of the virtual space
- *
  * See the reference paper for the description of the intermediates passed to
- * this function as arguments.
+ * this function as arguments. The memory layout of integrals is the same as
+ * for restricted (T) correction.
  *
- * i3_ovvv and i7_ovvv should be stored with symmetry (size o*v*v*(v-1)/2)
+ * aaaa spin-blocks of i3_ovvv and i7_ovvv are stored with symmetry
+ * (size o*v*v*(v-1)/2)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
@@ -122,13 +128,12 @@ double libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
  *
- * o - size of the occupied space
- * v - size of the virtual space
- *
  * See the reference paper for the description of the intermediates passed to
- * this function as arguments.
+ * this function as arguments. The memory layout of integrals is the same as
+ * for unrestricted (T) correction.
  *
- * i3_ovvv and i7_ovvv should be stored with symmetry (size o*v*v*(v-1)/2)
+ * aaaa and bbbb spin-blocks of i3_ovvv and i7_ovvv are stored with symmetry
+ * (size o*v*v*(v-1)/2)
  *
  * All arrays should be arranged contiguously in memory by last index first.
  * E.g., for d_ov the first v contiguous elements in memory are d_ov[o=0,v=0],
