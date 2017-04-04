@@ -230,7 +230,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	double *t3ax1, *abc1, *abc2, *abc3;
+	double *t3ax1, *abc1;
 
 	if ((ij = malloc(oa*(oa-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
@@ -244,11 +244,9 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		}
 	}
 
-	if ((t3ax1 = malloc(4*va*va*va*sizeof(double))) == NULL)
+	if ((t3ax1 = malloc(2*va*va*va*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
-	abc1 = t3ax1 + 1*va*va*va;
-	abc2 = t3ax1 + 2*va*va*va;
-	abc3 = t3ax1 + 3*va*va*va;
+	abc1 = t3ax1 + va*va*va;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -259,25 +257,60 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	for (k = j+1; k < oa; k++) {
 
 	t2_i_ovvv_half(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
-	t2_i_ovvv_half(oa,va,i,k,j,abc2,t2_aaaa,i_ovvv_aaaa);
-	t2_i_ovvv_half(oa,va,k,j,i,abc3,t2_aaaa,i_ovvv_aaaa);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < b; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
 		t3ax1[a*va*va+b*va+c] =
-		    asymm_ijk_ab_c_half(va,abc1,abc2,abc3,a,b,c);
-	}}}
+		    +abc1[a*(a-1)/2*va+b*va+c]
+		    -abc1[a*(a-1)/2*va+c*va+b]
+		    +abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,i,k,j,abc1,t2_aaaa,i_ovvv_aaaa);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		t3ax1[a*va*va+b*va+c] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,k,j,i,abc1,t2_aaaa,i_ovvv_aaaa);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		t3ax1[a*va*va+b*va+c] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_oovo(oa,va,i,j,k,abc1,t2_aaaa,i_oovo_aaaa);
-	t2_i_oovo(oa,va,j,i,k,abc2,t2_aaaa,i_oovo_aaaa);
-	t2_i_oovo(oa,va,k,j,i,abc3,t2_aaaa,i_oovo_aaaa);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		t3ax1[a*va*va+b*va+c] +=
+		    +abc1[a*va*va+b*va+c]
+		    -abc1[b*va*va+a*va+c]
+		    -abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,j,i,k,abc1,t2_aaaa,i_oovo_aaaa);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		t3ax1[a*va*va+b*va+c] +=
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,k,j,i,abc1,t2_aaaa,i_oovo_aaaa);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		double t3ax, t3bx, dn;
 
 		t3ax1[a*va*va+b*va+c] +=
-		    asymm_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
 		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
 		t3ax = t3ax1[a*va*va+b*va+c];
 		t3bx = +i_jk_a_bc_ov_oovv(oa,va,t1,i_oovv_aaaa,i,j,k,a,b,c)
@@ -318,7 +351,7 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ij, nij = 0;
-	double *t3ax1, *abc1, *abc2, *abc3, *abc11, *abc12;
+	double *t3ax1, *abc1, *abc11, *abc12;
 
 	if ((ij = malloc(oa*(oa-1)*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ij");
@@ -332,13 +365,11 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 		}
 	}
 
-	if ((t3ax1 = malloc(4*va*va*vb*sizeof(double))) == NULL)
+	if ((t3ax1 = malloc(2*va*va*vb*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
-	abc1 = t3ax1 + 1*va*va*vb;
-	abc2 = t3ax1 + 2*va*va*vb;
-	abc3 = t3ax1 + 3*va*va*vb;
-	abc11 = t3ax1 + 1*va*va*vb;
-	abc12 = t3ax1 + 1*va*va*vb + vb*va*(va-1)/2;
+	abc1 = t3ax1 + va*va*vb;
+	abc11 = t3ax1 + va*va*vb;
+	abc12 = t3ax1 + va*va*vb + vb*va*(va-1)/2;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -349,48 +380,77 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	for (k = 0; k < ob; k++) {
 
 	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,t2_aaaa,i_ovvv_baba);
-	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc2,t2_abab,i_ovvv_abab);
-	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc3,t2_abab,i_ovvv_abab);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < vb; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
 		t3ax1[a*va*vb+b*vb+c] =
 		    -abc1[a+b*va+c*va*va]
-		    +abc1[b+a*va+c*va*va]
-		    -abc2[a+c*va+b*va*vb]
-		    +abc2[b+c*va+a*va*vb]
-		    +abc3[a+c*va+b*va*vb]
-		    -abc3[b+c*va+a*va*vb];
-	}}}
+		    +abc1[b+a*va+c*va*va];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc1,t2_abab,i_ovvv_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		t3ax1[a*va*vb+b*vb+c] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc1,t2_abab,i_ovvv_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		t3ax1[a*va*vb+b*vb+c] +=
+		    +abc1[a+c*va+b*va*vb]
+		    -abc1[b+c*va+a*va*vb];
 
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,j,i,abc11,t2_baba,i_ovvv_aaaa);
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,i,j,abc12,t2_baba,i_ovvv_aaaa);
-	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc2,t2_aaaa,i_oovo_baba);
-	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc3,t2_aaaa,i_oovo_baba);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < vb; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
 		t3ax1[a*va*vb+b*vb+c] +=
 		    -abc11[c+vb*a*(a-1)/2+vb*b]
-		    +abc12[c+vb*a*(a-1)/2+vb*b]
-		    -abc2[b+a*va+c*va*va]
-		    +abc3[b+a*va+c*va*va];
-	}}}
+		    +abc12[c+vb*a*(a-1)/2+vb*b];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc1,t2_aaaa,i_oovo_baba);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		t3ax1[a*va*vb+b*vb+c] +=
+		    -abc1[b+a*va+c*va*va];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc1,t2_aaaa,i_oovo_baba);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		t3ax1[a*va*vb+b*vb+c] +=
+		    +abc1[b+a*va+c*va*va];
 
 	t2_abab_i_oovo_abab(oa,va,ob,vb,i,j,k,abc1,t2_abab,i_oovo_abab);
-	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc2,t2_abab,i_oovo_abab);
-	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc3,t2_baba,i_oovo_aaaa);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		t3ax1[a*va*vb+b*vb+c] +=
+		    -abc1[c+a*vb+b*vb*va]
+		    +abc1[c+b*vb+a*vb*va];
+
+	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc1,t2_abab,i_oovo_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		t3ax1[a*va*vb+b*vb+c] +=
+		    -abc1[c+b*vb+a*vb*va]
+		    +abc1[c+a*vb+b*vb*va];
+
+	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc1,t2_baba,i_oovo_aaaa);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
 		double t3ax, t3bx, dn;
 
-		t3ax1[a*va*vb+b*vb+c] += -abc1[c+a*vb+b*vb*va]
-					 +abc1[c+b*vb+a*vb*va]
-					 -abc2[c+b*vb+a*vb*va]
-					 +abc2[c+a*vb+b*vb*va]
-					 -abc3[a+c*va+b*va*vb]
-					 +abc3[b+c*va+a*va*vb];
+		t3ax1[a*va*vb+b*vb+c] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
 		t3bx = +comp_t3b_ijkabc(va,ob,va,vb,i,j,k,a,b,c,
 			   t1_aa,i_oovv_abab,f_ov_aa,t2_abab)
 		       -comp_t3b_ijkabc(va,ob,va,vb,i,j,k,b,a,c,
