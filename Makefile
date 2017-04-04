@@ -16,7 +16,7 @@ LIBS= -lblas -lg2c -lm
 #LDFLAGS=
 #LIBS=
 
-all: testrpt testupt testrft testuft
+all: testrpt testupt testrft testuft benchmarkrpt
 
 testrpt: pt.o testrpt.o
 	$(CC) -o $@ $(CFLAGS) pt.o testrpt.o $(LDFLAGS) $(LIBS)
@@ -29,6 +29,9 @@ testrft: pt.o testrft.o
 
 testuft: pt.o testuft.o
 	$(CC) -o $@ $(CFLAGS) pt.o testuft.o $(LDFLAGS) $(LIBS)
+
+benchmarkrpt: pt.o benchmarkrpt.o
+	$(CC) -o $@ $(CFLAGS) pt.o benchmarkrpt.o $(LDFLAGS) $(LIBS)
 
 check: testrpt testupt testrft testuft
 	@echo rpt01 && ./testrpt tests/rpt01.dat && echo success
@@ -71,6 +74,6 @@ checkmpi: testrpt testupt testrft testuft
 	@echo uft03 && mpirun -np 3 ./testuft tests/uft03.dat && echo success
 
 clean:
-	rm -f testrpt testupt testrft testuft gmon.out *.core *.log *.o
+	rm -f testrpt testupt testrft testuft benchmarkrpt gmon.out *.core *.o
 
 .PHONY: all check checkmpi clean
