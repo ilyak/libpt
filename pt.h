@@ -29,8 +29,8 @@ extern "C" {
  * input data.
  *
  * Arguments:
- *   oa - size of alpha (== beta) spin-block occupied space
- *   va - size of alpha (== beta) spin-block virtual space
+ *   oa - size of alpha (equals beta) spin-block occupied space
+ *   va - size of alpha (equals beta) spin-block virtual space
  *   d_ov - Delta matrix (size oa*va)
  *   f_ov - Fock matrix (size oa*va)
  *   t1 - CCSD T1 amplitudes (size oa*va)
@@ -93,8 +93,7 @@ double libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *f_ov, const double *t1, const double *t2,
     const double *i_oovo, const double *i_oovv, const double *i_ovvv);
 
-/* Compute coupled-cluster (fT) ground state energy correction for
- * the restricted case.
+/* Compute coupled-cluster (fT) energy correction for the restricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
@@ -121,8 +120,7 @@ double libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv);
 
-/* Compute coupled-cluster (fT) ground state energy correction for
- * the unrestricted case.
+/* Compute coupled-cluster (fT) energy correction for the unrestricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
  * input data.
