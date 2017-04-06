@@ -114,130 +114,110 @@ read_test_data(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
 	}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o*o*v*v; i++) {
+	for (i = 0; i < o*o*v*v; i++)
 		tmp[i] = read_next_double(fp);
-	}
-	for (i = 0; i < oa; i++) {
-	for (j = 0; j < oa; j++) {
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < va; b++) {
+	for (i = 0; i < oa; i++)
+	for (j = 0; j < oa; j++)
+	for (a = 0; a < va; a++)
+	for (b = 0; b < va; b++)
 		*t2++ = tmp[i*o*v*v+j*v*v+a*v+b];
-	}}}}
-	for (i = 0; i < oa; i++) {
-	for (j = 0; j < ob; j++) {
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < vb; b++) {
+	for (i = 0; i < oa; i++)
+	for (j = 0; j < ob; j++)
+	for (a = 0; a < va; a++)
+	for (b = 0; b < vb; b++)
 		*t2++ = tmp[i*o*v*v+(j+oa)*v*v+a*v+(b+va)];
-	}}}}
-	for (i = 0; i < ob; i++) {
-	for (j = 0; j < ob; j++) {
-	for (a = 0; a < vb; a++) {
-	for (b = 0; b < vb; b++) {
+	for (i = 0; i < ob; i++)
+	for (j = 0; j < ob; j++)
+	for (a = 0; a < vb; a++)
+	for (b = 0; b < vb; b++)
 		*t2++ = tmp[(i+oa)*o*v*v+(j+oa)*v*v+(a+va)*v+(b+va)];
-	}}}}
-	for (i = 0; i < ob; i++) {
-	for (j = 0; j < oa; j++) {
-	for (a = 0; a < vb; a++) {
-	for (b = 0; b < va; b++) {
+	for (i = 0; i < ob; i++)
+	for (j = 0; j < oa; j++)
+	for (a = 0; a < vb; a++)
+	for (b = 0; b < va; b++)
 		*t2++ = tmp[(i+oa)*o*v*v+j*v*v+(a+va)*v+b];
-	}}}}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o*o*v*o; i++) {
+	for (i = 0; i < o*o*v*o; i++)
 		tmp[i] = read_next_double(fp);
-	}
-	for (i = 0; i < oa; i++) {
-	for (j = 0; j < oa; j++) {
-	for (a = 0; a < va; a++) {
-	for (k = 0; k < oa; k++) {
+	for (i = 0; i < oa; i++)
+	for (j = 0; j < oa; j++)
+	for (a = 0; a < va; a++)
+	for (k = 0; k < oa; k++)
 		*i_oovo++ = tmp[i*o*v*o+j*v*o+a*o+k];
-	}}}}
-	for (i = 0; i < oa; i++) {
-	for (j = 0; j < ob; j++) {
-	for (a = 0; a < va; a++) {
-	for (k = 0; k < ob; k++) {
+	for (i = 0; i < oa; i++)
+	for (j = 0; j < ob; j++)
+	for (a = 0; a < va; a++)
+	for (k = 0; k < ob; k++)
 		*i_oovo++ = tmp[i*o*v*o+(j+oa)*v*o+a*o+(k+oa)];
-	}}}}
-	for (i = 0; i < ob; i++) {
-	for (j = 0; j < ob; j++) {
-	for (a = 0; a < vb; a++) {
-	for (k = 0; k < ob; k++) {
+	for (i = 0; i < ob; i++)
+	for (j = 0; j < ob; j++)
+	for (a = 0; a < vb; a++)
+	for (k = 0; k < ob; k++)
 		*i_oovo++ = tmp[(i+oa)*o*v*o+(j+oa)*v*o+(a+va)*o+(k+oa)];
-	}}}}
-	for (i = 0; i < ob; i++) {
-	for (j = 0; j < oa; j++) {
-	for (a = 0; a < vb; a++) {
-	for (k = 0; k < oa; k++) {
+	for (i = 0; i < ob; i++)
+	for (j = 0; j < oa; j++)
+	for (a = 0; a < vb; a++)
+	for (k = 0; k < oa; k++)
 		*i_oovo++ = tmp[(i+oa)*o*v*o+j*v*o+(a+va)*o+k];
-	}}}}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o*o*v*v; i++) {
+	for (i = 0; i < o*o*v*v; i++)
 		tmp[i] = read_next_double(fp);
-	}
-	for (i = 0; i < oa; i++) {
-	for (j = 0; j < oa; j++) {
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < va; b++) {
+	for (i = 0; i < oa; i++)
+	for (j = 0; j < oa; j++)
+	for (a = 0; a < va; a++)
+	for (b = 0; b < va; b++)
 		*i_oovv++ = tmp[i*o*v*v+j*v*v+a*v+b];
-	}}}}
-	for (i = 0; i < oa; i++) {
-	for (j = 0; j < ob; j++) {
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < vb; b++) {
+	for (i = 0; i < oa; i++)
+	for (j = 0; j < ob; j++)
+	for (a = 0; a < va; a++)
+	for (b = 0; b < vb; b++)
 		*i_oovv++ = tmp[i*o*v*v+(j+oa)*v*v+a*v+(b+va)];
-	}}}}
-	for (i = 0; i < ob; i++) {
-	for (j = 0; j < ob; j++) {
-	for (a = 0; a < vb; a++) {
-	for (b = 0; b < vb; b++) {
+	for (i = 0; i < ob; i++)
+	for (j = 0; j < ob; j++)
+	for (a = 0; a < vb; a++)
+	for (b = 0; b < vb; b++)
 		*i_oovv++ = tmp[(i+oa)*o*v*v+(j+oa)*v*v+(a+va)*v+(b+va)];
-	}}}}
-	for (i = 0; i < ob; i++) {
-	for (j = 0; j < oa; j++) {
-	for (a = 0; a < vb; a++) {
-	for (b = 0; b < va; b++) {
+	for (i = 0; i < ob; i++)
+	for (j = 0; j < oa; j++)
+	for (a = 0; a < vb; a++)
+	for (b = 0; b < va; b++)
 		*i_oovv++ = tmp[(i+oa)*o*v*v+j*v*v+(a+va)*v+b];
-	}}}}
 	skip_line(fp);
 	skip_line(fp);
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
+	for (i = 0; i < o; i++)
+	for (a = 0; a < v; a++)
+	for (b = 0; b < v; b++)
 	for (c = 0; c < b; c++) {
 		double t = read_next_double(fp);
 		tmp[i*v*v*v+a*v*v+b*v+c] = t;
 		tmp[i*v*v*v+a*v*v+c*v+b] = -t;
-	}}}}
-	for (i = 0; i < o; i++) {
-	for (a = 0; a < v; a++) {
-	for (b = 0; b < v; b++) {
+	}
+	for (i = 0; i < o; i++)
+	for (a = 0; a < v; a++)
+	for (b = 0; b < v; b++)
 		tmp[i*v*v*v+a*v*v+b*v+b] = 0;
-	}}}
-	for (i = 0; i < oa; i++) {
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < va; b++) {
-	for (c = 0; c < b; c++) {
+	for (i = 0; i < oa; i++)
+	for (a = 0; a < va; a++)
+	for (b = 0; b < va; b++)
+	for (c = 0; c < b; c++)
 		*i_ovvv++ = tmp[i*v*v*v+a*v*v+b*v+c];
-	}}}}
-	for (i = 0; i < oa; i++) {
-	for (a = 0; a < vb; a++) {
-	for (b = 0; b < va; b++) {
-	for (c = 0; c < vb; c++) {
+	for (i = 0; i < oa; i++)
+	for (a = 0; a < vb; a++)
+	for (b = 0; b < va; b++)
+	for (c = 0; c < vb; c++)
 		*i_ovvv++ = tmp[i*v*v*v+(a+va)*v*v+b*v+(c+va)];
-	}}}}
-	for (i = 0; i < ob; i++) {
-	for (a = 0; a < vb; a++) {
-	for (b = 0; b < vb; b++) {
-	for (c = 0; c < b; c++) {
+	for (i = 0; i < ob; i++)
+	for (a = 0; a < vb; a++)
+	for (b = 0; b < vb; b++)
+	for (c = 0; c < b; c++)
 		*i_ovvv++ = tmp[(i+oa)*v*v*v+(a+va)*v*v+(b+va)*v+(c+va)];
-	}}}}
-	for (i = 0; i < ob; i++) {
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < vb; b++) {
-	for (c = 0; c < va; c++) {
+	for (i = 0; i < ob; i++)
+	for (a = 0; a < va; a++)
+	for (b = 0; b < vb; b++)
+	for (c = 0; c < va; c++)
 		*i_ovvv++ = tmp[(i+oa)*v*v*v+a*v*v+(b+va)*v+c];
-	}}}}
 	free(tmp);
 }
 
