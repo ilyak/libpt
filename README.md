@@ -27,7 +27,7 @@ of 9 water molecules with the cc-pVTZ basis set (522 basis functions in total)
 was used as a benchmark system.
 
 |      Nodes       | (T) calculation time | Speedup (max) |
-|-----------------:|---------------------:|--------------:|
+|:----------------:|:--------------------:|:-------------:|
 |   4  (128 cores) |            11064 sec |      1x (1x)  |
 |   8  (256 cores) |             5599 sec |      2x (2x)  |
 |  16  (512 cores) |             2925 sec |    3.8x (4x)  |
