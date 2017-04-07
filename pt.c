@@ -229,17 +229,20 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 #pragma omp parallel
 #endif
 {
-	size_t i, j, k, a, b, c, it, *ij, nij = 0;
+	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
 	double *t3ax1, *abc1;
 
-	if ((ij = malloc(oa*(oa-1)*sizeof(size_t))) == NULL)
-		err(1, "libpt malloc ij");
+	if ((ijk = malloc(oa*oa*oa*sizeof(size_t))) == NULL)
+		err(1, "libpt malloc ijk");
 	for (i = 0, it = 0; i < oa; i++) {
-		for (j = i+1; j < oa; j++, it++) {
-			if ((int)it % size == rank) {
-				ij[2*nij+0] = i;
-				ij[2*nij+1] = j;
-				nij++;
+		for (j = i+1; j < oa; j++) {
+			for (k = j+1; k < oa; k++, it++) {
+				if ((int)it % size == rank) {
+					ijk[3*nijk+0] = i;
+					ijk[3*nijk+1] = j;
+					ijk[3*nijk+2] = k;
+					nijk++;
+				}
 			}
 		}
 	}
@@ -251,10 +254,11 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
 #endif
-	for (it = 0; it < nij; it++) {
-		i = ij[2*it+0];
-		j = ij[2*it+1];
-	for (k = j+1; k < oa; k++) {
+	for (it = 0; it < nijk; it++) {
+
+	i = ijk[3*it+0];
+	j = ijk[3*it+1];
+	k = ijk[3*it+2];
 
 	t2_i_ovvv_half(oa,va,i,j,k,abc1,t2_aaaa,i_ovvv_aaaa);
 	for (a = 0; a < va; a++)
@@ -317,8 +321,8 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		       +i_jk_a_bc_ov_oovv(oa,va,f_ov,t2_aaaa,i,j,k,a,b,c);
 		e_pt += t3ax * (t3ax-t3bx) / dn;
 	}}}
-	}}
-	free(ij);
+	}
+	free(ijk);
 	free(t3ax1);
 }
 	return (e_pt);
@@ -346,17 +350,20 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 #pragma omp parallel
 #endif
 {
-	size_t i, j, k, a, b, c, it, *ij, nij = 0;
+	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
 	double *t3ax1, *abc1, *abc11, *abc12;
 
-	if ((ij = malloc(oa*(oa-1)*sizeof(size_t))) == NULL)
-		err(1, "libpt malloc ij");
+	if ((ijk = malloc(2*oa*oa*ob*sizeof(size_t))) == NULL)
+		err(1, "libpt malloc ijk");
 	for (i = 0, it = 0; i < oa; i++) {
-		for (j = i+1; j < oa; j++, it++) {
-			if ((int)it % size == rank) {
-				ij[2*nij+0] = i;
-				ij[2*nij+1] = j;
-				nij++;
+		for (j = i+1; j < oa; j++) {
+			for (k = 0; k < ob; k++, it++) {
+				if ((int)it % size == rank) {
+					ijk[3*nijk+0] = i;
+					ijk[3*nijk+1] = j;
+					ijk[3*nijk+2] = k;
+					nijk++;
+				}
 			}
 		}
 	}
@@ -370,10 +377,11 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
 #endif
-	for (it = 0; it < nij; it++) {
-		i = ij[2*it+0];
-		j = ij[2*it+1];
-	for (k = 0; k < ob; k++) {
+	for (it = 0; it < nijk; it++) {
+
+	i = ijk[3*it+0];
+	j = ijk[3*it+1];
+	k = ijk[3*it+2];
 
 	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,t2_aaaa,i_ovvv_baba);
 	for (a = 0; a < va; a++)
@@ -461,8 +469,8 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 		t3ax = t3ax1[a*va*vb+b*vb+c];
 		e_pt += t3ax * (t3ax-t3bx) / dn;
 	}}}
-	}}
-	free(ij);
+	}
+	free(ijk);
 	free(t3ax1);
 }
 	return (e_pt);
