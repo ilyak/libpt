@@ -16,7 +16,7 @@ LIBS= -lblas -lg2c -lm
 #LDFLAGS=
 #LIBS=
 
-all: testrpt testupt testrft testuft benchmarkrpt benchmarkuft
+all: testrpt testupt testrft testuft benchmarkrpt benchmarkrft benchmarkuft
 
 testrpt: pt.o testrpt.o
 	$(CC) -o $@ $(CFLAGS) pt.o testrpt.o $(LDFLAGS) $(LIBS)
@@ -32,6 +32,9 @@ testuft: pt.o testuft.o
 
 benchmarkrpt: pt.o benchmarkrpt.o
 	$(CC) -o $@ $(CFLAGS) pt.o benchmarkrpt.o $(LDFLAGS) $(LIBS)
+
+benchmarkrft: pt.o benchmarkrft.o
+	$(CC) -o $@ $(CFLAGS) pt.o benchmarkrft.o $(LDFLAGS) $(LIBS)
 
 benchmarkuft: pt.o benchmarkuft.o
 	$(CC) -o $@ $(CFLAGS) pt.o benchmarkuft.o $(LDFLAGS) $(LIBS)
@@ -77,7 +80,8 @@ checkmpi: testrpt testupt testrft testuft
 	@echo uft03 && mpirun -np 3 ./testuft tests/uft03.dat && echo success
 
 clean:
+	rm -f *.core *.o gmon.out
+	rm -f benchmarkrpt benchmarkrft benchmarkuft
 	rm -f testrpt testupt testrft testuft
-	rm -f benchmarkrpt benchmarkuft gmon.out *.core *.o
 
 .PHONY: all check checkmpi clean
