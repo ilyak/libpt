@@ -184,36 +184,6 @@ comp_t3b_ijkabc(size_t v1, size_t o2, size_t v2a, size_t v2b,
 }
 
 static double
-asymm_ijk_a_bc(size_t v, const double *abc1, const double *abc2,
-    const double *abc3, size_t a, size_t b, size_t c)
-{
-	return +abc1[a*v*v+b*v+c]
-	       -abc1[b*v*v+a*v+c]
-	       -abc1[c*v*v+b*v+a]
-	       -abc2[a*v*v+b*v+c]
-	       +abc2[b*v*v+a*v+c]
-	       +abc2[c*v*v+b*v+a]
-	       -abc3[a*v*v+b*v+c]
-	       +abc3[b*v*v+a*v+c]
-	       +abc3[c*v*v+b*v+a];
-}
-
-static double
-asymm_ijk_ab_c_half(size_t v, const double *abc1, const double *abc2,
-    const double *abc3, size_t a, size_t b, size_t c)
-{
-	return +abc1[a*(a-1)/2*v+b*v+c]
-	       -abc1[a*(a-1)/2*v+c*v+b]
-	       +abc1[b*(b-1)/2*v+c*v+a]
-	       -abc2[a*(a-1)/2*v+b*v+c]
-	       +abc2[a*(a-1)/2*v+c*v+b]
-	       -abc2[b*(b-1)/2*v+c*v+a]
-	       -abc3[a*(a-1)/2*v+b*v+c]
-	       +abc3[a*(a-1)/2*v+c*v+b]
-	       -abc3[b*(b-1)/2*v+c*v+a];
-}
-
-static double
 cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2_aaaa, const double *i_oovo_aaaa,
     const double *i_oovv_aaaa, const double *i_ovvv_aaaa)
@@ -577,7 +547,7 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
-	double *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3;
+	double *sigvvvl, *sigvvvr, *abc1;
 
 	if ((ijk = malloc(oa*oa*oa*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ijk");
@@ -594,12 +564,10 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 		}
 	}
 
-	if ((sigvvvl = malloc(5*va*va*va*sizeof(*sigvvvl))) == NULL)
+	if ((sigvvvl = malloc(3*va*va*va*sizeof(*sigvvvl))) == NULL)
 		err(1, "libpt malloc work");
 	sigvvvr = sigvvvl + va*va*va;
 	abc1 = sigvvvl + 2*va*va*va;
-	abc2 = sigvvvl + 3*va*va*va;
-	abc3 = sigvvvl + 4*va*va*va;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -611,45 +579,114 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 	k = ijk[3*it+2];
 
 	t2_i_ovvv_half(oa,va,i,j,k,abc1,l2,i7_ovvv);
-	t2_i_ovvv_half(oa,va,k,j,i,abc2,l2,i7_ovvv);
-	t2_i_ovvv_half(oa,va,i,k,j,abc3,l2,i7_ovvv);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < b; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
 		sigvvvl[a*va*va+b*va+c] =
-		    asymm_ijk_ab_c_half(va,abc1,abc2,abc3,a,b,c);
-	}}}
+		    +abc1[a*(a-1)/2*va+b*va+c]
+		    -abc1[a*(a-1)/2*va+c*va+b]
+		    +abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,k,j,i,abc1,l2,i7_ovvv);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		sigvvvl[a*va*va+b*va+c] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,i,k,j,abc1,l2,i7_ovvv);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		sigvvvl[a*va*va+b*va+c] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_oovo(oa,va,i,j,k,abc1,l2,i6_oovo);
-	t2_i_oovo(oa,va,j,i,k,abc2,l2,i6_oovo);
-	t2_i_oovo(oa,va,k,j,i,abc3,l2,i6_oovo);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < b; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
 		sigvvvl[a*va*va+b*va+c] +=
-		    asymm_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
-	}}}
+		    +abc1[a*va*va+b*va+c]
+		    -abc1[b*va*va+a*va+c]
+		    -abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,j,i,k,abc1,l2,i6_oovo);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		sigvvvl[a*va*va+b*va+c] +=
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,k,j,i,abc1,l2,i6_oovo);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		sigvvvl[a*va*va+b*va+c] +=
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
 
 	t2_i_ovvv_half(oa,va,i,j,k,abc1,t2,i3_ovvv);
-	t2_i_ovvv_half(oa,va,k,j,i,abc2,t2,i3_ovvv);
-	t2_i_ovvv_half(oa,va,i,k,j,abc3,t2,i3_ovvv);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < b; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
 		sigvvvr[a*va*va+b*va+c] =
-		    asymm_ijk_ab_c_half(va,abc1,abc2,abc3,a,b,c);
-	}}}
+		    +abc1[a*(a-1)/2*va+b*va+c]
+		    -abc1[a*(a-1)/2*va+c*va+b]
+		    +abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,k,j,i,abc1,t2,i3_ovvv);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		sigvvvr[a*va*va+b*va+c] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,i,k,j,abc1,t2,i3_ovvv);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		sigvvvr[a*va*va+b*va+c] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_oovo(oa,va,i,j,k,abc1,t2,i2_t2f2_oovo);
-	t2_i_oovo(oa,va,j,i,k,abc2,t2,i2_t2f2_oovo);
-	t2_i_oovo(oa,va,k,j,i,abc3,t2,i2_t2f2_oovo);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		sigvvvr[a*va*va+b*va+c] +=
+		    +abc1[a*va*va+b*va+c]
+		    -abc1[b*va*va+a*va+c]
+		    -abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,j,i,k,abc1,t2,i2_t2f2_oovo);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++)
+		sigvvvr[a*va*va+b*va+c] +=
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,k,j,i,abc1,t2,i2_t2f2_oovo);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
 		double dn, l1t, sigvvvl1, sigvvvr1;
 
 		sigvvvr[a*va*va+b*va+c] +=
-		    asymm_ijk_a_bc(va,abc1,abc2,abc3,a,b,c);
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
 		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
 		l1t = +i_jk_a_bc_ov_oovv(oa,va,l1,i_oovv,i,j,k,a,b,c)
 		      +i_jk_a_bc_ov_oovv(oa,va,f2_ov,l2,i,j,k,a,b,c);
@@ -693,7 +730,7 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
-	double *sigvvvl, *sigvvvr, *abc1, *abc2, *abc3, *abc11, *abc12;
+	double *sigvvvl, *sigvvvr, *abc1, *abc11, *abc12;
 
 	if ((ijk = malloc(2*oa*oa*ob*sizeof(size_t))) == NULL)
 		err(1, "libpt malloc ijk");
@@ -710,12 +747,10 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 		}
 	}
 
-	if ((sigvvvl = malloc(5*va*va*vb*sizeof(double))) == NULL)
+	if ((sigvvvl = malloc(3*va*va*vb*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
-	sigvvvr = sigvvvl + 1*va*va*vb;
+	sigvvvr = sigvvvl + va*va*vb;
 	abc1 = sigvvvl + 2*va*va*vb;
-	abc2 = sigvvvl + 3*va*va*vb;
-	abc3 = sigvvvl + 4*va*va*vb;
 	abc11 = sigvvvl + 2*va*va*vb;
 	abc12 = sigvvvl + 2*va*va*vb + vb*va*(va-1)/2;
 
@@ -729,93 +764,148 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	k = ijk[3*it+2];
 
 	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,l2_aaaa,i7_ovvv_baba);
-	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc2,l2_abab,i7_ovvv_abab);
-	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc3,l2_abab,i7_ovvv_abab);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < vb; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
 		sigvvvl[a*va*vb+b*vb+c] =
 		    -abc1[a+b*va+c*va*va]
-		    +abc1[b+a*va+c*va*va]
-		    -abc2[a+c*va+b*va*vb]
-		    +abc2[b+c*va+a*va*vb]
-		    +abc3[a+c*va+b*va*vb]
-		    -abc3[b+c*va+a*va*vb];
-	}}}
+		    +abc1[b+a*va+c*va*va];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc1,l2_abab,i7_ovvv_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvl[a*va*vb+b*vb+c] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc1,l2_abab,i7_ovvv_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvl[a*va*vb+b*vb+c] +=
+		    +abc1[a+c*va+b*va*vb]
+		    -abc1[b+c*va+a*va*vb];
 
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,j,i,abc11,l2_baba,i7_ovvv_aaaa);
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,i,j,abc12,l2_baba,i7_ovvv_aaaa);
-	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc2,l2_aaaa,i6_oovo_baba);
-	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc3,l2_aaaa,i6_oovo_baba);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < vb; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
 		sigvvvl[a*va*vb+b*vb+c] +=
 		    -abc11[c+vb*a*(a-1)/2+vb*b]
-		    +abc12[c+vb*a*(a-1)/2+vb*b]
-		    -abc2[b+a*va+c*va*va]
-		    +abc3[b+a*va+c*va*va];
-	}}}
+		    +abc12[c+vb*a*(a-1)/2+vb*b];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc1,l2_aaaa,i6_oovo_baba);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvl[a*va*vb+b*vb+c] +=
+		    -abc1[b+a*va+c*va*va];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc1,l2_aaaa,i6_oovo_baba);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvl[a*va*vb+b*vb+c] +=
+		    +abc1[b+a*va+c*va*va];
 
 	t2_abab_i_oovo_abab(oa,va,ob,vb,i,j,k,abc1,l2_abab,i6_oovo_abab);
-	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc2,l2_abab,i6_oovo_abab);
-	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc3,l2_baba,i6_oovo_aaaa);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < vb; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
 		sigvvvl[a*va*vb+b*vb+c] +=
 		    -abc1[c+a*vb+b*vb*va]
-		    +abc1[c+b*vb+a*vb*va]
-		    -abc2[c+b*vb+a*vb*va]
-		    +abc2[c+a*vb+b*vb*va]
-		    -abc3[a+c*va+b*va*vb]
-		    +abc3[b+c*va+a*va*vb];
-	}}}
+		    +abc1[c+b*vb+a*vb*va];
+
+	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc1,l2_abab,i6_oovo_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvl[a*va*vb+b*vb+c] +=
+		    -abc1[c+b*vb+a*vb*va]
+		    +abc1[c+a*vb+b*vb*va];
+
+	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc1,l2_baba,i6_oovo_aaaa);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvl[a*va*vb+b*vb+c] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
 
 	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,t2_aaaa,i3_ovvv_baba);
-	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc2,t2_abab,i3_ovvv_abab);
-	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc3,t2_abab,i3_ovvv_abab);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < vb; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
 		sigvvvr[a*va*vb+b*vb+c] =
 		    -abc1[a+b*va+c*va*va]
-		    +abc1[b+a*va+c*va*va]
-		    -abc2[a+c*va+b*va*vb]
-		    +abc2[b+c*va+a*va*vb]
-		    +abc3[a+c*va+b*va*vb]
-		    -abc3[b+c*va+a*va*vb];
-	}}}
+		    +abc1[b+a*va+c*va*va];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc1,t2_abab,i3_ovvv_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvr[a*va*vb+b*vb+c] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc1,t2_abab,i3_ovvv_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvr[a*va*vb+b*vb+c] +=
+		    +abc1[a+c*va+b*va*vb]
+		    -abc1[b+c*va+a*va*vb];
 
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,j,i,abc11,t2_baba,i3_ovvv_aaaa);
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,i,j,abc12,t2_baba,i3_ovvv_aaaa);
-	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc2,t2_aaaa,i2_t2f2_oovo_baba);
-	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc3,t2_aaaa,i2_t2f2_oovo_baba);
-	for (a = 0; a < va; a++) {
-	for (b = 0; b < a; b++) {
-	for (c = 0; c < vb; c++) {
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
 		sigvvvr[a*va*vb+b*vb+c] +=
 		    -abc11[c+vb*a*(a-1)/2+vb*b]
-		    +abc12[c+vb*a*(a-1)/2+vb*b]
-		    -abc2[b+a*va+c*va*va]
-		    +abc3[b+a*va+c*va*va];
-	}}}
+		    +abc12[c+vb*a*(a-1)/2+vb*b];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc1,t2_aaaa,i2_t2f2_oovo_baba);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvr[a*va*vb+b*vb+c] +=
+		    -abc1[b+a*va+c*va*va];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc1,t2_aaaa,i2_t2f2_oovo_baba);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvr[a*va*vb+b*vb+c] +=
+		    +abc1[b+a*va+c*va*va];
 
 	t2_abab_i_oovo_abab(oa,va,ob,vb,i,j,k,abc1,t2_abab,i2_t2f2_oovo_abab);
-	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc2,t2_abab,i2_t2f2_oovo_abab);
-	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc3,t2_baba,i2_t2f2_oovo_aaaa);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvr[a*va*vb+b*vb+c] +=
+		    -abc1[c+a*vb+b*vb*va]
+		    +abc1[c+b*vb+a*vb*va];
+
+	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc1,t2_abab,i2_t2f2_oovo_abab);
+	for (a = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++)
+		sigvvvr[a*va*vb+b*vb+c] +=
+		    -abc1[c+b*vb+a*vb*va]
+		    +abc1[c+a*vb+b*vb*va];
+
+	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc1,t2_baba,i2_t2f2_oovo_aaaa);
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
 		double sigvvvl1, sigvvvr1, l1t, dn;
 
 		sigvvvr[a*va*vb+b*vb+c] +=
-		    -abc1[c+a*vb+b*vb*va]
-		    +abc1[c+b*vb+a*vb*va]
-		    -abc2[c+b*vb+a*vb*va]
-		    +abc2[c+a*vb+b*vb*va]
-		    -abc3[a+c*va+b*va*vb]
-		    +abc3[b+c*va+a*va*vb];
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
 		l1t = +comp_t3b_ijkabc(va,ob,va,vb,i,j,k,a,b,c,
 			  l1_aa,i_oovv_abab,f2_ov_aa,l2_abab)
 		      -comp_t3b_ijkabc(va,ob,va,vb,i,j,k,b,a,c,
