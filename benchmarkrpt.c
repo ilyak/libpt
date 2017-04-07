@@ -42,7 +42,7 @@ main(int argc, char **argv)
 	double *d_ov, *f_ov, *t1, *t2, *i_oovo, *i_oovv, *i_ovvv;
 	size_t d_ov_sz, f_ov_sz, t1_sz, t2_sz, i_oovo_sz, i_oovv_sz, i_ovvv_sz;
 	size_t oa, va, ob, vb;
-	time_t wall;
+	time_t wall = 0;
 	int rank = 0;
 
 #ifdef WITH_MPI
@@ -83,14 +83,15 @@ main(int argc, char **argv)
 	randomfill(i_oovv, i_oovv_sz);
 	randomfill(i_ovvv, i_ovvv_sz);
 
-	if (rank == 0)
+	if (rank == 0) {
 		printf("rpt with oa = %zu, va = %zu\n", oa, va);
-	wall = time(NULL);
+		wall = time(NULL);
+	}
 	libpt_rpt(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
-	wall = time(NULL) - wall;
-	if (rank == 0)
+	if (rank == 0) {
+		wall = time(NULL) - wall;
 		printf("rpt done in %d sec\n", (int)wall);
-
+	}
 	free(d_ov);
 	free(f_ov);
 	free(t1);

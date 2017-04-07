@@ -44,7 +44,7 @@ main(int argc, char **argv)
 	size_t d_ov_sz, f2_ov_sz, l1_sz, t2_sz, l2_sz;
 	size_t i_oovv_sz, i2_t2f2_oovo_sz, i3_ovvv_sz, i6_oovo_sz, i7_ovvv_sz;
 	size_t oa, va, ob, vb;
-	time_t wall;
+	time_t wall = 0;
 	int rank = 0;
 
 #ifdef WITH_MPI
