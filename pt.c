@@ -321,10 +321,6 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	free(ij);
 	free(t3ax1);
 }
-#ifdef WITH_MPI
-	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
-	    MPI_SUM, MPI_COMM_WORLD);
-#endif
 	return (e_pt);
 }
 
@@ -469,10 +465,6 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	free(ij);
 	free(t3ax1);
 }
-#ifdef WITH_MPI
-	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
-	    MPI_SUM, MPI_COMM_WORLD);
-#endif
 	return (e_pt);
 }
 
@@ -481,7 +473,7 @@ libpt_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
     const double *t1, const double *t2, const double *i_oovo,
     const double *i_oovv, const double *i_ovvv)
 {
-	double e_pt1, e_pt2;
+	double e_pt = 0.0;
 	const double *t2_aaaa = t2;
 	const double *t2_abab = t2 + oa*oa*va*va;
 	const double *i_ovvv_aaaa = i_ovvv;
@@ -491,13 +483,16 @@ libpt_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	const double *i_oovv_aaaa = i_oovv;
 	const double *i_oovv_abab = i_oovv + oa*oa*va*va;
 
-	e_pt1 = cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
+	e_pt += cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
 	    i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
-	e_pt2 = cc_pt_aab(oa, va, oa, va, d_ov, d_ov, f_ov, f_ov, t1, t1,
+	e_pt += cc_pt_aab(oa, va, oa, va, d_ov, d_ov, f_ov, f_ov, t1, t1,
 	    t2_aaaa, t2_abab, t2_abab, i_oovo_aaaa, i_oovo_abab, i_oovo_abab,
 	    i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab, i_ovvv_abab);
-
-	return 2.0 * (e_pt1 + e_pt2);
+#ifdef WITH_MPI
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
+	    MPI_SUM, MPI_COMM_WORLD);
+#endif
+	return 2.0 * e_pt;
 }
 
 double
@@ -505,7 +500,7 @@ libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *f_ov, const double *t1, const double *t2,
     const double *i_oovo, const double *i_oovv, const double *i_ovvv)
 {
-	double e_pt1, e_pt2, e_pt3, e_pt4;
+	double e_pt = 0.0;
 	const double *d_ov_aa = d_ov;
 	const double *d_ov_bb = d_ov_aa + oa*va;
 	const double *f_ov_aa = f_ov;
@@ -534,23 +529,26 @@ libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	const double *i_ovvv_baba = i_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
 
 	/* aaaaaa */
-	e_pt1 = cc_pt_aaa(oa, va, d_ov_aa, f_ov_aa, t1_aa, t2_aaaa,
+	e_pt += cc_pt_aaa(oa, va, d_ov_aa, f_ov_aa, t1_aa, t2_aaaa,
 	    i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
 	/* bbbbbb */
-	e_pt2 = cc_pt_aaa(ob, vb, d_ov_bb, f_ov_bb, t1_bb, t2_bbbb,
+	e_pt += cc_pt_aaa(ob, vb, d_ov_bb, f_ov_bb, t1_bb, t2_bbbb,
 	    i_oovo_bbbb, i_oovv_bbbb, i_ovvv_bbbb);
 	/* aabaab */
-	e_pt3 = cc_pt_aab(oa, va, ob, vb, d_ov_aa, d_ov_bb, f_ov_aa, f_ov_bb,
+	e_pt += cc_pt_aab(oa, va, ob, vb, d_ov_aa, d_ov_bb, f_ov_aa, f_ov_bb,
 	    t1_aa, t1_bb, t2_aaaa, t2_abab, t2_baba, i_oovo_aaaa, i_oovo_abab,
 	    i_oovo_baba, i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab,
 	    i_ovvv_baba);
 	/* bbabba */
-	e_pt4 = cc_pt_aab(ob, vb, oa, va, d_ov_bb, d_ov_aa, f_ov_bb, f_ov_aa,
+	e_pt += cc_pt_aab(ob, vb, oa, va, d_ov_bb, d_ov_aa, f_ov_bb, f_ov_aa,
 	    t1_bb, t1_aa, t2_bbbb, t2_baba, t2_abab, i_oovo_bbbb, i_oovo_baba,
 	    i_oovo_abab, i_oovv_bbbb, i_oovv_baba, i_ovvv_bbbb, i_ovvv_baba,
 	    i_ovvv_abab);
-
-	return (e_pt1 + e_pt2 + e_pt3 + e_pt4);
+#ifdef WITH_MPI
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
+	    MPI_SUM, MPI_COMM_WORLD);
+#endif
+	return e_pt;
 }
 
 static double
@@ -651,10 +649,6 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 	free(ij);
 	free(sigvvvl);
 }
-#ifdef WITH_MPI
-	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
-	    MPI_SUM, MPI_COMM_WORLD);
-#endif
 	return (e_pt);
 }
 
@@ -825,10 +819,6 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	free(ij);
 	free(sigvvvl);
 }
-#ifdef WITH_MPI
-	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
-	    MPI_SUM, MPI_COMM_WORLD);
-#endif
 	return (e_pt);
 }
 
@@ -838,7 +828,7 @@ libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv)
 {
-	double e_pt1, e_pt2;
+	double e_pt = 0.0;
 	const double *t2_aaaa = t2;
 	const double *t2_abab = t2 + oa*oa*va*va;
 	const double *l2_aaaa = l2;
@@ -854,17 +844,20 @@ libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 	const double *i7_ovvv_aaaa = i7_ovvv;
 	const double *i7_ovvv_abab = i7_ovvv + oa*va*va*(va-1)/2;
 
-	e_pt1 = cc_ft_aaa(oa, va, d_ov, f2_ov, l1, t2_aaaa, l2_aaaa,
+	e_pt += cc_ft_aaa(oa, va, d_ov, f2_ov, l1, t2_aaaa, l2_aaaa,
 	    i_oovv_aaaa, i2_t2f2_oovo_aaaa, i3_ovvv_aaaa, i6_oovo_aaaa,
 	    i7_ovvv_aaaa);
-	e_pt2 = cc_ft_aab(oa, va, oa, va, d_ov, d_ov, f2_ov, f2_ov,
+	e_pt += cc_ft_aab(oa, va, oa, va, d_ov, d_ov, f2_ov, f2_ov,
 	    l1, l1, t2_aaaa, t2_abab, t2_abab, l2_aaaa, l2_abab, l2_abab,
 	    i_oovv_aaaa, i_oovv_abab, i2_t2f2_oovo_aaaa, i2_t2f2_oovo_abab,
 	    i2_t2f2_oovo_abab, i3_ovvv_aaaa, i3_ovvv_abab, i3_ovvv_abab,
 	    i6_oovo_aaaa, i6_oovo_abab, i6_oovo_abab,
 	    i7_ovvv_aaaa, i7_ovvv_abab, i7_ovvv_abab);
-
-	return 2.0 * (e_pt1 + e_pt2);
+#ifdef WITH_MPI
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
+	    MPI_SUM, MPI_COMM_WORLD);
+#endif
+	return 2.0 * e_pt;
 }
 
 double
@@ -873,7 +866,7 @@ libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *i_oovv, const double *i2_t2f2_oovo, const double *i3_ovvv,
     const double *i6_oovo, const double *i7_ovvv)
 {
-	double e_pt1, e_pt2, e_pt3, e_pt4;
+	double e_pt = 0.0;
 	const double *d_ov_aa = d_ov;
 	const double *d_ov_bb = d_ov_aa + oa*va;
 	const double *f2_ov_aa = f2_ov;
@@ -917,27 +910,30 @@ libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	const double *i7_ovvv_baba = i7_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
 
 	/* aaaaaa */
-	e_pt1 = cc_ft_aaa(oa, va, d_ov_aa, f2_ov_aa, l1_aa, t2_aaaa, l2_aaaa,
+	e_pt += cc_ft_aaa(oa, va, d_ov_aa, f2_ov_aa, l1_aa, t2_aaaa, l2_aaaa,
 	    i_oovv_aaaa, i2_t2f2_oovo_aaaa, i3_ovvv_aaaa, i6_oovo_aaaa,
 	    i7_ovvv_aaaa);
 	/* bbbbbb */
-	e_pt2 = cc_ft_aaa(ob, vb, d_ov_bb, f2_ov_bb, l1_bb, t2_bbbb, l2_bbbb,
+	e_pt += cc_ft_aaa(ob, vb, d_ov_bb, f2_ov_bb, l1_bb, t2_bbbb, l2_bbbb,
 	    i_oovv_bbbb, i2_t2f2_oovo_bbbb, i3_ovvv_bbbb, i6_oovo_bbbb,
 	    i7_ovvv_bbbb);
 	/* aabaab */
-	e_pt3 = cc_ft_aab(oa, va, ob, vb, d_ov_aa, d_ov_bb, f2_ov_aa, f2_ov_bb,
+	e_pt += cc_ft_aab(oa, va, ob, vb, d_ov_aa, d_ov_bb, f2_ov_aa, f2_ov_bb,
 	    l1_aa, l1_bb, t2_aaaa, t2_abab, t2_baba, l2_aaaa, l2_abab, l2_baba,
 	    i_oovv_aaaa, i_oovv_abab, i2_t2f2_oovo_aaaa, i2_t2f2_oovo_abab,
 	    i2_t2f2_oovo_baba, i3_ovvv_aaaa, i3_ovvv_abab, i3_ovvv_baba,
 	    i6_oovo_aaaa, i6_oovo_abab, i6_oovo_baba,
 	    i7_ovvv_aaaa, i7_ovvv_abab, i7_ovvv_baba);
 	/* bbabba */
-	e_pt4 = cc_ft_aab(ob, vb, oa, va, d_ov_bb, d_ov_aa, f2_ov_bb, f2_ov_aa,
+	e_pt += cc_ft_aab(ob, vb, oa, va, d_ov_bb, d_ov_aa, f2_ov_bb, f2_ov_aa,
 	    l1_bb, l1_aa, t2_bbbb, t2_baba, t2_abab, l2_bbbb, l2_baba, l2_abab,
 	    i_oovv_bbbb, i_oovv_baba, i2_t2f2_oovo_bbbb, i2_t2f2_oovo_baba,
 	    i2_t2f2_oovo_abab, i3_ovvv_bbbb, i3_ovvv_baba, i3_ovvv_abab,
 	    i6_oovo_bbbb, i6_oovo_baba, i6_oovo_abab,
 	    i7_ovvv_bbbb, i7_ovvv_baba, i7_ovvv_abab);
-
-	return (e_pt1 + e_pt2 + e_pt3 + e_pt4);
+#ifdef WITH_MPI
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
+	    MPI_SUM, MPI_COMM_WORLD);
+#endif
+	return e_pt;
 }
