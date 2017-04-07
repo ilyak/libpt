@@ -546,7 +546,7 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 #pragma omp parallel
 #endif
 {
-	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
+	size_t i, j, k, a, b, c, t, it, *ijk, nijk = 0;
 	double *sigvvvl, *sigvvvr, *abc1;
 
 	if ((ijk = malloc(oa*oa*oa*sizeof(size_t))) == NULL)
@@ -564,10 +564,10 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 		}
 	}
 
-	if ((sigvvvl = malloc(3*va*va*va*sizeof(*sigvvvl))) == NULL)
+	if ((sigvvvl = malloc(2*va*va*va*sizeof(*sigvvvl))) == NULL)
 		err(1, "libpt malloc work");
-	sigvvvr = sigvvvl + va*va*va;
-	abc1 = sigvvvl + 2*va*va*va;
+	sigvvvr = sigvvvl + va*va*(va-1)/2;
+	abc1 = sigvvvl + va*va*va;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -579,120 +579,118 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 	k = ijk[3*it+2];
 
 	t2_i_ovvv_half(oa,va,i,j,k,abc1,l2,i7_ovvv);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvl[a*va*va+b*va+c] =
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] =
 		    +abc1[a*(a-1)/2*va+b*va+c]
 		    -abc1[a*(a-1)/2*va+c*va+b]
 		    +abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_ovvv_half(oa,va,k,j,i,abc1,l2,i7_ovvv);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvl[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[a*(a-1)/2*va+b*va+c]
 		    +abc1[a*(a-1)/2*va+c*va+b]
 		    -abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_ovvv_half(oa,va,i,k,j,abc1,l2,i7_ovvv);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvl[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[a*(a-1)/2*va+b*va+c]
 		    +abc1[a*(a-1)/2*va+c*va+b]
 		    -abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_oovo(oa,va,i,j,k,abc1,l2,i6_oovo);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvl[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
 		    +abc1[a*va*va+b*va+c]
 		    -abc1[b*va*va+a*va+c]
 		    -abc1[c*va*va+b*va+a];
 
 	t2_i_oovo(oa,va,j,i,k,abc1,l2,i6_oovo);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvl[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[a*va*va+b*va+c]
 		    +abc1[b*va*va+a*va+c]
 		    +abc1[c*va*va+b*va+a];
 
 	t2_i_oovo(oa,va,k,j,i,abc1,l2,i6_oovo);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvl[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[a*va*va+b*va+c]
 		    +abc1[b*va*va+a*va+c]
 		    +abc1[c*va*va+b*va+a];
 
 	t2_i_ovvv_half(oa,va,i,j,k,abc1,t2,i3_ovvv);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvr[a*va*va+b*va+c] =
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] =
 		    +abc1[a*(a-1)/2*va+b*va+c]
 		    -abc1[a*(a-1)/2*va+c*va+b]
 		    +abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_ovvv_half(oa,va,k,j,i,abc1,t2,i3_ovvv);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvr[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] +=
 		    -abc1[a*(a-1)/2*va+b*va+c]
 		    +abc1[a*(a-1)/2*va+c*va+b]
 		    -abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_ovvv_half(oa,va,i,k,j,abc1,t2,i3_ovvv);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvr[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] +=
 		    -abc1[a*(a-1)/2*va+b*va+c]
 		    +abc1[a*(a-1)/2*va+c*va+b]
 		    -abc1[b*(b-1)/2*va+c*va+a];
 
 	t2_i_oovo(oa,va,i,j,k,abc1,t2,i2_t2f2_oovo);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvr[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] +=
 		    +abc1[a*va*va+b*va+c]
 		    -abc1[b*va*va+a*va+c]
 		    -abc1[c*va*va+b*va+a];
 
 	t2_i_oovo(oa,va,j,i,k,abc1,t2,i2_t2f2_oovo);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < b; c++)
-		sigvvvr[a*va*va+b*va+c] +=
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] +=
 		    -abc1[a*va*va+b*va+c]
 		    +abc1[b*va*va+a*va+c]
 		    +abc1[c*va*va+b*va+a];
 
 	t2_i_oovo(oa,va,k,j,i,abc1,t2,i2_t2f2_oovo);
-	for (a = 0; a < va; a++) {
+	for (a = 0, t = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
-	for (c = 0; c < b; c++) {
-		double dn, l1t, sigvvvl1, sigvvvr1;
+	for (c = 0; c < b; c++, t++) {
+		double dn, l1t;
 
-		sigvvvr[a*va*va+b*va+c] +=
+		sigvvvr[t] +=
 		    -abc1[a*va*va+b*va+c]
 		    +abc1[b*va*va+a*va+c]
 		    +abc1[c*va*va+b*va+a];
 		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
 		l1t = +i_jk_a_bc_ov_oovv(oa,va,l1,i_oovv,i,j,k,a,b,c)
 		      +i_jk_a_bc_ov_oovv(oa,va,f2_ov,l2,i,j,k,a,b,c);
-		sigvvvl1 = sigvvvl[a*va*va+b*va+c];
-		sigvvvr1 = sigvvvr[a*va*va+b*va+c];
-		e_pt += (sigvvvl1 - l1t) * sigvvvr1 / dn;
+		e_pt += (sigvvvl[t] - l1t) * sigvvvr[t] / dn;
 	}}}
 	}
 	free(ijk);
@@ -729,7 +727,7 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 #pragma omp parallel
 #endif
 {
-	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
+	size_t i, j, k, a, b, c, t, it, *ijk, nijk = 0;
 	double *sigvvvl, *sigvvvr, *abc1, *abc11, *abc12;
 
 	if ((ijk = malloc(2*oa*oa*ob*sizeof(size_t))) == NULL)
@@ -747,12 +745,12 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 		}
 	}
 
-	if ((sigvvvl = malloc(3*va*va*vb*sizeof(double))) == NULL)
+	if ((sigvvvl = malloc(2*va*va*vb*sizeof(double))) == NULL)
 		err(1, "libpt malloc work");
-	sigvvvr = sigvvvl + va*va*vb;
-	abc1 = sigvvvl + 2*va*va*vb;
-	abc11 = sigvvvl + 2*va*va*vb;
-	abc12 = sigvvvl + 2*va*va*vb + vb*va*(va-1)/2;
+	sigvvvr = sigvvvl + vb*va*(va-1)/2;
+	abc1 = sigvvvl + va*va*vb;
+	abc11 = sigvvvl + va*va*vb;
+	abc12 = sigvvvl + va*va*vb + vb*va*(va-1)/2;
 
 #ifdef _OPENMP
 #pragma omp for reduction(+:e_pt) schedule(dynamic)
@@ -764,146 +762,146 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	k = ijk[3*it+2];
 
 	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,l2_aaaa,i7_ovvv_baba);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] =
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] =
 		    -abc1[a+b*va+c*va*va]
 		    +abc1[b+a*va+c*va*va];
 
 	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc1,l2_abab,i7_ovvv_abab);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[a+c*va+b*va*vb]
 		    +abc1[b+c*va+a*va*vb];
 
 	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc1,l2_abab,i7_ovvv_abab);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
 		    +abc1[a+c*va+b*va*vb]
 		    -abc1[b+c*va+a*va*vb];
 
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,j,i,abc11,l2_baba,i7_ovvv_aaaa);
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,i,j,abc12,l2_baba,i7_ovvv_aaaa);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
 		    -abc11[c+vb*a*(a-1)/2+vb*b]
 		    +abc12[c+vb*a*(a-1)/2+vb*b];
 
 	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc1,l2_aaaa,i6_oovo_baba);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[b+a*va+c*va*va];
 
 	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc1,l2_aaaa,i6_oovo_baba);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
 		    +abc1[b+a*va+c*va*va];
 
 	t2_abab_i_oovo_abab(oa,va,ob,vb,i,j,k,abc1,l2_abab,i6_oovo_abab);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[c+a*vb+b*vb*va]
 		    +abc1[c+b*vb+a*vb*va];
 
 	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc1,l2_abab,i6_oovo_abab);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[c+b*vb+a*vb*va]
 		    +abc1[c+a*vb+b*vb*va];
 
 	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc1,l2_baba,i6_oovo_aaaa);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvl[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
 		    -abc1[a+c*va+b*va*vb]
 		    +abc1[b+c*va+a*va*vb];
 
 	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,t2_aaaa,i3_ovvv_baba);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvr[a*va*vb+b*vb+c] =
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] =
 		    -abc1[a+b*va+c*va*va]
 		    +abc1[b+a*va+c*va*va];
 
 	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc1,t2_abab,i3_ovvv_abab);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvr[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
 		    -abc1[a+c*va+b*va*vb]
 		    +abc1[b+c*va+a*va*vb];
 
 	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc1,t2_abab,i3_ovvv_abab);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvr[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
 		    +abc1[a+c*va+b*va*vb]
 		    -abc1[b+c*va+a*va*vb];
 
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,j,i,abc11,t2_baba,i3_ovvv_aaaa);
 	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,i,j,abc12,t2_baba,i3_ovvv_aaaa);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvr[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
 		    -abc11[c+vb*a*(a-1)/2+vb*b]
 		    +abc12[c+vb*a*(a-1)/2+vb*b];
 
 	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc1,t2_aaaa,i2_t2f2_oovo_baba);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvr[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
 		    -abc1[b+a*va+c*va*va];
 
 	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc1,t2_aaaa,i2_t2f2_oovo_baba);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvr[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
 		    +abc1[b+a*va+c*va*va];
 
 	t2_abab_i_oovo_abab(oa,va,ob,vb,i,j,k,abc1,t2_abab,i2_t2f2_oovo_abab);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvr[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
 		    -abc1[c+a*vb+b*vb*va]
 		    +abc1[c+b*vb+a*vb*va];
 
 	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc1,t2_abab,i2_t2f2_oovo_abab);
-	for (a = 0; a < va; a++)
+	for (a = 0, t = 0; a < va; a++)
 	for (b = 0; b < a; b++)
-	for (c = 0; c < vb; c++)
-		sigvvvr[a*va*vb+b*vb+c] +=
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
 		    -abc1[c+b*vb+a*vb*va]
 		    +abc1[c+a*vb+b*vb*va];
 
 	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc1,t2_baba,i2_t2f2_oovo_aaaa);
-	for (a = 0; a < va; a++) {
+	for (a = 0, t = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
-	for (c = 0; c < vb; c++) {
-		double sigvvvl1, sigvvvr1, l1t, dn;
+	for (c = 0; c < vb; c++, t++) {
+		double dn, l1t;
 
-		sigvvvr[a*va*vb+b*vb+c] +=
+		sigvvvr[t] +=
 		    -abc1[a+c*va+b*va*vb]
 		    +abc1[b+c*va+a*va*vb];
 		l1t = +comp_t3b_ijkabc(va,ob,va,vb,i,j,k,a,b,c,
@@ -917,9 +915,7 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 		      +comp_t3b_ijkabc(vb,oa,va,va,k,j,i,c,b,a,
 			  l1_bb,i_oovv_aaaa,f2_ov_bb,l2_aaaa);
 		dn = d_ov_aa[i*va+a] + d_ov_aa[j*va+b] + d_ov_bb[k*vb+c];
-		sigvvvl1 = sigvvvl[a*va*vb+b*vb+c];
-		sigvvvr1 = sigvvvr[a*va*vb+b*vb+c];
-		e_pt += (sigvvvl1 - l1t) * sigvvvr1 / dn;
+		e_pt += (sigvvvl[t] - l1t) * sigvvvr[t] / dn;
 	}}}
 	}
 	free(ijk);
