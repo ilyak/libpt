@@ -16,7 +16,10 @@ LIBS= -lblas -lg2c -lm
 #LDFLAGS=
 #LIBS=
 
-all: testrpt testupt testrft testuft benchmarkrpt benchmarkrft benchmarkuft
+ALL_TESTS= testrpt testupt testrft testuft
+ALL_BENCHMARKS= benchmarkrpt benchmarkupt benchmarkrft benchmarkuft
+
+all: $(ALL_TESTS) $(ALL_BENCHMARKS)
 
 testrpt: pt.o testrpt.o
 	$(CC) -o $@ $(CFLAGS) pt.o testrpt.o $(LDFLAGS) $(LIBS)
@@ -33,13 +36,16 @@ testuft: pt.o testuft.o
 benchmarkrpt: pt.o benchmarkrpt.o
 	$(CC) -o $@ $(CFLAGS) pt.o benchmarkrpt.o $(LDFLAGS) $(LIBS)
 
+benchmarkupt: pt.o benchmarkupt.o
+	$(CC) -o $@ $(CFLAGS) pt.o benchmarkupt.o $(LDFLAGS) $(LIBS)
+
 benchmarkrft: pt.o benchmarkrft.o
 	$(CC) -o $@ $(CFLAGS) pt.o benchmarkrft.o $(LDFLAGS) $(LIBS)
 
 benchmarkuft: pt.o benchmarkuft.o
 	$(CC) -o $@ $(CFLAGS) pt.o benchmarkuft.o $(LDFLAGS) $(LIBS)
 
-check: testrpt testupt testrft testuft
+check: $(ALL_TESTS)
 	@echo rpt01 && ./testrpt tests/rpt01.dat && echo success
 	@echo rpt02 && ./testrpt tests/rpt02.dat && echo success
 	@echo rpt03 && ./testrpt tests/rpt03.dat && echo success
@@ -59,7 +65,7 @@ check: testrpt testupt testrft testuft
 	@echo uft02 && ./testuft tests/uft02.dat && echo success
 	@echo uft03 && ./testuft tests/uft03.dat && echo success
 
-checkmpi: testrpt testupt testrft testuft
+checkmpi: $(ALL_TESTS)
 	@echo rpt01 && mpirun -np 2 ./testrpt tests/rpt01.dat && echo success
 	@echo rpt02 && mpirun -np 3 ./testrpt tests/rpt02.dat && echo success
 	@echo rpt03 && mpirun -np 4 ./testrpt tests/rpt03.dat && echo success
@@ -81,7 +87,6 @@ checkmpi: testrpt testupt testrft testuft
 
 clean:
 	rm -f *.core *.o gmon.out
-	rm -f benchmarkrpt benchmarkrft benchmarkuft
-	rm -f testrpt testupt testrft testuft
+	rm -f $(ALL_TESTS) $(ALL_BENCHMARKS)
 
 .PHONY: all check checkmpi clean
