@@ -21,11 +21,11 @@ ALL_BENCHMARKS= benchmarkrpt benchmarkupt benchmarkrft benchmarkuft
 
 all: $(ALL_TESTS) $(ALL_BENCHMARKS)
 
-testrpt: pt.o testrpt.o
-	$(CC) -o $@ $(CFLAGS) pt.o testrpt.o $(LDFLAGS) $(LIBS)
+testrpt: pt.o testpt.o
+	$(CC) -o $@ $(CFLAGS) pt.o testpt.o $(LDFLAGS) $(LIBS)
 
-testupt: pt.o testupt.o
-	$(CC) -o $@ $(CFLAGS) pt.o testupt.o $(LDFLAGS) $(LIBS)
+testupt: pt.o testpt.o
+	$(CC) -o $@ $(CFLAGS) pt.o testpt.o $(LDFLAGS) $(LIBS)
 
 testrft: pt.o testft.o
 	$(CC) -o $@ $(CFLAGS) pt.o testft.o $(LDFLAGS) $(LIBS)

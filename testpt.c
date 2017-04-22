@@ -17,6 +17,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <err.h>
 
@@ -29,11 +30,22 @@
 #define EPSILON 1.0e-8
 
 static void
-read_test_header(FILE *fp, size_t *oa, size_t *va, size_t *ob, size_t *vb,
-    double *e_ref)
+read_test_header(FILE *fp, int unrestricted, size_t *oa, size_t *va,
+    size_t *ob, size_t *vb, double *e_ref)
 {
-	if (fscanf(fp, "%zu %zu %zu %zu %lf", oa, va, ob, vb, e_ref) != 5)
-		errx(1, "unable to read test header");
+	int rc;
+
+	if (unrestricted) {
+		rc = fscanf(fp, "%zu %zu %zu %zu %lf", oa, va, ob, vb, e_ref);
+		if (rc != 5)
+			errx(1, "unable to read test header");
+	} else {
+		rc = fscanf(fp, "%zu %zu %lf", oa, va, e_ref);
+		if (rc != 3)
+			errx(1, "unable to read test header");
+		*ob = *oa;
+		*vb = *va;
+	}
 }
 
 static void
@@ -57,7 +69,59 @@ read_next_double(FILE *fp)
 }
 
 static void
-read_test_data(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
+read_test_data_rpt(FILE *fp, size_t oa, size_t va, double *d_ov, double *f_ov,
+    double *t1, double *t2, double *i_oovo, double *i_oovv, double *i_ovvv)
+{
+	size_t i;
+
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*va; i++)
+		d_ov[i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*va; i++)
+		f_ov[i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*va; i++)
+		t1[i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*oa*va*va; i++)
+		t2[i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*oa*va*va; i++)
+		t2[oa*oa*va*va+i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*oa*oa*va; i++)
+		i_oovo[i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*oa*oa*va; i++)
+		i_oovo[oa*oa*oa*va+i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*oa*va*va; i++)
+		i_oovv[i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*oa*va*va; i++)
+		i_oovv[oa*oa*va*va+i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*va*va*(va-1)/2; i++)
+		i_ovvv[i] = read_next_double(fp);
+	skip_line(fp);
+	skip_line(fp);
+	for (i = 0; i < oa*va*va*va; i++)
+		i_ovvv[oa*va*va*(va-1)/2+i] = read_next_double(fp);
+}
+
+static void
+read_test_data_upt(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
     double *d_ov, double *f_ov, double *t1, double *t2, double *i_oovo,
     double *i_oovv, double *i_ovvv)
 {
@@ -229,7 +293,7 @@ main(int argc, char **argv)
 	double *i_oovo, *i_oovv, *i_ovvv;
 	size_t oa, va, ob, vb, d_ov_sz, f_ov_sz, t1_sz, t2_sz;
 	size_t i_oovo_sz, i_oovv_sz, i_ovvv_sz;
-	int rank = 0;
+	int rank = 0, unrestricted;
 
 #ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
@@ -239,16 +303,28 @@ main(int argc, char **argv)
 		errx(1, "specify test file");
 	if ((fp = fopen(argv[1], "r")) == NULL)
 		err(1, "fopen");
-	read_test_header(fp, &oa, &va, &ob, &vb, &e_ref);
+	unrestricted = strstr(argv[0], "upt") != NULL;
+	read_test_header(fp, unrestricted, &oa, &va, &ob, &vb, &e_ref);
 
-	d_ov_sz = oa*va + ob*vb;
-	f_ov_sz = oa*va + ob*vb;
-	t1_sz = oa*va + ob*vb;
-	t2_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
-	i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob + ob*oa*vb*oa + ob*ob*vb*ob;
-	i_oovv_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
-	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
-	    ob*vb*vb*(vb-1)/2;
+	if (unrestricted) {
+		d_ov_sz = oa*va + ob*vb;
+		f_ov_sz = oa*va + ob*vb;
+		t1_sz = oa*va + ob*vb;
+		t2_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
+		i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob + ob*oa*vb*oa +
+		    ob*ob*vb*ob;
+		i_oovv_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
+		i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
+		    ob*vb*vb*(vb-1)/2;
+	} else {
+		d_ov_sz = oa*va;
+		f_ov_sz = oa*va;
+		t1_sz = oa*va;
+		t2_sz = oa*oa*va*va + oa*ob*va*vb;
+		i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
+		i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
+		i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
+	}
 	if ((d_ov = malloc(d_ov_sz * sizeof(double))) == NULL)
 		err(1, "malloc");
 	if ((f_ov = malloc(f_ov_sz * sizeof(double))) == NULL)
@@ -264,15 +340,26 @@ main(int argc, char **argv)
 	if ((i_ovvv = malloc(i_ovvv_sz * sizeof(double))) == NULL)
 		err(1, "malloc");
 
-	read_test_data(fp, oa, va, ob, vb, d_ov, f_ov, t1, t2, i_oovo,
-	    i_oovv, i_ovvv);
+	if (unrestricted) {
+		read_test_data_upt(fp, oa, va, ob, vb, d_ov, f_ov, t1, t2,
+		    i_oovo, i_oovv, i_ovvv);
+	} else {
+		read_test_data_rpt(fp, oa, va, d_ov, f_ov, t1, t2,
+		    i_oovo, i_oovv, i_ovvv);
+	}
 	fclose(fp);
 
-	e_cmp = libpt_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2, i_oovo,
-	    i_oovv, i_ovvv);
+	if (unrestricted) {
+		e_cmp = libpt_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2,
+		    i_oovo, i_oovv, i_ovvv);
+	} else {
+		e_cmp = libpt_rpt(oa, va, d_ov, f_ov, t1, t2,
+		    i_oovo, i_oovv, i_ovvv);
+	}
 	if (rank == 0) {
-		printf("upt energy: % .8lf\n", e_cmp);
-		printf("upt ref:    % .8lf\n", e_ref);
+		const char *s = unrestricted ? "upt" : "rpt";
+		printf("%s energy: % .8lf\n", s, e_cmp);
+		printf("%s ref:    % .8lf\n", s, e_ref);
 	}
 	free(d_ov);
 	free(f_ov);
