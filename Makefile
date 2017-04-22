@@ -27,11 +27,11 @@ testrpt: pt.o testrpt.o
 testupt: pt.o testupt.o
 	$(CC) -o $@ $(CFLAGS) pt.o testupt.o $(LDFLAGS) $(LIBS)
 
-testrft: pt.o testrft.o
-	$(CC) -o $@ $(CFLAGS) pt.o testrft.o $(LDFLAGS) $(LIBS)
+testrft: pt.o testft.o
+	$(CC) -o $@ $(CFLAGS) pt.o testft.o $(LDFLAGS) $(LIBS)
 
-testuft: pt.o testuft.o
-	$(CC) -o $@ $(CFLAGS) pt.o testuft.o $(LDFLAGS) $(LIBS)
+testuft: pt.o testft.o
+	$(CC) -o $@ $(CFLAGS) pt.o testft.o $(LDFLAGS) $(LIBS)
 
 benchmarkrpt: pt.o benchmarkpt.o
 	$(CC) -o $@ $(CFLAGS) pt.o benchmarkpt.o $(LDFLAGS) $(LIBS)
