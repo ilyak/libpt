@@ -17,6 +17,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include <err.h>
@@ -43,7 +44,7 @@ main(int argc, char **argv)
 	size_t d_ov_sz, f_ov_sz, t1_sz, t2_sz, i_oovo_sz, i_oovv_sz, i_ovvv_sz;
 	size_t oa, va, ob, vb;
 	time_t wall = 0;
-	int rank = 0;
+	int rank = 0, unrestricted;
 
 #ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
@@ -53,14 +54,27 @@ main(int argc, char **argv)
 		errx(1, "specify oa and va");
 	oa = ob = strtol(argv[1], NULL, 10);
 	va = vb = strtol(argv[2], NULL, 10);
+	unrestricted = strstr(argv[0], "upt") != NULL;
 
-	d_ov_sz = oa*va;
-	f_ov_sz = oa*va;
-	t1_sz = oa*va;
-	t2_sz = oa*oa*va*va + oa*ob*va*vb;
-	i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
-	i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
-	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
+	if (unrestricted) {
+		d_ov_sz = oa*va + ob*vb;
+		f_ov_sz = oa*va + ob*vb;
+		t1_sz = oa*va + ob*vb;
+		t2_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
+		i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob + ob*oa*vb*oa +
+		    ob*ob*vb*ob;
+		i_oovv_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
+		i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
+		    ob*vb*vb*(vb-1)/2;
+	} else {
+		d_ov_sz = oa*va;
+		f_ov_sz = oa*va;
+		t1_sz = oa*va;
+		t2_sz = oa*oa*va*va + oa*ob*va*vb;
+		i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
+		i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
+		i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
+	}
 	if ((d_ov = malloc(d_ov_sz * sizeof(double))) == NULL)
 		err(1, "malloc");
 	if ((f_ov = malloc(f_ov_sz * sizeof(double))) == NULL)
@@ -84,13 +98,20 @@ main(int argc, char **argv)
 	randomfill(i_ovvv, i_ovvv_sz);
 
 	if (rank == 0) {
-		printf("rpt with oa = %zu, va = %zu\n", oa, va);
+		printf("%s with oa = %zu, va = %zu, ob = %zu, vb = %zu\n",
+		    unrestricted ? "upt" : "rpt", oa, va, ob, vb);
 		wall = time(NULL);
 	}
-	libpt_rpt(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+	if (unrestricted) {
+		libpt_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2,
+		    i_oovo, i_oovv, i_ovvv);
+	} else {
+		libpt_rpt(oa, va, d_ov, f_ov, t1, t2,
+		    i_oovo, i_oovv, i_ovvv);
+	}
 	if (rank == 0) {
 		wall = time(NULL) - wall;
-		printf("rpt done in %d sec\n", (int)wall);
+		printf("done in %d sec\n", (int)wall);
 	}
 	free(d_ov);
 	free(f_ov);
