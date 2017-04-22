@@ -39,11 +39,11 @@ benchmarkrpt: pt.o benchmarkrpt.o
 benchmarkupt: pt.o benchmarkupt.o
 	$(CC) -o $@ $(CFLAGS) pt.o benchmarkupt.o $(LDFLAGS) $(LIBS)
 
-benchmarkrft: pt.o benchmarkrft.o
-	$(CC) -o $@ $(CFLAGS) pt.o benchmarkrft.o $(LDFLAGS) $(LIBS)
+benchmarkrft: pt.o benchmarkft.o
+	$(CC) -o $@ $(CFLAGS) pt.o benchmarkft.o $(LDFLAGS) $(LIBS)
 
-benchmarkuft: pt.o benchmarkuft.o
-	$(CC) -o $@ $(CFLAGS) pt.o benchmarkuft.o $(LDFLAGS) $(LIBS)
+benchmarkuft: pt.o benchmarkft.o
+	$(CC) -o $@ $(CFLAGS) pt.o benchmarkft.o $(LDFLAGS) $(LIBS)
 
 check: $(ALL_TESTS)
 	@echo rpt01 && ./testrpt tests/rpt01.dat && echo success
