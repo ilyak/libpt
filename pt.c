@@ -15,6 +15,7 @@
  */
 
 #include <err.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -1038,4 +1039,12 @@ libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	    MPI_SUM, MPI_COMM_WORLD);
 #endif
 	return e_pt;
+}
+
+void
+libpt_print_banner(void)
+{
+	printf("libpt (c) 2016-2017 Ilya Kaliman\n");
+	printf("Fast Coupled Cluster Triples Corrections\n");
+	printf("https://github.com/ilyak/libpt\n");
 }
