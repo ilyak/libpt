@@ -37,12 +37,9 @@ void libpt_print_banner(void);
  *   d_ov - Delta matrix (size oa*va)
  *   f_ov - Fock matrix (size oa*va)
  *   t1 - CCSD T1 amplitudes (size oa*va)
- *   t2 - CCSD T2 amplitudes, aaaa/abab blocks
- *     (size oa*oa*va*va + oa*oa*va*va)
- *   i_oovo - OOVO integrals, aaaa/abab blocks
- *     (size oa*oa*va*oa + oa*oa*va*oa)
- *   i_oovv - OOVV integrals, aaaa/abab blocks
- *     (size oa*oa*va*va + oa*oa*va*va)
+ *   t2 - CCSD T2 amplitudes, aaaa/abab blocks (size 2*oa*oa*va*va)
+ *   i_oovo - OOVO integrals, aaaa/abab blocks (size 2*oa*oa*va*oa)
+ *   i_oovv - OOVV integrals, aaaa/abab blocks (size 2*oa*oa*va*va)
  *   i_ovvv - OVVV integrals, aaaa block with vv symmetry followed by full
  *     abab block (size oa*va*va*(va-1)/2 + oa*va*va*va)
  *
