@@ -192,6 +192,8 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
 
+	if (oa == 0 || va == 0)
+		return 0.0;
 #ifdef WITH_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -313,6 +315,8 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
 
+	if (oa == 0 || va == 0 || ob == 0 || vb == 0)
+		return 0.0;
 #ifdef WITH_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -539,6 +543,8 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
 
+	if (oa == 0 || va == 0)
+		return 0.0;
 #ifdef WITH_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -720,6 +726,8 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
 
+	if (oa == 0 || va == 0 || ob == 0 || vb == 0)
+		return 0.0;
 #ifdef WITH_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
