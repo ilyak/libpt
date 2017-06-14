@@ -1,5 +1,5 @@
 CC= cc
-CFLAGS= -Wall -Wextra -g -O3 -fopenmp
+CFLAGS= -Wall -Wextra -g -fopenmp
 LDFLAGS= -L/usr/local/lib
 LIBS= -lblas -lm
 
