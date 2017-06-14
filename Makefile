@@ -1,16 +1,9 @@
-# cc with Netlib BLAS
 CC= cc
 CFLAGS= -Wall -Wextra -g -O3
 LDFLAGS= -L/usr/local/lib
 LIBS= -lblas -lm
 
-# mpicc with Netlib BLAS and MPI on OpenBSD
-#CC= mpicc
-#CFLAGS= -Wall -Wextra -g -O3 -DWITH_MPI
-#LDFLAGS= -L/usr/local/lib
-#LIBS= -lblas -lg2c -lm
-
-# icc with MKL and MPI on Linux
+# Intel Compiler with MPI and OpenMP
 #CC= mpicc
 #CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp -DWITH_MPI
 #LDFLAGS=
