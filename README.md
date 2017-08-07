@@ -14,11 +14,21 @@ The API defines several functions:
 - `libpt_rft` - compute EOM-CCSD(fT) energy correction for the restricted case
 - `libpt_uft` - compute EOM-CCSD(fT) energy correction for the unrestricted case
 
-All functions are MPI/OpenMP parallel. The detailed documentation can be found
-in the `pt.h` file. To use libpt in your project, include `pt.h` header and add
-`pt.c` to the list of project source files. OpenMP is enabled automatically
-when appropriate OpenMP compiler flags are used. Defining `LIBPT_USE_MPI` during
-compilation enables MPI support.
+### Compilation
+
+You will need a POSIX-compatible `make` utility, an efficient BLAS library (for
+linking), and an ANSI C complaint compiler. To compile libpt, issue:
+
+    cd src && make
+
+To change the default compiler and enable OpenMP and MPI, the following command
+can be used:
+
+    cd src && CC=mpicc CFLAGS="-O3 -fopenmp -DLIBPT_USE_MPI" make
+
+To use libpt in your project, include the `pt.h` file and link with the
+compiled static `libpt.a` library. The detailed API documentation can be found
+in the `pt.h` file.
 
 ### Benchmarks
 
