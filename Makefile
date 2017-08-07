@@ -5,7 +5,7 @@ LIBS= -lblas -lm
 
 # Intel Compiler with MPI and OpenMP
 #CC= mpicc
-#CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp -DWITH_MPI
+#CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp -DLIBPT_USE_MPI
 #LDFLAGS=
 #LIBS=
 

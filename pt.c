@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 #include <mpi.h>
 #endif
 
@@ -194,7 +194,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 
 	if (oa == 0 || va == 0)
 		return 0.0;
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
@@ -317,7 +317,7 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 
 	if (oa == 0 || va == 0 || ob == 0 || vb == 0)
 		return 0.0;
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
@@ -471,7 +471,7 @@ libpt_rpt(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	e_pt += cc_pt_aab(oa, va, oa, va, d_ov, d_ov, f_ov, f_ov, t1, t1,
 	    t2_aaaa, t2_abab, t2_abab, i_oovo_aaaa, i_oovo_abab, i_oovo_abab,
 	    i_oovv_aaaa, i_oovv_abab, i_ovvv_aaaa, i_ovvv_abab, i_ovvv_abab);
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
 	    MPI_SUM, MPI_COMM_WORLD);
 #endif
@@ -527,7 +527,7 @@ libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	    t1_bb, t1_aa, t2_bbbb, t2_baba, t2_abab, i_oovo_bbbb, i_oovo_baba,
 	    i_oovo_abab, i_oovv_bbbb, i_oovv_baba, i_ovvv_bbbb, i_ovvv_baba,
 	    i_ovvv_abab);
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
 	    MPI_SUM, MPI_COMM_WORLD);
 #endif
@@ -545,7 +545,7 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 
 	if (oa == 0 || va == 0)
 		return 0.0;
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
@@ -728,7 +728,7 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 
 	if (oa == 0 || va == 0 || ob == 0 || vb == 0)
 		return 0.0;
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
@@ -964,7 +964,7 @@ libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 	    i2_t2f2_oovo_abab, i3_ovvv_aaaa, i3_ovvv_abab, i3_ovvv_abab,
 	    i6_oovo_aaaa, i6_oovo_abab, i6_oovo_abab,
 	    i7_ovvv_aaaa, i7_ovvv_abab, i7_ovvv_abab);
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
 	    MPI_SUM, MPI_COMM_WORLD);
 #endif
@@ -1042,7 +1042,7 @@ libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	    i2_t2f2_oovo_abab, i3_ovvv_bbbb, i3_ovvv_baba, i3_ovvv_abab,
 	    i6_oovo_bbbb, i6_oovo_baba, i6_oovo_abab,
 	    i7_ovvv_bbbb, i7_ovvv_baba, i7_ovvv_abab);
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
 	    MPI_SUM, MPI_COMM_WORLD);
 #endif

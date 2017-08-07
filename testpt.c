@@ -21,7 +21,7 @@
 
 #include <err.h>
 
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 #include <mpi.h>
 #endif
 
@@ -295,7 +295,7 @@ main(int argc, char **argv)
 	size_t i_oovo_sz, i_oovv_sz, i_ovvv_sz;
 	int rank = 0, unrestricted;
 
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
@@ -368,7 +368,7 @@ main(int argc, char **argv)
 	free(i_oovo);
 	free(i_oovv);
 	free(i_ovvv);
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Finalize();
 #endif
 	return (fabs(e_cmp - e_ref) < EPSILON ? 0 : 1);

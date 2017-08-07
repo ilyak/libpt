@@ -22,7 +22,7 @@
 
 #include <err.h>
 
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 #include <mpi.h>
 #endif
 
@@ -48,7 +48,7 @@ main(int argc, char **argv)
 	time_t wall = 0;
 	int rank = 0, unrestricted;
 
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
@@ -142,7 +142,7 @@ main(int argc, char **argv)
 	free(i3_ovvv);
 	free(i6_oovo);
 	free(i7_ovvv);
-#ifdef WITH_MPI
+#ifdef LIBPT_USE_MPI
 	MPI_Finalize();
 #endif
 	return (0);

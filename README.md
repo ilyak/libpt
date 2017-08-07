@@ -17,7 +17,7 @@ The API defines several functions:
 All functions are MPI/OpenMP parallel. The detailed documentation can be found
 in the `pt.h` file. To use libpt in your project, include `pt.h` header and add
 `pt.c` to the list of project source files. OpenMP is enabled automatically
-when appropriate OpenMP compiler flags are used. Defining `WITH_MPI` during
+when appropriate OpenMP compiler flags are used. Defining `LIBPT_USE_MPI` during
 compilation enables MPI support.
 
 ### Benchmarks
