@@ -1,42 +1,47 @@
 CC= cc
-CFLAGS= -Wall -Wextra -g -fopenmp
+CFLAGS= -Wall -Wextra -g -fopenmp -Isrc
 LDFLAGS= -L/usr/local/lib
 LIBS= -lblas -lm
 
 # Intel Compiler with MPI and OpenMP
 #CC= mpicc
-#CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp -DLIBPT_USE_MPI
+#CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp -DLIBPT_USE_MPI -Isrc
 #LDFLAGS=
 #LIBS=
 
 ALL_TESTS= testrpt testupt testrft testuft
 ALL_BENCHMARKS= benchmarkrpt benchmarkupt benchmarkrft benchmarkuft
 
+LIBPT_A= src/libpt.a
+
 all: $(ALL_TESTS) $(ALL_BENCHMARKS)
 
-testrpt: pt.o testpt.o
-	$(CC) -o $@ $(CFLAGS) pt.o testpt.o $(LDFLAGS) $(LIBS)
+$(LIBPT_A):
+	cd src && CC="$(CC)" CFLAGS="$(CFLAGS)" $(MAKE)
 
-testupt: pt.o testpt.o
-	$(CC) -o $@ $(CFLAGS) pt.o testpt.o $(LDFLAGS) $(LIBS)
+testrpt: $(LIBPT_A) testpt.o
+	$(CC) -o $@ $(CFLAGS) testpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
-testrft: pt.o testft.o
-	$(CC) -o $@ $(CFLAGS) pt.o testft.o $(LDFLAGS) $(LIBS)
+testupt: $(LIBPT_A) testpt.o
+	$(CC) -o $@ $(CFLAGS) testpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
-testuft: pt.o testft.o
-	$(CC) -o $@ $(CFLAGS) pt.o testft.o $(LDFLAGS) $(LIBS)
+testrft: $(LIBPT_A) testft.o
+	$(CC) -o $@ $(CFLAGS) testft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
-benchmarkrpt: pt.o benchmarkpt.o
-	$(CC) -o $@ $(CFLAGS) pt.o benchmarkpt.o $(LDFLAGS) $(LIBS)
+testuft: $(LIBPT_A) testft.o
+	$(CC) -o $@ $(CFLAGS) testft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
-benchmarkupt: pt.o benchmarkpt.o
-	$(CC) -o $@ $(CFLAGS) pt.o benchmarkpt.o $(LDFLAGS) $(LIBS)
+benchmarkrpt: $(LIBPT_A) benchmarkpt.o
+	$(CC) -o $@ $(CFLAGS) benchmarkpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
-benchmarkrft: pt.o benchmarkft.o
-	$(CC) -o $@ $(CFLAGS) pt.o benchmarkft.o $(LDFLAGS) $(LIBS)
+benchmarkupt: $(LIBPT_A) benchmarkpt.o
+	$(CC) -o $@ $(CFLAGS) benchmarkpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
-benchmarkuft: pt.o benchmarkft.o
-	$(CC) -o $@ $(CFLAGS) pt.o benchmarkft.o $(LDFLAGS) $(LIBS)
+benchmarkrft: $(LIBPT_A) benchmarkft.o
+	$(CC) -o $@ $(CFLAGS) benchmarkft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
+
+benchmarkuft: $(LIBPT_A) benchmarkft.o
+	$(CC) -o $@ $(CFLAGS) benchmarkft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
 check: $(ALL_TESTS)
 	@echo rpt01 && ./testrpt tests/rpt01.dat && echo success
@@ -79,6 +84,7 @@ checkmpi: $(ALL_TESTS)
 	@echo uft03 && mpirun -np 3 ./testuft tests/uft03.dat && echo success
 
 clean:
+	cd src && $(MAKE) clean
 	rm -f *.core *.o gmon.out
 	rm -f $(ALL_TESTS) $(ALL_BENCHMARKS)
 
