@@ -10,14 +10,16 @@ LIBS= -lblas -lm
 #LIBS=
 
 ALL_TESTS= testrpt testupt testrft testuft
-ALL_BENCHMARKS= benchmarkrpt benchmarkupt benchmarkrft benchmarkuft
 
 LIBPT_A= src/libpt.a
 
-all: $(ALL_TESTS) $(ALL_BENCHMARKS)
+all: $(ALL_TESTS) benchmark
 
 $(LIBPT_A):
 	cd src && CC="$(CC)" CFLAGS="$(CFLAGS)" $(MAKE)
+
+benchmark: $(LIBPT_A) benchmark.o
+	$(CC) -o $@ $(CFLAGS) benchmark.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
 testrpt: $(LIBPT_A) testpt.o
 	$(CC) -o $@ $(CFLAGS) testpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
@@ -30,18 +32,6 @@ testrft: $(LIBPT_A) testft.o
 
 testuft: $(LIBPT_A) testft.o
 	$(CC) -o $@ $(CFLAGS) testft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
-
-benchmarkrpt: $(LIBPT_A) benchmarkpt.o
-	$(CC) -o $@ $(CFLAGS) benchmarkpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
-
-benchmarkupt: $(LIBPT_A) benchmarkpt.o
-	$(CC) -o $@ $(CFLAGS) benchmarkpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
-
-benchmarkrft: $(LIBPT_A) benchmarkft.o
-	$(CC) -o $@ $(CFLAGS) benchmarkft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
-
-benchmarkuft: $(LIBPT_A) benchmarkft.o
-	$(CC) -o $@ $(CFLAGS) benchmarkft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
 check: $(ALL_TESTS)
 	@echo rpt01 && ./testrpt tests/rpt01.dat && echo success
@@ -85,7 +75,7 @@ checkmpi: $(ALL_TESTS)
 
 clean:
 	cd src && $(MAKE) clean
-	rm -f *.core *.o gmon.out
-	rm -f $(ALL_TESTS) $(ALL_BENCHMARKS)
+	rm -f *.core *.o gmon.out benchmark
+	rm -f $(ALL_TESTS)
 
 .PHONY: all check checkmpi clean
