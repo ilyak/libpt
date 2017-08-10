@@ -9,11 +9,9 @@ LIBS= -lblas -lm
 #LDFLAGS=
 #LIBS=
 
-ALL_TESTS= testrpt testupt testrft testuft
-
 LIBPT_A= src/libpt.a
 
-all: $(ALL_TESTS) benchmark
+all: benchmark test
 
 $(LIBPT_A):
 	cd src && CC="$(CC)" CFLAGS="$(CFLAGS)" $(MAKE)
@@ -21,61 +19,51 @@ $(LIBPT_A):
 benchmark: $(LIBPT_A) benchmark.o
 	$(CC) -o $@ $(CFLAGS) benchmark.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
-testrpt: $(LIBPT_A) testpt.o
-	$(CC) -o $@ $(CFLAGS) testpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
+test: $(LIBPT_A) test.o
+	$(CC) -o $@ $(CFLAGS) test.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
-testupt: $(LIBPT_A) testpt.o
-	$(CC) -o $@ $(CFLAGS) testpt.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
+check: test
+	@./test rpt 01 && echo success
+	@./test rpt 02 && echo success
+	@./test rpt 03 && echo success
+	@./test rpt 04 && echo success
+	@./test rpt 05 && echo success
+	@./test rpt 06 && echo success
+	@./test rpt 07 && echo success
+	@./test rpt 08 && echo success
+	@./test rpt 09 && echo success
+	@./test upt 01 && echo success
+	@./test upt 02 && echo success
+	@./test upt 03 && echo success
+	@./test rft 01 && echo success
+	@./test rft 02 && echo success
+	@./test rft 03 && echo success
+	@./test uft 01 && echo success
+	@./test uft 02 && echo success
+	@./test uft 03 && echo success
 
-testrft: $(LIBPT_A) testft.o
-	$(CC) -o $@ $(CFLAGS) testft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
-
-testuft: $(LIBPT_A) testft.o
-	$(CC) -o $@ $(CFLAGS) testft.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
-
-check: $(ALL_TESTS)
-	@echo rpt01 && ./testrpt tests/rpt01.dat && echo success
-	@echo rpt02 && ./testrpt tests/rpt02.dat && echo success
-	@echo rpt03 && ./testrpt tests/rpt03.dat && echo success
-	@echo rpt04 && ./testrpt tests/rpt04.dat && echo success
-	@echo rpt05 && ./testrpt tests/rpt05.dat && echo success
-	@echo rpt06 && ./testrpt tests/rpt06.dat && echo success
-	@echo rpt07 && ./testrpt tests/rpt07.dat && echo success
-	@echo rpt08 && ./testrpt tests/rpt08.dat && echo success
-	@echo rpt09 && ./testrpt tests/rpt09.dat && echo success
-	@echo upt01 && ./testupt tests/upt01.dat && echo success
-	@echo upt02 && ./testupt tests/upt02.dat && echo success
-	@echo upt03 && ./testupt tests/upt03.dat && echo success
-	@echo rft01 && ./testrft tests/rft01.dat && echo success
-	@echo rft02 && ./testrft tests/rft02.dat && echo success
-	@echo rft03 && ./testrft tests/rft03.dat && echo success
-	@echo uft01 && ./testuft tests/uft01.dat && echo success
-	@echo uft02 && ./testuft tests/uft02.dat && echo success
-	@echo uft03 && ./testuft tests/uft03.dat && echo success
-
-checkmpi: $(ALL_TESTS)
-	@echo rpt01 && mpirun -np 2 ./testrpt tests/rpt01.dat && echo success
-	@echo rpt02 && mpirun -np 3 ./testrpt tests/rpt02.dat && echo success
-	@echo rpt03 && mpirun -np 4 ./testrpt tests/rpt03.dat && echo success
-	@echo rpt04 && mpirun -np 3 ./testrpt tests/rpt04.dat && echo success
-	@echo rpt05 && mpirun -np 1 ./testrpt tests/rpt05.dat && echo success
-	@echo rpt06 && mpirun -np 2 ./testrpt tests/rpt06.dat && echo success
-	@echo rpt07 && mpirun -np 4 ./testrpt tests/rpt07.dat && echo success
-	@echo rpt08 && mpirun -np 3 ./testrpt tests/rpt08.dat && echo success
-	@echo rpt09 && mpirun -np 2 ./testrpt tests/rpt09.dat && echo success
-	@echo upt01 && mpirun -np 3 ./testupt tests/upt01.dat && echo success
-	@echo upt02 && mpirun -np 4 ./testupt tests/upt02.dat && echo success
-	@echo upt03 && mpirun -np 3 ./testupt tests/upt03.dat && echo success
-	@echo rft01 && mpirun -np 3 ./testrft tests/rft01.dat && echo success
-	@echo rft02 && mpirun -np 2 ./testrft tests/rft02.dat && echo success
-	@echo rft03 && mpirun -np 1 ./testrft tests/rft03.dat && echo success
-	@echo uft01 && mpirun -np 3 ./testuft tests/uft01.dat && echo success
-	@echo uft02 && mpirun -np 2 ./testuft tests/uft02.dat && echo success
-	@echo uft03 && mpirun -np 3 ./testuft tests/uft03.dat && echo success
+checkmpi: test
+	@mpirun -np 2 ./test rpt 01 && echo success
+	@mpirun -np 3 ./test rpt 02 && echo success
+	@mpirun -np 4 ./test rpt 03 && echo success
+	@mpirun -np 3 ./test rpt 04 && echo success
+	@mpirun -np 1 ./test rpt 05 && echo success
+	@mpirun -np 2 ./test rpt 06 && echo success
+	@mpirun -np 4 ./test rpt 07 && echo success
+	@mpirun -np 3 ./test rpt 08 && echo success
+	@mpirun -np 2 ./test rpt 09 && echo success
+	@mpirun -np 3 ./test upt 01 && echo success
+	@mpirun -np 4 ./test upt 02 && echo success
+	@mpirun -np 3 ./test upt 03 && echo success
+	@mpirun -np 3 ./test rft 01 && echo success
+	@mpirun -np 2 ./test rft 02 && echo success
+	@mpirun -np 1 ./test rft 03 && echo success
+	@mpirun -np 3 ./test uft 01 && echo success
+	@mpirun -np 2 ./test uft 02 && echo success
+	@mpirun -np 3 ./test uft 03 && echo success
 
 clean:
 	cd src && $(MAKE) clean
-	rm -f *.core *.o gmon.out benchmark
-	rm -f $(ALL_TESTS)
+	rm -f *.core *.o gmon.out benchmark test
 
 .PHONY: all check checkmpi clean
