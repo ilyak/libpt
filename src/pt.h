@@ -26,6 +26,10 @@ extern "C" {
 /* Print libpt banner to standard output. */
 void libpt_print_banner(void);
 
+void libpt_set_malloc(void *(*fn)(size_t));
+
+void libpt_set_free(void (*fn)(void *));
+
 /* Compute coupled-cluster (T) energy correction for the restricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
