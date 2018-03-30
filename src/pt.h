@@ -26,8 +26,12 @@ extern "C" {
 /* Print libpt banner to standard output. */
 void libpt_print_banner(void);
 
+/* Provide custom memory allocation routine. Defaults to standard "malloc"
+ * function if the argument is NULL. */
 void libpt_set_malloc(void *(*fn)(size_t));
 
+/* Provide custom memory deallocation routine. Defaults to standard "free"
+ * function if the argument is NULL. */
 void libpt_set_free(void (*fn)(void *));
 
 /* Compute coupled-cluster (T) energy correction for the restricted case.
