@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Ilya Kaliman
+ * Copyright (c) 2016-2018 Ilya Kaliman
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1071,7 +1071,7 @@ libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 void
 libpt_print_banner(void)
 {
-	printf("libpt (c) 2016-2017 Ilya Kaliman\n");
+	printf("libpt (c) 2016-2018 Ilya Kaliman\n");
 	printf("Fast Coupled Cluster Triples Corrections\n");
 	printf("https://github.com/ilyak/libpt\n");
 }
