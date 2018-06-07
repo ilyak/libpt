@@ -1,5 +1,5 @@
 LIBPT_A= libpt.a
-LIBPT_O= misc.o pt.o
+LIBPT_O= misc.o pt.o ptmp.o
 
 AR= ar rc
 RANLIB= ranlib
