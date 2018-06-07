@@ -15,7 +15,6 @@
  */
 
 #include <err.h>
-#include <string.h>
 
 #ifdef LIBPT_USE_MPI
 #include <mpi.h>
