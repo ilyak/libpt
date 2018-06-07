@@ -15,8 +15,6 @@
  */
 
 #include <err.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #ifdef LIBPT_USE_MPI
@@ -25,8 +23,8 @@
 
 #include "pt.h"
 
-static void *(*libpt_malloc)(size_t) = malloc;
-static void (*libpt_free)(void *) = free;
+extern void *(*libpt_malloc)(size_t);
+extern void (*libpt_free)(void *);
 
 void dgemm_(char *, char *, int *, int *, int *, double *, double *,
     int *, double *, int *, double *, double *, int *);
@@ -452,22 +450,6 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	libpt_free(t3ax1);
 }
 	return (e_pt);
-}
-
-void
-libpt_set_malloc(void *(*fn)(size_t))
-{
-	if (fn == NULL)
-		fn = malloc;
-	libpt_malloc = fn;
-}
-
-void
-libpt_set_free(void (*fn)(void *))
-{
-	if (fn == NULL)
-		fn = free;
-	libpt_free = fn;
 }
 
 double
@@ -1066,12 +1048,4 @@ libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
 	    MPI_SUM, MPI_COMM_WORLD);
 #endif
 	return e_pt;
-}
-
-void
-libpt_print_banner(void)
-{
-	printf("libpt (c) 2016-2018 Ilya Kaliman\n");
-	printf("Fast Coupled Cluster Triples Corrections\n");
-	printf("https://github.com/ilyak/libpt\n");
 }
