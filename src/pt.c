@@ -205,7 +205,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
 	double *t3ax1, *abc1;
 
-	if ((ijk = libpt_malloc(oa*oa*oa*sizeof(size_t))) == NULL)
+	if ((ijk = libpt_malloc(oa*oa*oa*sizeof(*ijk))) == NULL)
 		err(1, "libpt malloc ijk");
 	for (i = 0, it = 0; i < oa; i++) {
 		for (j = i+1; j < oa; j++) {
@@ -220,7 +220,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		}
 	}
 
-	if ((t3ax1 = libpt_malloc(2*va*va*va*sizeof(double))) == NULL)
+	if ((t3ax1 = libpt_malloc(2*va*va*va*sizeof(*t3ax1))) == NULL)
 		err(1, "libpt malloc work");
 	abc1 = t3ax1 + va*va*va;
 
@@ -328,7 +328,7 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
 	double *t3ax1, *abc1, *abc11, *abc12;
 
-	if ((ijk = libpt_malloc(2*oa*oa*ob*sizeof(size_t))) == NULL)
+	if ((ijk = libpt_malloc(2*oa*oa*ob*sizeof(*ijk))) == NULL)
 		err(1, "libpt malloc ijk");
 	for (i = 0, it = 0; i < oa; i++) {
 		for (j = i+1; j < oa; j++) {
@@ -343,7 +343,7 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 		}
 	}
 
-	if ((t3ax1 = libpt_malloc(2*va*va*vb*sizeof(double))) == NULL)
+	if ((t3ax1 = libpt_malloc(2*va*va*vb*sizeof(*t3ax1))) == NULL)
 		err(1, "libpt malloc work");
 	abc1 = t3ax1 + va*va*vb;
 	abc11 = t3ax1 + va*va*vb;
@@ -556,7 +556,7 @@ cc_ft_aaa(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
 	size_t i, j, k, a, b, c, t, it, *ijk, nijk = 0;
 	double *sigvvvl, *sigvvvr, *abc1;
 
-	if ((ijk = libpt_malloc(oa*oa*oa*sizeof(size_t))) == NULL)
+	if ((ijk = libpt_malloc(oa*oa*oa*sizeof(*ijk))) == NULL)
 		err(1, "libpt malloc ijk");
 	for (i = 0, it = 0; i < oa; i++) {
 		for (j = i+1; j < oa; j++) {
@@ -739,7 +739,7 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	size_t i, j, k, a, b, c, t, it, *ijk, nijk = 0;
 	double *sigvvvl, *sigvvvr, *abc1, *abc11, *abc12;
 
-	if ((ijk = libpt_malloc(2*oa*oa*ob*sizeof(size_t))) == NULL)
+	if ((ijk = libpt_malloc(2*oa*oa*ob*sizeof(*ijk))) == NULL)
 		err(1, "libpt malloc ijk");
 	for (i = 0, it = 0; i < oa; i++) {
 		for (j = i+1; j < oa; j++) {
@@ -754,7 +754,7 @@ cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
 		}
 	}
 
-	if ((sigvvvl = libpt_malloc(2*va*va*vb*sizeof(double))) == NULL)
+	if ((sigvvvl = libpt_malloc(2*va*va*vb*sizeof(*sigvvvl))) == NULL)
 		err(1, "libpt malloc work");
 	sigvvvr = sigvvvl + vb*va*(va-1)/2;
 	abc1 = sigvvvl + va*va*vb;
