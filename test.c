@@ -726,13 +726,13 @@ test_rpt(FILE *fp, double *e_ref, double *e_cmp)
 	i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
 	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
 
-	d_ov = xmalloc(d_ov_sz * sizeof(double));
-	f_ov = xmalloc(f_ov_sz * sizeof(double));
-	t1 = xmalloc(t1_sz * sizeof(double));
-	t2 = xmalloc(t2_sz * sizeof(double));
-	i_oovo = xmalloc(i_oovo_sz * sizeof(double));
-	i_oovv = xmalloc(i_oovv_sz * sizeof(double));
-	i_ovvv = xmalloc(i_ovvv_sz * sizeof(double));
+	d_ov = xmalloc(d_ov_sz * sizeof(*d_ov));
+	f_ov = xmalloc(f_ov_sz * sizeof(*f_ov));
+	t1 = xmalloc(t1_sz * sizeof(*t1));
+	t2 = xmalloc(t2_sz * sizeof(*t2));
+	i_oovo = xmalloc(i_oovo_sz * sizeof(*i_oovo));
+	i_oovv = xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i_ovvv = xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
 
 	read_test_data_rpt(fp, oa, va, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
@@ -768,13 +768,13 @@ test_upt(FILE *fp, double *e_ref, double *e_cmp)
 	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
 	    ob*vb*vb*(vb-1)/2;
 
-	d_ov = xmalloc(d_ov_sz * sizeof(double));
-	f_ov = xmalloc(f_ov_sz * sizeof(double));
-	t1 = xmalloc(t1_sz * sizeof(double));
-	t2 = xmalloc(t2_sz * sizeof(double));
-	i_oovo = xmalloc(i_oovo_sz * sizeof(double));
-	i_oovv = xmalloc(i_oovv_sz * sizeof(double));
-	i_ovvv = xmalloc(i_ovvv_sz * sizeof(double));
+	d_ov = xmalloc(d_ov_sz * sizeof(*d_ov));
+	f_ov = xmalloc(f_ov_sz * sizeof(*f_ov));
+	t1 = xmalloc(t1_sz * sizeof(*t1));
+	t2 = xmalloc(t2_sz * sizeof(*t2));
+	i_oovo = xmalloc(i_oovo_sz * sizeof(*i_oovo));
+	i_oovv = xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i_ovvv = xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
 
 	read_test_data_upt(fp, oa, va, ob, vb, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
@@ -811,16 +811,16 @@ test_rft(FILE *fp, double *e_ref, double *e_cmp)
 	i6_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
 	i7_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
 
-	d_ov = xmalloc(d_ov_sz * sizeof(double));
-	f2_ov = xmalloc(f2_ov_sz * sizeof(double));
-	l1 = xmalloc(l1_sz * sizeof(double));
-	t2 = xmalloc(t2_sz * sizeof(double));
-	l2 = xmalloc(l2_sz * sizeof(double));
-	i_oovv = xmalloc(i_oovv_sz * sizeof(double));
-	i2_t2f2_oovo = xmalloc(i2_t2f2_oovo_sz * sizeof(double));
-	i3_ovvv = xmalloc(i3_ovvv_sz * sizeof(double));
-	i6_oovo = xmalloc(i6_oovo_sz * sizeof(double));
-	i7_ovvv = xmalloc(i7_ovvv_sz * sizeof(double));
+	d_ov = xmalloc(d_ov_sz * sizeof(*d_ov));
+	f2_ov = xmalloc(f2_ov_sz * sizeof(*f2_ov));
+	l1 = xmalloc(l1_sz * sizeof(*l1));
+	t2 = xmalloc(t2_sz * sizeof(*t2));
+	l2 = xmalloc(l2_sz * sizeof(*l2));
+	i_oovv = xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i2_t2f2_oovo = xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
+	i3_ovvv = xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
+	i6_oovo = xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
+	i7_ovvv = xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
 
 	read_test_data_rft(fp, oa, va, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
@@ -864,16 +864,16 @@ test_uft(FILE *fp, double *e_ref, double *e_cmp)
 	i7_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
 	    ob*vb*vb*(vb-1)/2;
 
-	d_ov = xmalloc(d_ov_sz * sizeof(double));
-	f2_ov = xmalloc(f2_ov_sz * sizeof(double));
-	l1 = xmalloc(l1_sz * sizeof(double));
-	t2 = xmalloc(t2_sz * sizeof(double));
-	l2 = xmalloc(l2_sz * sizeof(double));
-	i_oovv = xmalloc(i_oovv_sz * sizeof(double));
-	i2_t2f2_oovo = xmalloc(i2_t2f2_oovo_sz * sizeof(double));
-	i3_ovvv = xmalloc(i3_ovvv_sz * sizeof(double));
-	i6_oovo = xmalloc(i6_oovo_sz * sizeof(double));
-	i7_ovvv = xmalloc(i7_ovvv_sz * sizeof(double));
+	d_ov = xmalloc(d_ov_sz * sizeof(*d_ov));
+	f2_ov = xmalloc(f2_ov_sz * sizeof(*f2_ov));
+	l1 = xmalloc(l1_sz * sizeof(*l1));
+	t2 = xmalloc(t2_sz * sizeof(*t2));
+	l2 = xmalloc(l2_sz * sizeof(*l2));
+	i_oovv = xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i2_t2f2_oovo = xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
+	i3_ovvv = xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
+	i6_oovo = xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
+	i7_ovvv = xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
 
 	read_test_data_uft(fp, oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
