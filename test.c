@@ -901,7 +901,7 @@ static const struct {
 	{ "rft", test_rft },
 	{ "uft", test_uft },
 };
-static const size_t ntests = sizeof tests / sizeof *tests;
+static const size_t ntests = sizeof(tests) / sizeof(*tests);
 
 int
 main(int argc, char **argv)
@@ -920,7 +920,7 @@ main(int argc, char **argv)
 		errx(1, "usage: test rpt|upt|rft|uft id");
 	if (rank == 0)
 		printf("%s%s\n", argv[1], argv[2]);
-	snprintf(path, sizeof path, "tests/%s%s.dat", argv[1], argv[2]);
+	snprintf(path, sizeof(path), "tests/%s%s.dat", argv[1], argv[2]);
 	if ((fp = fopen(path, "r")) == NULL)
 		err(1, "fopen");
 	for (i = 0; i < ntests; i++)
