@@ -289,5 +289,5 @@ main(int argc, char **argv)
 #ifdef LIBPT_USE_MPI
 	MPI_Finalize();
 #endif
-	return (0);
+	return 0;
 }
