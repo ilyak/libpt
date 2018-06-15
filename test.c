@@ -893,13 +893,27 @@ test_uft(FILE *fp, double *e_ref, double *e_cmp)
 }
 
 static const struct {
-	const char *type;
+	const char *name;
 	void (*fn)(FILE *, double *, double *);
 } tests[] = {
-	{ "rpt", test_rpt },
-	{ "upt", test_upt },
-	{ "rft", test_rft },
-	{ "uft", test_uft },
+	{ "rpt01", test_rpt },
+	{ "rpt02", test_rpt },
+	{ "rpt03", test_rpt },
+	{ "rpt04", test_rpt },
+	{ "rpt05", test_rpt },
+	{ "rpt06", test_rpt },
+	{ "rpt07", test_rpt },
+	{ "rpt08", test_rpt },
+	{ "rpt09", test_rpt },
+	{ "upt01", test_upt },
+	{ "upt02", test_upt },
+	{ "upt03", test_upt },
+	{ "rft01", test_rft },
+	{ "rft02", test_rft },
+	{ "rft03", test_rft },
+	{ "uft01", test_uft },
+	{ "uft02", test_uft },
+	{ "uft03", test_uft },
 };
 static const size_t ntests = sizeof(tests) / sizeof(*tests);
 
@@ -912,31 +926,29 @@ main(int argc, char **argv)
 	int rank = 0;
 	char path[256];
 
+	(void)argc;
+	(void)argv;
 #ifdef LIBPT_USE_MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
-	if (argc < 2)
-		errx(1, "usage: test rpt|upt|rft|uft id");
-	if (rank == 0)
-		printf("%s%s\n", argv[1], argv[2]);
-	snprintf(path, sizeof(path), "tests/%s%s.dat", argv[1], argv[2]);
-	if ((fp = fopen(path, "r")) == NULL)
-		err(1, "fopen");
-	for (i = 0; i < ntests; i++)
-		if (strcmp(tests[i].type, argv[1]) == 0) {
-			tests[i].fn(fp, &e_ref, &e_cmp);
-			break;
+	for (i = 0; i < ntests; i++) {
+		snprintf(path, sizeof(path), "tests/%s.dat", tests[i].name);
+		if (rank == 0)
+			printf("%s\n", path);
+		if ((fp = fopen(path, "r")) == NULL)
+			err(1, "fopen");
+		tests[i].fn(fp, &e_ref, &e_cmp);
+		fclose(fp);
+		if (rank == 0) {
+			printf("energy: % .8lf\n", e_cmp);
+			printf("ref:    % .8lf\n", e_ref);
+			if (fabs(e_cmp - e_ref) > EPSILON)
+				abort();
 		}
-	if (i == ntests)
-		errx(1, "bad test type");
-	if (rank == 0) {
-		printf("%s energy: % .8lf\n", argv[1], e_cmp);
-		printf("%s ref:    % .8lf\n", argv[1], e_ref);
 	}
-	fclose(fp);
 #ifdef LIBPT_USE_MPI
 	MPI_Finalize();
 #endif
-	return (fabs(e_cmp - e_ref) < EPSILON ? 0 : 1);
+	return 0;
 }
