@@ -47,6 +47,15 @@ randomfill(double *arr, size_t arrlen)
 }
 
 static void
+randomfill_float(float *arr, size_t arrlen)
+{
+	size_t i;
+
+	for (i = 0; i < arrlen; i++)
+		arr[i] = drand48() / 10000.0;
+}
+
+static void
 benchmark_rpt(size_t oa, size_t va, size_t ob, size_t vb)
 {
 	double *d_ov, *f_ov, *t1, *t2;
@@ -79,6 +88,49 @@ benchmark_rpt(size_t oa, size_t va, size_t ob, size_t vb)
 	randomfill(i_ovvv, i_ovvv_sz);
 
 	libpt_rpt(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+
+	free(d_ov);
+	free(f_ov);
+	free(t1);
+	free(t2);
+	free(i_oovo);
+	free(i_oovv);
+	free(i_ovvv);
+}
+
+static void
+benchmark_rpt_mp(size_t oa, size_t va, size_t ob, size_t vb)
+{
+	float *d_ov, *f_ov, *t1, *t2;
+	float *i_oovo, *i_oovv, *i_ovvv;
+	size_t d_ov_sz, f_ov_sz, t1_sz, t2_sz;
+	size_t i_oovo_sz, i_oovv_sz, i_ovvv_sz;
+
+	d_ov_sz = oa*va;
+	f_ov_sz = oa*va;
+	t1_sz = oa*va;
+	t2_sz = oa*oa*va*va + oa*ob*va*vb;
+	i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
+	i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
+	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
+
+	d_ov = xmalloc(d_ov_sz * sizeof(*d_ov));
+	f_ov = xmalloc(f_ov_sz * sizeof(*f_ov));
+	t1 = xmalloc(t1_sz * sizeof(*t1));
+	t2 = xmalloc(t2_sz * sizeof(*t2));
+	i_oovo = xmalloc(i_oovo_sz * sizeof(*i_oovo));
+	i_oovv = xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i_ovvv = xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
+
+	randomfill_float(d_ov, d_ov_sz);
+	randomfill_float(f_ov, f_ov_sz);
+	randomfill_float(t1, t1_sz);
+	randomfill_float(t2, t2_sz);
+	randomfill_float(i_oovo, i_oovo_sz);
+	randomfill_float(i_oovv, i_oovv_sz);
+	randomfill_float(i_ovvv, i_ovvv_sz);
+
+	libpt_rpt_mp(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
 
 	free(d_ov);
 	free(f_ov);
@@ -123,6 +175,51 @@ benchmark_upt(size_t oa, size_t va, size_t ob, size_t vb)
 	randomfill(i_ovvv, i_ovvv_sz);
 
 	libpt_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+
+	free(d_ov);
+	free(f_ov);
+	free(t1);
+	free(t2);
+	free(i_oovo);
+	free(i_oovv);
+	free(i_ovvv);
+}
+
+static void
+benchmark_upt_mp(size_t oa, size_t va, size_t ob, size_t vb)
+{
+	float *d_ov, *f_ov, *t1, *t2;
+	float *i_oovo, *i_oovv, *i_ovvv;
+	size_t d_ov_sz, f_ov_sz, t1_sz, t2_sz;
+	size_t i_oovo_sz, i_oovv_sz, i_ovvv_sz;
+
+	d_ov_sz = oa*va + ob*vb;
+	f_ov_sz = oa*va + ob*vb;
+	t1_sz = oa*va + ob*vb;
+	t2_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
+	i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob + ob*oa*vb*oa + ob*ob*vb*ob;
+	i_oovv_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
+	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
+	    ob*vb*vb*(vb-1)/2;
+
+	d_ov = xmalloc(d_ov_sz * sizeof(*d_ov));
+	f_ov = xmalloc(f_ov_sz * sizeof(*f_ov));
+	t1 = xmalloc(t1_sz * sizeof(*t1));
+	t2 = xmalloc(t2_sz * sizeof(*t2));
+	i_oovo = xmalloc(i_oovo_sz * sizeof(*i_oovo));
+	i_oovv = xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i_ovvv = xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
+
+	randomfill_float(d_ov, d_ov_sz);
+	randomfill_float(f_ov, f_ov_sz);
+	randomfill_float(t1, t1_sz);
+	randomfill_float(t2, t2_sz);
+	randomfill_float(i_oovo, i_oovo_sz);
+	randomfill_float(i_oovv, i_oovv_sz);
+	randomfill_float(i_ovvv, i_ovvv_sz);
+
+	libpt_upt_mp(oa, va, ob, vb, d_ov, f_ov, t1, t2,
+	    i_oovo, i_oovv, i_ovvv);
 
 	free(d_ov);
 	free(f_ov);
@@ -256,6 +353,8 @@ static const struct {
 	{ "upt", benchmark_upt },
 	{ "rft", benchmark_rft },
 	{ "uft", benchmark_uft },
+	{ "rptmp", benchmark_rpt_mp },
+	{ "uptmp", benchmark_upt_mp },
 };
 static const size_t nbenchmarks = sizeof benchmarks / sizeof *benchmarks;
 
@@ -271,7 +370,7 @@ main(int argc, char **argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
 	if (argc < 4)
-		errx(1, "usage: benchmark rpt|upt|rft|uft o v");
+		errx(1, "usage: benchmark rpt|upt|rft|uft|rptmp|uptmp o v");
 	oa = ob = strtol(argv[2], NULL, 10);
 	va = vb = strtol(argv[3], NULL, 10);
 	if (rank == 0)
