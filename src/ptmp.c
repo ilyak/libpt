@@ -25,24 +25,24 @@
 extern void *(*libpt_malloc)(size_t);
 extern void (*libpt_free)(void *);
 
-void dgemm_(char *, char *, int *, int *, int *, double *, double *,
-    int *, double *, int *, double *, double *, int *);
+void sgemm_(char *, char *, int *, int *, int *, float *, float *,
+    int *, float *, int *, float *, float *, int *);
 
 static void
-gemm(char transa, char transb, int m, int n, int k, double alpha,
-    const double *a, int lda, const double *b, int ldb, double beta,
-    double *c, int ldc)
+gemm(char transa, char transb, int m, int n, int k, float alpha,
+    const float *a, int lda, const float *b, int ldb, float beta,
+    float *c, int ldc)
 {
-	dgemm_(&transa, &transb, &m, &n, &k, &alpha, (double *)a, &lda,
-	    (double *)b, &ldb, &beta, c, &ldc);
+	sgemm_(&transa, &transb, &m, &n, &k, &alpha, (float *)a, &lda,
+	    (float *)b, &ldb, &beta, c, &ldc);
 }
 
 static void
 t2_i_ovvv_half(size_t o, size_t v, size_t i, size_t j, size_t k,
-    double *abc, const double *t2, const double *i_ovvv)
+    float *abc, const float *t2, const float *i_ovvv)
 {
-	const double *t2_p = &t2[i*o*v*v+j*v*v];
-	const double *i_ovvv_p = &i_ovvv[k*v*v*(v-1)/2];
+	const float *t2_p = &t2[i*o*v*v+j*v*v];
+	const float *i_ovvv_p = &i_ovvv[k*v*v*(v-1)/2];
 
 	/* out(i,j,k,a,b,c) = contract(d, t2(i,j,a,d), i_ovvv(k,d,b,c)) */
 
@@ -52,11 +52,11 @@ t2_i_ovvv_half(size_t o, size_t v, size_t i, size_t j, size_t k,
 
 static void
 t2_baba_i_ovvv_aaaa_half(size_t oa, size_t va, size_t ob, size_t vb,
-    size_t i, size_t j, size_t k, double *abc, const double *t2,
-    const double *i_ovvv)
+    size_t i, size_t j, size_t k, float *abc, const float *t2,
+    const float *i_ovvv)
 {
-	const double *t2_p = &t2[i*oa*vb*va+j*vb*va];
-	const double *i_ovvv_p = &i_ovvv[k*va*va*(va-1)/2];
+	const float *t2_p = &t2[i*oa*vb*va+j*vb*va];
+	const float *i_ovvv_p = &i_ovvv[k*va*va*(va-1)/2];
 
 	(void)ob; /* unused */
 
@@ -68,11 +68,11 @@ t2_baba_i_ovvv_aaaa_half(size_t oa, size_t va, size_t ob, size_t vb,
 
 static void
 t2_aaaa_i_ovvv_baba(size_t oa, size_t va, size_t ob, size_t vb,
-    size_t i, size_t j, size_t k, double *abc, const double *t2,
-    const double *i_ovvv)
+    size_t i, size_t j, size_t k, float *abc, const float *t2,
+    const float *i_ovvv)
 {
-	const double *t2_p = &t2[i*oa*va*va+j*va*va];
-	const double *i_ovvv_p = &i_ovvv[k*va*vb*va];
+	const float *t2_p = &t2[i*oa*va*va+j*va*va];
+	const float *i_ovvv_p = &i_ovvv[k*va*vb*va];
 
 	(void)ob; /* unused */
 
@@ -84,11 +84,11 @@ t2_aaaa_i_ovvv_baba(size_t oa, size_t va, size_t ob, size_t vb,
 
 static void
 t2_abab_i_ovvv_abab(size_t oa, size_t va, size_t ob, size_t vb,
-    size_t i, size_t j, size_t k, double *abc, const double *t2,
-    const double *i_ovvv)
+    size_t i, size_t j, size_t k, float *abc, const float *t2,
+    const float *i_ovvv)
 {
-	const double *t2_p = &t2[i*ob*va*vb+j*va*vb];
-	const double *i_ovvv_p = &i_ovvv[k*vb*va*vb];
+	const float *t2_p = &t2[i*ob*va*vb+j*va*vb];
+	const float *i_ovvv_p = &i_ovvv[k*vb*va*vb];
 
 	(void)oa; /* unused */
 
@@ -100,10 +100,10 @@ t2_abab_i_ovvv_abab(size_t oa, size_t va, size_t ob, size_t vb,
 
 static void
 t2_i_oovo(size_t o, size_t v, size_t i, size_t j, size_t k,
-    double *abc, const double *t2, const double *i_oovo)
+    float *abc, const float *t2, const float *i_oovo)
 {
-	const double *t2_p = &t2[i*o*v*v];
-	const double *i_oovo_p = &i_oovo[j*o*o*v+k*o*v];
+	const float *t2_p = &t2[i*o*v*v];
+	const float *i_oovo_p = &i_oovo[j*o*o*v+k*o*v];
 
 	/* out(i,j,k,a,b,c) = contract(l, t2(i,l,a,b), i_oovo(j,k,c,l)) */
 
@@ -113,11 +113,11 @@ t2_i_oovo(size_t o, size_t v, size_t i, size_t j, size_t k,
 
 static void
 t2_aaaa_i_oovo_baba(size_t oa, size_t va, size_t ob, size_t vb,
-    size_t i, size_t j, size_t k, double *abc, const double *t2,
-    const double *i_oovo)
+    size_t i, size_t j, size_t k, float *abc, const float *t2,
+    const float *i_oovo)
 {
-	const double *t2_p = &t2[i*oa*va*va];
-	const double *i_oovo_p = &i_oovo[j*oa*vb*oa+k*vb*oa];
+	const float *t2_p = &t2[i*oa*va*va];
+	const float *i_oovo_p = &i_oovo[j*oa*vb*oa+k*vb*oa];
 
 	(void)ob; /* unused */
 
@@ -129,11 +129,11 @@ t2_aaaa_i_oovo_baba(size_t oa, size_t va, size_t ob, size_t vb,
 
 static void
 t2_abab_i_oovo_abab(size_t oa, size_t va, size_t ob, size_t vb,
-    size_t i, size_t j, size_t k, double *abc, const double *t2,
-    const double *i_oovo)
+    size_t i, size_t j, size_t k, float *abc, const float *t2,
+    const float *i_oovo)
 {
-	const double *t2_p = &t2[i*ob*va*vb];
-	const double *i_oovo_p = &i_oovo[j*ob*va*ob+k*va*ob];
+	const float *t2_p = &t2[i*ob*va*vb];
+	const float *i_oovo_p = &i_oovo[j*ob*va*ob+k*va*ob];
 
 	(void)oa; /* unused */
 
@@ -145,11 +145,11 @@ t2_abab_i_oovo_abab(size_t oa, size_t va, size_t ob, size_t vb,
 
 static void
 t2_baba_i_oovo_aaaa(size_t oa, size_t va, size_t ob, size_t vb,
-    size_t i, size_t j, size_t k, double *abc, const double *t2,
-    const double *i_oovo)
+    size_t i, size_t j, size_t k, float *abc, const float *t2,
+    const float *i_oovo)
 {
-	const double *t2_p = &t2[i*oa*vb*va];
-	const double *i_oovo_p = &i_oovo[j*oa*va*oa+k*va*oa];
+	const float *t2_p = &t2[i*oa*vb*va];
+	const float *i_oovo_p = &i_oovo[j*oa*va*oa+k*va*oa];
 
 	(void)ob; /* unused */
 
@@ -159,8 +159,8 @@ t2_baba_i_oovo_aaaa(size_t oa, size_t va, size_t ob, size_t vb,
 	    i_oovo_p, oa, 0.0, abc, va*vb);
 }
 
-static double
-i_jk_a_bc_ov_oovv(size_t o, size_t v, const double *ov, const double *oovv,
+static float
+i_jk_a_bc_ov_oovv(size_t o, size_t v, const float *ov, const float *oovv,
     size_t i, size_t j, size_t k, size_t a, size_t b, size_t c)
 {
 	return +ov[i*v+a]*oovv[j*o*v*v+k*v*v+b*v+c]
@@ -174,20 +174,20 @@ i_jk_a_bc_ov_oovv(size_t o, size_t v, const double *ov, const double *oovv,
 	       +ov[k*v+c]*oovv[j*o*v*v+i*v*v+b*v+a];
 }
 
-static double
+static float
 comp_t3b_ijkabc(size_t v1, size_t o2, size_t v2a, size_t v2b,
     size_t i, size_t j, size_t k, size_t a, size_t b, size_t c,
-    const double *t1, const double *i_oovv, const double *f_ov,
-    const double *t2)
+    const float *t1, const float *i_oovv, const float *f_ov,
+    const float *t2)
 {
 	return t1[i*v1+a] * i_oovv[j*o2*v2a*v2b+k*v2a*v2b+b*v2b+c] +
 	       f_ov[i*v1+a] * t2[j*o2*v2a*v2b+k*v2a*v2b+b*v2b+c];
 }
 
 static double
-cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
-    const double *t1, const double *t2_aaaa, const double *i_oovo_aaaa,
-    const double *i_oovv_aaaa, const double *i_ovvv_aaaa)
+cc_pt_aaa(size_t oa, size_t va, const float *d_ov, const float *f_ov,
+    const float *t1, const float *t2_aaaa, const float *i_oovo_aaaa,
+    const float *i_oovv_aaaa, const float *i_ovvv_aaaa)
 {
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
@@ -203,9 +203,9 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
-	double *t3ax1, *abc1;
+	float *t3ax1, *abc1;
 
-	if ((ijk = libpt_malloc(oa*oa*oa*sizeof(size_t))) == NULL)
+	if ((ijk = libpt_malloc(oa*oa*oa*sizeof(*ijk))) == NULL)
 		err(1, "libpt malloc ijk");
 	for (i = 0, it = 0; i < oa; i++) {
 		for (j = i+1; j < oa; j++) {
@@ -220,7 +220,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 		}
 	}
 
-	if ((t3ax1 = libpt_malloc(2*va*va*va*sizeof(double))) == NULL)
+	if ((t3ax1 = libpt_malloc(2*va*va*va*sizeof(*t3ax1))) == NULL)
 		err(1, "libpt malloc work");
 	abc1 = t3ax1 + va*va*va;
 
@@ -282,7 +282,7 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < b; c++) {
-		double t3ax, t3bx, dn;
+		float t3ax, t3bx, dn;
 
 		t3ax1[a*va*va+b*va+c] +=
 		    -abc1[a*va*va+b*va+c]
@@ -303,14 +303,14 @@ cc_pt_aaa(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 
 static double
 cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
-    const double *d_ov_aa, const double *d_ov_bb,
-    const double *f_ov_aa, const double *f_ov_bb,
-    const double *t1_aa, const double *t1_bb,
-    const double *t2_aaaa, const double *t2_abab, const double *t2_baba,
-    const double *i_oovo_aaaa, const double *i_oovo_abab,
-    const double *i_oovo_baba, const double *i_oovv_aaaa,
-    const double *i_oovv_abab, const double *i_ovvv_aaaa,
-    const double *i_ovvv_abab, const double *i_ovvv_baba)
+    const float *d_ov_aa, const float *d_ov_bb,
+    const float *f_ov_aa, const float *f_ov_bb,
+    const float *t1_aa, const float *t1_bb,
+    const float *t2_aaaa, const float *t2_abab, const float *t2_baba,
+    const float *i_oovo_aaaa, const float *i_oovo_abab,
+    const float *i_oovo_baba, const float *i_oovv_aaaa,
+    const float *i_oovv_abab, const float *i_ovvv_aaaa,
+    const float *i_ovvv_abab, const float *i_ovvv_baba)
 {
 	double e_pt = 0.0;
 	int rank = 0, size = 1;
@@ -326,9 +326,9 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 #endif
 {
 	size_t i, j, k, a, b, c, it, *ijk, nijk = 0;
-	double *t3ax1, *abc1, *abc11, *abc12;
+	float *t3ax1, *abc1, *abc11, *abc12;
 
-	if ((ijk = libpt_malloc(2*oa*oa*ob*sizeof(size_t))) == NULL)
+	if ((ijk = libpt_malloc(2*oa*oa*ob*sizeof(*ijk))) == NULL)
 		err(1, "libpt malloc ijk");
 	for (i = 0, it = 0; i < oa; i++) {
 		for (j = i+1; j < oa; j++) {
@@ -343,7 +343,7 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 		}
 	}
 
-	if ((t3ax1 = libpt_malloc(2*va*va*vb*sizeof(double))) == NULL)
+	if ((t3ax1 = libpt_malloc(2*va*va*vb*sizeof(*t3ax1))) == NULL)
 		err(1, "libpt malloc work");
 	abc1 = t3ax1 + va*va*vb;
 	abc11 = t3ax1 + va*va*vb;
@@ -425,7 +425,7 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 	for (a = 0; a < va; a++) {
 	for (b = 0; b < a; b++) {
 	for (c = 0; c < vb; c++) {
-		double t3ax, t3bx, dn;
+		float t3ax, t3bx, dn;
 
 		t3ax1[a*va*vb+b*vb+c] +=
 		    -abc1[a+c*va+b*va*vb]
@@ -452,19 +452,19 @@ cc_pt_aab(size_t oa, size_t va, size_t ob, size_t vb,
 }
 
 double
-libpt_rpt_mp(size_t oa, size_t va, const double *d_ov, const double *f_ov,
-    const double *t1, const double *t2, const double *i_oovo,
-    const double *i_oovv, const double *i_ovvv)
+libpt_rpt_mp(size_t oa, size_t va, const float *d_ov, const float *f_ov,
+    const float *t1, const float *t2, const float *i_oovo,
+    const float *i_oovv, const float *i_ovvv)
 {
 	double e_pt = 0.0;
-	const double *t2_aaaa = t2;
-	const double *t2_abab = t2 + oa*oa*va*va;
-	const double *i_ovvv_aaaa = i_ovvv;
-	const double *i_ovvv_abab = i_ovvv + oa*va*va*(va-1)/2;
-	const double *i_oovo_aaaa = i_oovo;
-	const double *i_oovo_abab = i_oovo + oa*oa*oa*va;
-	const double *i_oovv_aaaa = i_oovv;
-	const double *i_oovv_abab = i_oovv + oa*oa*va*va;
+	const float *t2_aaaa = t2;
+	const float *t2_abab = t2 + oa*oa*va*va;
+	const float *i_ovvv_aaaa = i_ovvv;
+	const float *i_ovvv_abab = i_ovvv + oa*va*va*(va-1)/2;
+	const float *i_oovo_aaaa = i_oovo;
+	const float *i_oovo_abab = i_oovo + oa*oa*oa*va;
+	const float *i_oovv_aaaa = i_oovv;
+	const float *i_oovv_abab = i_oovv + oa*oa*va*va;
 
 	e_pt += cc_pt_aaa(oa, va, d_ov, f_ov, t1, t2_aaaa,
 	    i_oovo_aaaa, i_oovv_aaaa, i_ovvv_aaaa);
@@ -479,37 +479,37 @@ libpt_rpt_mp(size_t oa, size_t va, const double *d_ov, const double *f_ov,
 }
 
 double
-libpt_upt_mp(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
-    const double *f_ov, const double *t1, const double *t2,
-    const double *i_oovo, const double *i_oovv, const double *i_ovvv)
+libpt_upt_mp(size_t oa, size_t va, size_t ob, size_t vb, const float *d_ov,
+    const float *f_ov, const float *t1, const float *t2,
+    const float *i_oovo, const float *i_oovv, const float *i_ovvv)
 {
 	double e_pt = 0.0;
-	const double *d_ov_aa = d_ov;
-	const double *d_ov_bb = d_ov_aa + oa*va;
-	const double *f_ov_aa = f_ov;
-	const double *f_ov_bb = f_ov_aa + oa*va;
-	const double *t1_aa = t1;
-	const double *t1_bb = t1_aa + oa*va;
+	const float *d_ov_aa = d_ov;
+	const float *d_ov_bb = d_ov_aa + oa*va;
+	const float *f_ov_aa = f_ov;
+	const float *f_ov_bb = f_ov_aa + oa*va;
+	const float *t1_aa = t1;
+	const float *t1_bb = t1_aa + oa*va;
 
-	const double *t2_aaaa = t2;
-	const double *t2_abab = t2_aaaa + oa*oa*va*va;
-	const double *t2_bbbb = t2_abab + oa*ob*va*vb;
-	const double *t2_baba = t2_bbbb + ob*ob*vb*vb;
+	const float *t2_aaaa = t2;
+	const float *t2_abab = t2_aaaa + oa*oa*va*va;
+	const float *t2_bbbb = t2_abab + oa*ob*va*vb;
+	const float *t2_baba = t2_bbbb + ob*ob*vb*vb;
 
-	const double *i_oovo_aaaa = i_oovo;
-	const double *i_oovo_abab = i_oovo_aaaa + oa*oa*va*oa;
-	const double *i_oovo_bbbb = i_oovo_abab + oa*ob*va*ob;
-	const double *i_oovo_baba = i_oovo_bbbb + ob*ob*vb*ob;
+	const float *i_oovo_aaaa = i_oovo;
+	const float *i_oovo_abab = i_oovo_aaaa + oa*oa*va*oa;
+	const float *i_oovo_bbbb = i_oovo_abab + oa*ob*va*ob;
+	const float *i_oovo_baba = i_oovo_bbbb + ob*ob*vb*ob;
 
-	const double *i_oovv_aaaa = i_oovv;
-	const double *i_oovv_abab = i_oovv_aaaa + oa*oa*va*va;
-	const double *i_oovv_bbbb = i_oovv_abab + oa*ob*va*vb;
-	const double *i_oovv_baba = i_oovv_bbbb + ob*ob*vb*vb;
+	const float *i_oovv_aaaa = i_oovv;
+	const float *i_oovv_abab = i_oovv_aaaa + oa*oa*va*va;
+	const float *i_oovv_bbbb = i_oovv_abab + oa*ob*va*vb;
+	const float *i_oovv_baba = i_oovv_bbbb + ob*ob*vb*vb;
 
-	const double *i_ovvv_aaaa = i_ovvv;
-	const double *i_ovvv_abab = i_ovvv_aaaa + oa*va*va*(va-1)/2;
-	const double *i_ovvv_bbbb = i_ovvv_abab + oa*vb*va*vb;
-	const double *i_ovvv_baba = i_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
+	const float *i_ovvv_aaaa = i_ovvv;
+	const float *i_ovvv_abab = i_ovvv_aaaa + oa*va*va*(va-1)/2;
+	const float *i_ovvv_bbbb = i_ovvv_abab + oa*vb*va*vb;
+	const float *i_ovvv_baba = i_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
 
 	/* aaaaaa */
 	e_pt += cc_pt_aaa(oa, va, d_ov_aa, f_ov_aa, t1_aa, t2_aaaa,
