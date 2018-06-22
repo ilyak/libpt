@@ -155,6 +155,13 @@ double libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *i_oovv, const double *i2_t2f2_oovo, const double *i3_ovvv,
     const double *i6_oovo, const double *i7_ovvv);
 
+double libpt_rpt_mp(size_t oa, size_t va, const float *d_ov, const float *f_ov,
+    const float *t1, const float *t2, const float *i_oovo,
+    const float *i_oovv, const float *i_ovvv);
+double libpt_upt_mp(size_t oa, size_t va, size_t ob, size_t vb,
+    const float *d_ov, const float *f_ov, const float *t1, const float *t2,
+    const float *i_oovo, const float *i_oovv, const float *i_ovvv);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
