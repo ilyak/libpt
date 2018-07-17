@@ -533,3 +533,518 @@ libpt_upt_mp(size_t oa, size_t va, size_t ob, size_t vb, const float *d_ov,
 #endif
 	return e_pt;
 }
+
+static double
+cc_ft_aaa(size_t oa, size_t va, const float *d_ov, const float *f2_ov,
+    const float *l1, const float *t2, const float *l2, const float *i_oovv,
+    const float *i2_t2f2_oovo, const float *i3_ovvv, const float *i6_oovo,
+    const float *i7_ovvv)
+{
+	double e_pt = 0.0;
+	int rank = 0, size = 1;
+
+	if (oa == 0 || va == 0)
+		return 0.0;
+#ifdef LIBPT_USE_MPI
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+#endif
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+{
+	size_t i, j, k, a, b, c, t, it, *ijk, nijk = 0;
+	float *sigvvvl, *sigvvvr, *abc1;
+
+	if ((ijk = libpt_malloc(oa*oa*oa*sizeof(*ijk))) == NULL)
+		err(1, "libpt malloc ijk");
+	for (i = 0, it = 0; i < oa; i++) {
+		for (j = i+1; j < oa; j++) {
+			for (k = j+1; k < oa; k++, it++) {
+				if ((int)it % size == rank) {
+					ijk[3*nijk+0] = i;
+					ijk[3*nijk+1] = j;
+					ijk[3*nijk+2] = k;
+					nijk++;
+				}
+			}
+		}
+	}
+
+	if ((sigvvvl = libpt_malloc(2*va*va*va*sizeof(*sigvvvl))) == NULL)
+		err(1, "libpt malloc work");
+	sigvvvr = sigvvvl + va*va*(va-1)/2;
+	abc1 = sigvvvl + va*va*va;
+
+#ifdef _OPENMP
+#pragma omp for reduction(+:e_pt) schedule(dynamic)
+#endif
+	for (it = 0; it < nijk; it++) {
+
+	i = ijk[3*it+0];
+	j = ijk[3*it+1];
+	k = ijk[3*it+2];
+
+	t2_i_ovvv_half(oa,va,i,j,k,abc1,l2,i7_ovvv);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] =
+		    +abc1[a*(a-1)/2*va+b*va+c]
+		    -abc1[a*(a-1)/2*va+c*va+b]
+		    +abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,k,j,i,abc1,l2,i7_ovvv);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,i,k,j,abc1,l2,i7_ovvv);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_oovo(oa,va,i,j,k,abc1,l2,i6_oovo);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
+		    +abc1[a*va*va+b*va+c]
+		    -abc1[b*va*va+a*va+c]
+		    -abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,j,i,k,abc1,l2,i6_oovo);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,k,j,i,abc1,l2,i6_oovo);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
+
+	t2_i_ovvv_half(oa,va,i,j,k,abc1,t2,i3_ovvv);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] =
+		    +abc1[a*(a-1)/2*va+b*va+c]
+		    -abc1[a*(a-1)/2*va+c*va+b]
+		    +abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,k,j,i,abc1,t2,i3_ovvv);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_ovvv_half(oa,va,i,k,j,abc1,t2,i3_ovvv);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] +=
+		    -abc1[a*(a-1)/2*va+b*va+c]
+		    +abc1[a*(a-1)/2*va+c*va+b]
+		    -abc1[b*(b-1)/2*va+c*va+a];
+
+	t2_i_oovo(oa,va,i,j,k,abc1,t2,i2_t2f2_oovo);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] +=
+		    +abc1[a*va*va+b*va+c]
+		    -abc1[b*va*va+a*va+c]
+		    -abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,j,i,k,abc1,t2,i2_t2f2_oovo);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < b; c++, t++)
+		sigvvvr[t] +=
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
+
+	t2_i_oovo(oa,va,k,j,i,abc1,t2,i2_t2f2_oovo);
+	for (a = 0, t = 0; a < va; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < b; c++, t++) {
+		float dn, l1t;
+
+		sigvvvr[t] +=
+		    -abc1[a*va*va+b*va+c]
+		    +abc1[b*va*va+a*va+c]
+		    +abc1[c*va*va+b*va+a];
+		dn = d_ov[i*va+a] + d_ov[j*va+b] + d_ov[k*va+c];
+		l1t = +i_jk_a_bc_ov_oovv(oa,va,l1,i_oovv,i,j,k,a,b,c)
+		      +i_jk_a_bc_ov_oovv(oa,va,f2_ov,l2,i,j,k,a,b,c);
+		e_pt += (sigvvvl[t] - l1t) * sigvvvr[t] / dn;
+	}}}
+	}
+	libpt_free(ijk);
+	libpt_free(sigvvvl);
+}
+	return (e_pt);
+}
+
+static double
+cc_ft_aab(size_t oa, size_t va, size_t ob, size_t vb,
+    const float *d_ov_aa, const float *d_ov_bb,
+    const float *f2_ov_aa, const float *f2_ov_bb,
+    const float *l1_aa, const float *l1_bb,
+    const float *t2_aaaa, const float *t2_abab, const float *t2_baba,
+    const float *l2_aaaa, const float *l2_abab, const float *l2_baba,
+    const float *i_oovv_aaaa, const float *i_oovv_abab,
+    const float *i2_t2f2_oovo_aaaa, const float *i2_t2f2_oovo_abab,
+    const float *i2_t2f2_oovo_baba,
+    const float *i3_ovvv_aaaa, const float *i3_ovvv_abab,
+    const float *i3_ovvv_baba,
+    const float *i6_oovo_aaaa, const float *i6_oovo_abab,
+    const float *i6_oovo_baba,
+    const float *i7_ovvv_aaaa, const float *i7_ovvv_abab,
+    const float *i7_ovvv_baba)
+{
+	double e_pt = 0.0;
+	int rank = 0, size = 1;
+
+	if (oa == 0 || va == 0 || ob == 0 || vb == 0)
+		return 0.0;
+#ifdef LIBPT_USE_MPI
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+#endif
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+{
+	size_t i, j, k, a, b, c, t, it, *ijk, nijk = 0;
+	float *sigvvvl, *sigvvvr, *abc1, *abc11, *abc12;
+
+	if ((ijk = libpt_malloc(2*oa*oa*ob*sizeof(*ijk))) == NULL)
+		err(1, "libpt malloc ijk");
+	for (i = 0, it = 0; i < oa; i++) {
+		for (j = i+1; j < oa; j++) {
+			for (k = 0; k < ob; k++, it++) {
+				if ((int)it % size == rank) {
+					ijk[3*nijk+0] = i;
+					ijk[3*nijk+1] = j;
+					ijk[3*nijk+2] = k;
+					nijk++;
+				}
+			}
+		}
+	}
+
+	if ((sigvvvl = libpt_malloc(2*va*va*vb*sizeof(*sigvvvl))) == NULL)
+		err(1, "libpt malloc work");
+	sigvvvr = sigvvvl + vb*va*(va-1)/2;
+	abc1 = sigvvvl + va*va*vb;
+	abc11 = sigvvvl + va*va*vb;
+	abc12 = sigvvvl + va*va*vb + vb*va*(va-1)/2;
+
+#ifdef _OPENMP
+#pragma omp for reduction(+:e_pt) schedule(dynamic)
+#endif
+	for (it = 0; it < nijk; it++) {
+
+	i = ijk[3*it+0];
+	j = ijk[3*it+1];
+	k = ijk[3*it+2];
+
+	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,l2_aaaa,i7_ovvv_baba);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] =
+		    -abc1[a+b*va+c*va*va]
+		    +abc1[b+a*va+c*va*va];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc1,l2_abab,i7_ovvv_abab);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc1,l2_abab,i7_ovvv_abab);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
+		    +abc1[a+c*va+b*va*vb]
+		    -abc1[b+c*va+a*va*vb];
+
+	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,j,i,abc11,l2_baba,i7_ovvv_aaaa);
+	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,i,j,abc12,l2_baba,i7_ovvv_aaaa);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
+		    -abc11[c+vb*a*(a-1)/2+vb*b]
+		    +abc12[c+vb*a*(a-1)/2+vb*b];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc1,l2_aaaa,i6_oovo_baba);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[b+a*va+c*va*va];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc1,l2_aaaa,i6_oovo_baba);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
+		    +abc1[b+a*va+c*va*va];
+
+	t2_abab_i_oovo_abab(oa,va,ob,vb,i,j,k,abc1,l2_abab,i6_oovo_abab);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[c+a*vb+b*vb*va]
+		    +abc1[c+b*vb+a*vb*va];
+
+	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc1,l2_abab,i6_oovo_abab);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[c+b*vb+a*vb*va]
+		    +abc1[c+a*vb+b*vb*va];
+
+	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc1,l2_baba,i6_oovo_aaaa);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvl[t] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
+
+	t2_aaaa_i_ovvv_baba(oa,va,ob,vb,i,j,k,abc1,t2_aaaa,i3_ovvv_baba);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] =
+		    -abc1[a+b*va+c*va*va]
+		    +abc1[b+a*va+c*va*va];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,i,k,j,abc1,t2_abab,i3_ovvv_abab);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
+
+	t2_abab_i_ovvv_abab(oa,va,ob,vb,j,k,i,abc1,t2_abab,i3_ovvv_abab);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
+		    +abc1[a+c*va+b*va*vb]
+		    -abc1[b+c*va+a*va*vb];
+
+	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,j,i,abc11,t2_baba,i3_ovvv_aaaa);
+	t2_baba_i_ovvv_aaaa_half(oa,va,ob,vb,k,i,j,abc12,t2_baba,i3_ovvv_aaaa);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
+		    -abc11[c+vb*a*(a-1)/2+vb*b]
+		    +abc12[c+vb*a*(a-1)/2+vb*b];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,i,k,j,abc1,t2_aaaa,i2_t2f2_oovo_baba);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
+		    -abc1[b+a*va+c*va*va];
+
+	t2_aaaa_i_oovo_baba(oa,va,ob,vb,j,k,i,abc1,t2_aaaa,i2_t2f2_oovo_baba);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
+		    +abc1[b+a*va+c*va*va];
+
+	t2_abab_i_oovo_abab(oa,va,ob,vb,i,j,k,abc1,t2_abab,i2_t2f2_oovo_abab);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
+		    -abc1[c+a*vb+b*vb*va]
+		    +abc1[c+b*vb+a*vb*va];
+
+	t2_abab_i_oovo_abab(oa,va,ob,vb,j,i,k,abc1,t2_abab,i2_t2f2_oovo_abab);
+	for (a = 0, t = 0; a < va; a++)
+	for (b = 0; b < a; b++)
+	for (c = 0; c < vb; c++, t++)
+		sigvvvr[t] +=
+		    -abc1[c+b*vb+a*vb*va]
+		    +abc1[c+a*vb+b*vb*va];
+
+	t2_baba_i_oovo_aaaa(oa,va,ob,vb,k,j,i,abc1,t2_baba,i2_t2f2_oovo_aaaa);
+	for (a = 0, t = 0; a < va; a++) {
+	for (b = 0; b < a; b++) {
+	for (c = 0; c < vb; c++, t++) {
+		float dn, l1t;
+
+		sigvvvr[t] +=
+		    -abc1[a+c*va+b*va*vb]
+		    +abc1[b+c*va+a*va*vb];
+		l1t = +comp_t3b_ijkabc(va,ob,va,vb,i,j,k,a,b,c,
+			  l1_aa,i_oovv_abab,f2_ov_aa,l2_abab)
+		      -comp_t3b_ijkabc(va,ob,va,vb,i,j,k,b,a,c,
+			  l1_aa,i_oovv_abab,f2_ov_aa,l2_abab)
+		      -comp_t3b_ijkabc(va,ob,va,vb,j,i,k,a,b,c,
+			  l1_aa,i_oovv_abab,f2_ov_aa,l2_abab)
+		      +comp_t3b_ijkabc(va,ob,va,vb,j,i,k,b,a,c,
+			  l1_aa,i_oovv_abab,f2_ov_aa,l2_abab)
+		      +comp_t3b_ijkabc(vb,oa,va,va,k,j,i,c,b,a,
+			  l1_bb,i_oovv_aaaa,f2_ov_bb,l2_aaaa);
+		dn = d_ov_aa[i*va+a] + d_ov_aa[j*va+b] + d_ov_bb[k*vb+c];
+		e_pt += (sigvvvl[t] - l1t) * sigvvvr[t] / dn;
+	}}}
+	}
+	libpt_free(ijk);
+	libpt_free(sigvvvl);
+}
+	return (e_pt);
+}
+
+double
+libpt_rft_mp(size_t oa, size_t va, const float *d_ov, const float *f2_ov,
+    const float *l1, const float *t2, const float *l2, const float *i_oovv,
+    const float *i2_t2f2_oovo, const float *i3_ovvv, const float *i6_oovo,
+    const float *i7_ovvv)
+{
+	double e_pt = 0.0;
+	const float *t2_aaaa = t2;
+	const float *t2_abab = t2 + oa*oa*va*va;
+	const float *l2_aaaa = l2;
+	const float *l2_abab = l2 + oa*oa*va*va;
+	const float *i_oovv_aaaa = i_oovv;
+	const float *i_oovv_abab = i_oovv + oa*oa*va*va;
+	const float *i2_t2f2_oovo_aaaa = i2_t2f2_oovo;
+	const float *i2_t2f2_oovo_abab = i2_t2f2_oovo + oa*oa*oa*va;
+	const float *i3_ovvv_aaaa = i3_ovvv;
+	const float *i3_ovvv_abab = i3_ovvv + oa*va*va*(va-1)/2;
+	const float *i6_oovo_aaaa = i6_oovo;
+	const float *i6_oovo_abab = i6_oovo + oa*oa*oa*va;
+	const float *i7_ovvv_aaaa = i7_ovvv;
+	const float *i7_ovvv_abab = i7_ovvv + oa*va*va*(va-1)/2;
+
+	e_pt += cc_ft_aaa(oa, va, d_ov, f2_ov, l1, t2_aaaa, l2_aaaa,
+	    i_oovv_aaaa, i2_t2f2_oovo_aaaa, i3_ovvv_aaaa, i6_oovo_aaaa,
+	    i7_ovvv_aaaa);
+	e_pt += cc_ft_aab(oa, va, oa, va, d_ov, d_ov, f2_ov, f2_ov,
+	    l1, l1, t2_aaaa, t2_abab, t2_abab, l2_aaaa, l2_abab, l2_abab,
+	    i_oovv_aaaa, i_oovv_abab, i2_t2f2_oovo_aaaa, i2_t2f2_oovo_abab,
+	    i2_t2f2_oovo_abab, i3_ovvv_aaaa, i3_ovvv_abab, i3_ovvv_abab,
+	    i6_oovo_aaaa, i6_oovo_abab, i6_oovo_abab,
+	    i7_ovvv_aaaa, i7_ovvv_abab, i7_ovvv_abab);
+#ifdef LIBPT_USE_MPI
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
+	    MPI_SUM, MPI_COMM_WORLD);
+#endif
+	return 2.0 * e_pt;
+}
+
+double
+libpt_uft_mp(size_t oa, size_t va, size_t ob, size_t vb, const float *d_ov,
+    const float *f2_ov, const float *l1, const float *t2, const float *l2,
+    const float *i_oovv, const float *i2_t2f2_oovo, const float *i3_ovvv,
+    const float *i6_oovo, const float *i7_ovvv)
+{
+	double e_pt = 0.0;
+	const float *d_ov_aa = d_ov;
+	const float *d_ov_bb = d_ov_aa + oa*va;
+	const float *f2_ov_aa = f2_ov;
+	const float *f2_ov_bb = f2_ov_aa + oa*va;
+	const float *l1_aa = l1;
+	const float *l1_bb = l1_aa + oa*va;
+
+	const float *t2_aaaa = t2;
+	const float *t2_abab = t2_aaaa + oa*oa*va*va;
+	const float *t2_bbbb = t2_abab + oa*ob*va*vb;
+	const float *t2_baba = t2_bbbb + ob*ob*vb*vb;
+
+	const float *l2_aaaa = l2;
+	const float *l2_abab = l2_aaaa + oa*oa*va*va;
+	const float *l2_bbbb = l2_abab + oa*ob*va*vb;
+	const float *l2_baba = l2_bbbb + ob*ob*vb*vb;
+
+	const float *i_oovv_aaaa = i_oovv;
+	const float *i_oovv_abab = i_oovv_aaaa + oa*oa*va*va;
+	const float *i_oovv_bbbb = i_oovv_abab + oa*ob*va*vb;
+	const float *i_oovv_baba = i_oovv_bbbb + ob*ob*vb*vb;
+
+	const float *i2_t2f2_oovo_aaaa = i2_t2f2_oovo;
+	const float *i2_t2f2_oovo_abab = i2_t2f2_oovo_aaaa + oa*oa*va*oa;
+	const float *i2_t2f2_oovo_bbbb = i2_t2f2_oovo_abab + oa*ob*va*ob;
+	const float *i2_t2f2_oovo_baba = i2_t2f2_oovo_bbbb + ob*ob*vb*ob;
+
+	const float *i3_ovvv_aaaa = i3_ovvv;
+	const float *i3_ovvv_abab = i3_ovvv_aaaa + oa*va*va*(va-1)/2;
+	const float *i3_ovvv_bbbb = i3_ovvv_abab + oa*vb*va*vb;
+	const float *i3_ovvv_baba = i3_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
+
+	const float *i6_oovo_aaaa = i6_oovo;
+	const float *i6_oovo_abab = i6_oovo_aaaa + oa*oa*va*oa;
+	const float *i6_oovo_bbbb = i6_oovo_abab + oa*ob*va*ob;
+	const float *i6_oovo_baba = i6_oovo_bbbb + ob*ob*vb*ob;
+
+	const float *i7_ovvv_aaaa = i7_ovvv;
+	const float *i7_ovvv_abab = i7_ovvv_aaaa + oa*va*va*(va-1)/2;
+	const float *i7_ovvv_bbbb = i7_ovvv_abab + oa*vb*va*vb;
+	const float *i7_ovvv_baba = i7_ovvv_bbbb + ob*vb*vb*(vb-1)/2;
+
+	/* aaaaaa */
+	e_pt += cc_ft_aaa(oa, va, d_ov_aa, f2_ov_aa, l1_aa, t2_aaaa, l2_aaaa,
+	    i_oovv_aaaa, i2_t2f2_oovo_aaaa, i3_ovvv_aaaa, i6_oovo_aaaa,
+	    i7_ovvv_aaaa);
+	/* bbbbbb */
+	e_pt += cc_ft_aaa(ob, vb, d_ov_bb, f2_ov_bb, l1_bb, t2_bbbb, l2_bbbb,
+	    i_oovv_bbbb, i2_t2f2_oovo_bbbb, i3_ovvv_bbbb, i6_oovo_bbbb,
+	    i7_ovvv_bbbb);
+	/* aabaab */
+	e_pt += cc_ft_aab(oa, va, ob, vb, d_ov_aa, d_ov_bb, f2_ov_aa, f2_ov_bb,
+	    l1_aa, l1_bb, t2_aaaa, t2_abab, t2_baba, l2_aaaa, l2_abab, l2_baba,
+	    i_oovv_aaaa, i_oovv_abab, i2_t2f2_oovo_aaaa, i2_t2f2_oovo_abab,
+	    i2_t2f2_oovo_baba, i3_ovvv_aaaa, i3_ovvv_abab, i3_ovvv_baba,
+	    i6_oovo_aaaa, i6_oovo_abab, i6_oovo_baba,
+	    i7_ovvv_aaaa, i7_ovvv_abab, i7_ovvv_baba);
+	/* bbabba */
+	e_pt += cc_ft_aab(ob, vb, oa, va, d_ov_bb, d_ov_aa, f2_ov_bb, f2_ov_aa,
+	    l1_bb, l1_aa, t2_bbbb, t2_baba, t2_abab, l2_bbbb, l2_baba, l2_abab,
+	    i_oovv_bbbb, i_oovv_baba, i2_t2f2_oovo_bbbb, i2_t2f2_oovo_baba,
+	    i2_t2f2_oovo_abab, i3_ovvv_bbbb, i3_ovvv_baba, i3_ovvv_abab,
+	    i6_oovo_bbbb, i6_oovo_baba, i6_oovo_abab,
+	    i7_ovvv_bbbb, i7_ovvv_baba, i7_ovvv_abab);
+#ifdef LIBPT_USE_MPI
+	MPI_Allreduce(MPI_IN_PLACE, &e_pt, 1, MPI_DOUBLE,
+	    MPI_SUM, MPI_COMM_WORLD);
+#endif
+	return e_pt;
+}
