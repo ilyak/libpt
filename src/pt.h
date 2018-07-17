@@ -138,6 +138,11 @@ double libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv);
 
+double libpt_rft_mp(size_t oa, size_t va, const float *d_ov, const float *f2_ov,
+    const float *l1, const float *t2, const float *l2, const float *i_oovv,
+    const float *i2_t2f2_oovo, const float *i3_ovvv, const float *i6_oovo,
+    const float *i7_ovvv);
+
 /* Compute coupled-cluster (fT) energy correction for the unrestricted case.
  *
  * This routine is MPI/OpenMP parallel. All MPI processes must receive same
@@ -164,6 +169,11 @@ double libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *f2_ov, const double *l1, const double *t2, const double *l2,
     const double *i_oovv, const double *i2_t2f2_oovo, const double *i3_ovvv,
     const double *i6_oovo, const double *i7_ovvv);
+
+double libpt_uft_mp(size_t oa, size_t va, size_t ob, size_t vb,
+    const float *d_ov, const float *f2_ov, const float *l1, const float *t2,
+    const float *l2, const float *i_oovv, const float *i2_t2f2_oovo,
+    const float *i3_ovvv, const float *i6_oovo, const float *i7_ovvv);
 
 #ifdef __cplusplus
 } /* extern "C" */
