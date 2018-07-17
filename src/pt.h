@@ -138,6 +138,7 @@ double libpt_rft(size_t oa, size_t va, const double *d_ov, const double *f2_ov,
     const double *i2_t2f2_oovo, const double *i3_ovvv, const double *i6_oovo,
     const double *i7_ovvv);
 
+/* Mixed precision version of the libpt_rft function. */
 double libpt_rft_mp(size_t oa, size_t va, const float *d_ov, const float *f2_ov,
     const float *l1, const float *t2, const float *l2, const float *i_oovv,
     const float *i2_t2f2_oovo, const float *i3_ovvv, const float *i6_oovo,
@@ -170,6 +171,7 @@ double libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const double *d_ov,
     const double *i_oovv, const double *i2_t2f2_oovo, const double *i3_ovvv,
     const double *i6_oovo, const double *i7_ovvv);
 
+/* Mixed precision version of the libpt_uft function. */
 double libpt_uft_mp(size_t oa, size_t va, size_t ob, size_t vb,
     const float *d_ov, const float *f2_ov, const float *l1, const float *t2,
     const float *l2, const float *i_oovv, const float *i2_t2f2_oovo,
