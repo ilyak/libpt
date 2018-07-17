@@ -1192,39 +1192,39 @@ test_uft(FILE *fp, double *e_ref, double *e_cmp)
 
 static const struct {
 	const char *name;
-	const char *type;
+	int is_mixed_precision;
 	void (*fn)(FILE *, double *, double *);
 } tests[] = {
-	{ "rpt01", "double precision", test_rpt },
-	{ "rpt02", "double precision", test_rpt },
-	{ "rpt03", "double precision", test_rpt },
-	{ "rpt04", "double precision", test_rpt },
-	{ "rpt05", "double precision", test_rpt },
-	{ "rpt06", "double precision", test_rpt },
-	{ "rpt07", "double precision", test_rpt },
-	{ "rpt08", "double precision", test_rpt },
-	{ "rpt09", "double precision", test_rpt },
-	{ "upt01", "double precision", test_upt },
-	{ "upt02", "double precision", test_upt },
-	{ "upt03", "double precision", test_upt },
-	{ "rft01", "double precision", test_rft },
-	{ "rft02", "double precision", test_rft },
-	{ "rft03", "double precision", test_rft },
-	{ "uft01", "double precision", test_uft },
-	{ "uft02", "double precision", test_uft },
-	{ "uft03", "double precision", test_uft },
-	{ "rpt01", "mixed precision", test_rpt_mp },
-	{ "rpt02", "mixed precision", test_rpt_mp },
-	{ "rpt03", "mixed precision", test_rpt_mp },
-	{ "rpt04", "mixed precision", test_rpt_mp },
-	{ "rpt05", "mixed precision", test_rpt_mp },
-	{ "rpt06", "mixed precision", test_rpt_mp },
-	{ "rpt07", "mixed precision", test_rpt_mp },
-	{ "rpt08", "mixed precision", test_rpt_mp },
-	{ "rpt09", "mixed precision", test_rpt_mp },
-	{ "upt01", "mixed precision", test_upt_mp },
-	{ "upt02", "mixed precision", test_upt_mp },
-	{ "upt03", "mixed precision", test_upt_mp },
+	{ "rpt01", 0, test_rpt },
+	{ "rpt02", 0, test_rpt },
+	{ "rpt03", 0, test_rpt },
+	{ "rpt04", 0, test_rpt },
+	{ "rpt05", 0, test_rpt },
+	{ "rpt06", 0, test_rpt },
+	{ "rpt07", 0, test_rpt },
+	{ "rpt08", 0, test_rpt },
+	{ "rpt09", 0, test_rpt },
+	{ "upt01", 0, test_upt },
+	{ "upt02", 0, test_upt },
+	{ "upt03", 0, test_upt },
+	{ "rft01", 0, test_rft },
+	{ "rft02", 0, test_rft },
+	{ "rft03", 0, test_rft },
+	{ "uft01", 0, test_uft },
+	{ "uft02", 0, test_uft },
+	{ "uft03", 0, test_uft },
+	{ "rpt01", 1, test_rpt_mp },
+	{ "rpt02", 1, test_rpt_mp },
+	{ "rpt03", 1, test_rpt_mp },
+	{ "rpt04", 1, test_rpt_mp },
+	{ "rpt05", 1, test_rpt_mp },
+	{ "rpt06", 1, test_rpt_mp },
+	{ "rpt07", 1, test_rpt_mp },
+	{ "rpt08", 1, test_rpt_mp },
+	{ "rpt09", 1, test_rpt_mp },
+	{ "upt01", 1, test_upt_mp },
+	{ "upt02", 1, test_upt_mp },
+	{ "upt03", 1, test_upt_mp },
 };
 static const size_t ntests = sizeof(tests) / sizeof(*tests);
 
@@ -1245,8 +1245,11 @@ main(int argc, char **argv)
 #endif
 	for (i = 0; i < ntests; i++) {
 		snprintf(path, sizeof(path), "tests/%s.dat", tests[i].name);
-		if (rank == 0)
-			printf("%s (%s)\n", path, tests[i].type);
+		if (rank == 0) {
+			const char *prec = tests[i].is_mixed_precision ?
+			    "mixed" : "double";
+			printf("%s (%s precision)\n", path, prec);
+		}
 		if ((fp = fopen(path, "r")) == NULL)
 			err(1, "fopen");
 		tests[i].fn(fp, &e_ref, &e_cmp);
