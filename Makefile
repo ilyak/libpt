@@ -1,10 +1,12 @@
 CFLAGS= -Wall -Wextra -g -fopenmp -Isrc
+CXXFLAGS= $(CFLAGS)
 LDFLAGS= -L/usr/local/lib
 LIBS= -lblas -lm
 
 # Intel Compiler with MPI and OpenMP
 #CC= mpicc
 #CFLAGS= -Wall -Wextra -g -O3 -mkl=sequential -fopenmp -DLIBPT_USE_MPI -Isrc
+#CXXFLAGS= $(CFLAGS)
 #LDFLAGS=
 #LIBS=
 
@@ -19,7 +21,7 @@ benchmark: $(LIBPT_A) benchmark.o
 	$(CC) -o $@ $(CFLAGS) benchmark.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
 test: $(LIBPT_A) test.o
-	$(CC) -o $@ $(CFLAGS) test.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
+	$(CXX) -o $@ $(CFLAGS) test.o $(LDFLAGS) $(LIBPT_A) $(LIBS)
 
 check: test
 	@./test
