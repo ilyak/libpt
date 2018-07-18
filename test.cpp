@@ -65,16 +65,6 @@ libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const float *d_ov,
 	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 }
 
-static void *
-xmalloc(size_t size)
-{
-	void *ptr;
-
-	if ((ptr = malloc(size)) == NULL)
-		err(1, "malloc");
-	return ptr;
-}
-
 static void
 read_test_header(FILE *fp, int unrestricted, size_t *oa, size_t *va,
     size_t *ob, size_t *vb, double *e_ref)
@@ -170,7 +160,7 @@ read_test_data_upt(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
 	size_t x = o > v ? o : v;
 	T *tmp;
 
-	tmp = (T *)xmalloc(x*x*x*x*sizeof(*tmp));
+	tmp = new T[x*x*x*x];
 
 	skip_line(fp);
 	skip_line(fp);
@@ -320,7 +310,8 @@ read_test_data_upt(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
 	for (b = 0; b < vb; b++)
 	for (c = 0; c < va; c++)
 		*i_ovvv++ = tmp[(i+oa)*v*v*v+a*v*v+(b+va)*v+c];
-	free(tmp);
+
+	delete[] tmp;
 }
 
 template<class T> void
@@ -333,7 +324,7 @@ read_test_data_rft(FILE *fp, size_t oa, size_t va, T *d_ov, T *f2_ov,
 	size_t x = o > v ? o : v;
 	T *tmp;
 
-	tmp = (T *)xmalloc(x*x*x*x*sizeof(*tmp));
+	tmp = new T[x*x*x*x];
 
 	skip_line(fp);
 	skip_line(fp);
@@ -489,7 +480,8 @@ read_test_data_rft(FILE *fp, size_t oa, size_t va, T *d_ov, T *f2_ov,
 	for (b = 0; b < va; b++)
 	for (c = 0; c < vb; c++)
 		*i7_ovvv++ = tmp[i*v*v*v+(a+va)*v*v+b*v+(c+va)];
-	free(tmp);
+
+	delete[] tmp;
 }
 
 template<class T> void
@@ -502,7 +494,7 @@ read_test_data_uft(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
 	size_t x = o > v ? o : v;
 	T *tmp;
 
-	tmp = (T *)xmalloc(x*x*x*x*sizeof(*tmp));
+	tmp = new T[x*x*x*x];
 
 	skip_line(fp);
 	skip_line(fp);
@@ -734,7 +726,8 @@ read_test_data_uft(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
 	for (b = 0; b < vb; b++)
 	for (c = 0; c < va; c++)
 		*i7_ovvv++ = tmp[(i+oa)*v*v*v+a*v*v+(b+va)*v+c];
-	free(tmp);
+
+	delete[] tmp;
 }
 
 template<class T> void
@@ -755,26 +748,26 @@ test_rpt(FILE *fp, double *e_ref, double *e_cmp)
 	i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
 	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
 
-	d_ov = (T *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f_ov = (T *)xmalloc(f_ov_sz * sizeof(*f_ov));
-	t1 = (T *)xmalloc(t1_sz * sizeof(*t1));
-	t2 = (T *)xmalloc(t2_sz * sizeof(*t2));
-	i_oovo = (T *)xmalloc(i_oovo_sz * sizeof(*i_oovo));
-	i_oovv = (T *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i_ovvv = (T *)xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
+	d_ov = new T[d_ov_sz];
+	f_ov = new T[f_ov_sz];
+	t1 = new T[t1_sz];
+	t2 = new T[t2_sz];
+	i_oovo = new T[i_oovo_sz];
+	i_oovv = new T[i_oovv_sz];
+	i_ovvv = new T[i_ovvv_sz];
 
 	read_test_data_rpt(fp, oa, va, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
 	*e_cmp = libpt_rpt(oa, va, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
 
-	free(d_ov);
-	free(f_ov);
-	free(t1);
-	free(t2);
-	free(i_oovo);
-	free(i_oovv);
-	free(i_ovvv);
+	delete[] d_ov;
+	delete[] f_ov;
+	delete[] t1;
+	delete[] t2;
+	delete[] i_oovo;
+	delete[] i_oovv;
+	delete[] i_ovvv;
 }
 
 template<class T> void
@@ -797,26 +790,26 @@ test_upt(FILE *fp, double *e_ref, double *e_cmp)
 	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
 	    ob*vb*vb*(vb-1)/2;
 
-	d_ov = (T *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f_ov = (T *)xmalloc(f_ov_sz * sizeof(*f_ov));
-	t1 = (T *)xmalloc(t1_sz * sizeof(*t1));
-	t2 = (T *)xmalloc(t2_sz * sizeof(*t2));
-	i_oovo = (T *)xmalloc(i_oovo_sz * sizeof(*i_oovo));
-	i_oovv = (T *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i_ovvv = (T *)xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
+	d_ov = new T[d_ov_sz];
+	f_ov = new T[f_ov_sz];
+	t1 = new T[t1_sz];
+	t2 = new T[t2_sz];
+	i_oovo = new T[i_oovo_sz];
+	i_oovv = new T[i_oovv_sz];
+	i_ovvv = new T[i_ovvv_sz];
 
 	read_test_data_upt(fp, oa, va, ob, vb, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
 	*e_cmp = libpt_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
 
-	free(d_ov);
-	free(f_ov);
-	free(t1);
-	free(t2);
-	free(i_oovo);
-	free(i_oovv);
-	free(i_ovvv);
+	delete[] d_ov;
+	delete[] f_ov;
+	delete[] t1;
+	delete[] t2;
+	delete[] i_oovo;
+	delete[] i_oovv;
+	delete[] i_ovvv;
 }
 
 template<class T> void
@@ -840,32 +833,32 @@ test_rft(FILE *fp, double *e_ref, double *e_cmp)
 	i6_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
 	i7_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
 
-	d_ov = (T *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f2_ov = (T *)xmalloc(f2_ov_sz * sizeof(*f2_ov));
-	l1 = (T *)xmalloc(l1_sz * sizeof(*l1));
-	t2 = (T *)xmalloc(t2_sz * sizeof(*t2));
-	l2 = (T *)xmalloc(l2_sz * sizeof(*l2));
-	i_oovv = (T *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i2_t2f2_oovo = (T *)xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
-	i3_ovvv = (T *)xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
-	i6_oovo = (T *)xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
-	i7_ovvv = (T *)xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
+	d_ov = new T[d_ov_sz];
+	f2_ov = new T[f2_ov_sz];
+	l1 = new T[l1_sz];
+	t2 = new T[t2_sz];
+	l2 = new T[l2_sz];
+	i_oovv = new T[i_oovv_sz];
+	i2_t2f2_oovo = new T[i2_t2f2_oovo_sz];
+	i3_ovvv = new T[i3_ovvv_sz];
+	i6_oovo = new T[i6_oovo_sz];
+	i7_ovvv = new T[i7_ovvv_sz];
 
 	read_test_data_rft(fp, oa, va, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	*e_cmp = libpt_rft(oa, va, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 
-	free(d_ov);
-	free(f2_ov);
-	free(l1);
-	free(t2);
-	free(l2);
-	free(i_oovv);
-	free(i2_t2f2_oovo);
-	free(i3_ovvv);
-	free(i6_oovo);
-	free(i7_ovvv);
+	delete[] d_ov;
+	delete[] f2_ov;
+	delete[] l1;
+	delete[] t2;
+	delete[] l2;
+	delete[] i_oovv;
+	delete[] i2_t2f2_oovo;
+	delete[] i3_ovvv;
+	delete[] i6_oovo;
+	delete[] i7_ovvv;
 }
 
 template<class T> void
@@ -893,32 +886,32 @@ test_uft(FILE *fp, double *e_ref, double *e_cmp)
 	i7_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
 	    ob*vb*vb*(vb-1)/2;
 
-	d_ov = (T *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f2_ov = (T *)xmalloc(f2_ov_sz * sizeof(*f2_ov));
-	l1 = (T *)xmalloc(l1_sz * sizeof(*l1));
-	t2 = (T *)xmalloc(t2_sz * sizeof(*t2));
-	l2 = (T *)xmalloc(l2_sz * sizeof(*l2));
-	i_oovv = (T *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i2_t2f2_oovo = (T *)xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
-	i3_ovvv = (T *)xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
-	i6_oovo = (T *)xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
-	i7_ovvv = (T *)xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
+	d_ov = new T[d_ov_sz];
+	f2_ov = new T[f2_ov_sz];
+	l1 = new T[l1_sz];
+	t2 = new T[t2_sz];
+	l2 = new T[l2_sz];
+	i_oovv = new T[i_oovv_sz];
+	i2_t2f2_oovo = new T[i2_t2f2_oovo_sz];
+	i3_ovvv = new T[i3_ovvv_sz];
+	i6_oovo = new T[i6_oovo_sz];
+	i7_ovvv = new T[i7_ovvv_sz];
 
 	read_test_data_uft(fp, oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 	*e_cmp = libpt_uft(oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 
-	free(d_ov);
-	free(f2_ov);
-	free(l1);
-	free(t2);
-	free(l2);
-	free(i_oovv);
-	free(i2_t2f2_oovo);
-	free(i3_ovvv);
-	free(i6_oovo);
-	free(i7_ovvv);
+	delete[] d_ov;
+	delete[] f2_ov;
+	delete[] l1;
+	delete[] t2;
+	delete[] l2;
+	delete[] i_oovv;
+	delete[] i2_t2f2_oovo;
+	delete[] i3_ovvv;
+	delete[] i6_oovo;
+	delete[] i7_ovvv;
 }
 
 static const struct {
