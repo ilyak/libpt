@@ -28,6 +28,43 @@
 
 #define EPSILON 1.0e-8
 
+double
+libpt_rpt(size_t oa, size_t va, const float *d_ov, const float *f_ov,
+    const float *t1, const float *t2, const float *i_oovo,
+    const float *i_oovv, const float *i_ovvv)
+{
+	return libpt_rpt_mp(oa, va, d_ov, f_ov, t1, t2, i_oovo, i_oovv, i_ovvv);
+}
+
+double
+libpt_upt(size_t oa, size_t va, size_t ob, size_t vb, const float *d_ov,
+    const float *f_ov, const float *t1, const float *t2, const float *i_oovo,
+    const float *i_oovv, const float *i_ovvv)
+{
+	return libpt_upt_mp(oa, va, ob, vb, d_ov, f_ov, t1, t2,
+	    i_oovo, i_oovv, i_ovvv);
+}
+
+double
+libpt_rft(size_t oa, size_t va, const float *d_ov, const float *f2_ov,
+    const float *l1, const float *t2, const float *l2, const float *i_oovv,
+    const float *i2_t2f2_oovo, const float *i3_ovvv, const float *i6_oovo,
+    const float *i7_ovvv)
+{
+	return libpt_rft_mp(oa, va, d_ov, f2_ov, l1, t2, l2, i_oovv,
+	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
+}
+
+double
+libpt_uft(size_t oa, size_t va, size_t ob, size_t vb, const float *d_ov,
+    const float *f2_ov, const float *l1, const float *t2, const float *l2,
+    const float *i_oovv, const float *i2_t2f2_oovo, const float *i3_ovvv,
+    const float *i6_oovo, const float *i7_ovvv)
+{
+	return libpt_uft_mp(oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2, i_oovv,
+	    i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
+}
+
 static void *
 xmalloc(size_t size)
 {
@@ -768,7 +805,7 @@ test_rpt_mp(FILE *fp, double *e_ref, double *e_cmp)
 
 	read_test_data_rpt(fp, oa, va, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
-	*e_cmp = libpt_rpt_mp(oa, va, d_ov, f_ov, t1, t2,
+	*e_cmp = libpt_rpt(oa, va, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
 
 	free(d_ov);
@@ -852,7 +889,7 @@ test_upt_mp(FILE *fp, double *e_ref, double *e_cmp)
 
 	read_test_data_upt(fp, oa, va, ob, vb, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
-	*e_cmp = libpt_upt_mp(oa, va, ob, vb, d_ov, f_ov, t1, t2,
+	*e_cmp = libpt_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
 
 	free(d_ov);
@@ -947,7 +984,7 @@ test_rft_mp(FILE *fp, double *e_ref, double *e_cmp)
 
 	read_test_data_rft(fp, oa, va, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
-	*e_cmp = libpt_rft_mp(oa, va, d_ov, f2_ov, l1, t2, l2,
+	*e_cmp = libpt_rft(oa, va, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 
 	free(d_ov);
@@ -1053,7 +1090,7 @@ test_uft_mp(FILE *fp, double *e_ref, double *e_cmp)
 
 	read_test_data_uft(fp, oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
-	*e_cmp = libpt_uft_mp(oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
+	*e_cmp = libpt_uft(oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
 
 	free(d_ov);
