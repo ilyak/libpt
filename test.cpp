@@ -737,11 +737,11 @@ read_test_data_uft(FILE *fp, size_t oa, size_t va, size_t ob, size_t vb,
 	free(tmp);
 }
 
-static void
+template<class T> void
 test_rpt(FILE *fp, double *e_ref, double *e_cmp)
 {
-	double *d_ov, *f_ov, *t1, *t2;
-	double *i_oovo, *i_oovv, *i_ovvv;
+	T *d_ov, *f_ov, *t1, *t2;
+	T *i_oovo, *i_oovv, *i_ovvv;
 	size_t oa, va, ob, vb, d_ov_sz, f_ov_sz, t1_sz, t2_sz;
 	size_t i_oovo_sz, i_oovv_sz, i_ovvv_sz;
 
@@ -755,13 +755,13 @@ test_rpt(FILE *fp, double *e_ref, double *e_cmp)
 	i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
 	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
 
-	d_ov = (double *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f_ov = (double *)xmalloc(f_ov_sz * sizeof(*f_ov));
-	t1 = (double *)xmalloc(t1_sz * sizeof(*t1));
-	t2 = (double *)xmalloc(t2_sz * sizeof(*t2));
-	i_oovo = (double *)xmalloc(i_oovo_sz * sizeof(*i_oovo));
-	i_oovv = (double *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i_ovvv = (double *)xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
+	d_ov = (T *)xmalloc(d_ov_sz * sizeof(*d_ov));
+	f_ov = (T *)xmalloc(f_ov_sz * sizeof(*f_ov));
+	t1 = (T *)xmalloc(t1_sz * sizeof(*t1));
+	t2 = (T *)xmalloc(t2_sz * sizeof(*t2));
+	i_oovo = (T *)xmalloc(i_oovo_sz * sizeof(*i_oovo));
+	i_oovv = (T *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i_ovvv = (T *)xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
 
 	read_test_data_rpt(fp, oa, va, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
@@ -777,51 +777,11 @@ test_rpt(FILE *fp, double *e_ref, double *e_cmp)
 	free(i_ovvv);
 }
 
-static void
-test_rpt_mp(FILE *fp, double *e_ref, double *e_cmp)
-{
-	float *d_ov, *f_ov, *t1, *t2;
-	float *i_oovo, *i_oovv, *i_ovvv;
-	size_t oa, va, ob, vb, d_ov_sz, f_ov_sz, t1_sz, t2_sz;
-	size_t i_oovo_sz, i_oovv_sz, i_ovvv_sz;
-
-	read_test_header(fp, 0, &oa, &va, &ob, &vb, e_ref);
-
-	d_ov_sz = oa*va;
-	f_ov_sz = oa*va;
-	t1_sz = oa*va;
-	t2_sz = oa*oa*va*va + oa*ob*va*vb;
-	i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
-	i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
-	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
-
-	d_ov = (float *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f_ov = (float *)xmalloc(f_ov_sz * sizeof(*f_ov));
-	t1 = (float *)xmalloc(t1_sz * sizeof(*t1));
-	t2 = (float *)xmalloc(t2_sz * sizeof(*t2));
-	i_oovo = (float *)xmalloc(i_oovo_sz * sizeof(*i_oovo));
-	i_oovv = (float *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i_ovvv = (float *)xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
-
-	read_test_data_rpt(fp, oa, va, d_ov, f_ov, t1, t2,
-	    i_oovo, i_oovv, i_ovvv);
-	*e_cmp = libpt_rpt(oa, va, d_ov, f_ov, t1, t2,
-	    i_oovo, i_oovv, i_ovvv);
-
-	free(d_ov);
-	free(f_ov);
-	free(t1);
-	free(t2);
-	free(i_oovo);
-	free(i_oovv);
-	free(i_ovvv);
-}
-
-static void
+template<class T> void
 test_upt(FILE *fp, double *e_ref, double *e_cmp)
 {
-	double *d_ov, *f_ov, *t1, *t2;
-	double *i_oovo, *i_oovv, *i_ovvv;
+	T *d_ov, *f_ov, *t1, *t2;
+	T *i_oovo, *i_oovv, *i_ovvv;
 	size_t oa, va, ob, vb, d_ov_sz, f_ov_sz, t1_sz, t2_sz;
 	size_t i_oovo_sz, i_oovv_sz, i_ovvv_sz;
 
@@ -837,13 +797,13 @@ test_upt(FILE *fp, double *e_ref, double *e_cmp)
 	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
 	    ob*vb*vb*(vb-1)/2;
 
-	d_ov = (double *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f_ov = (double *)xmalloc(f_ov_sz * sizeof(*f_ov));
-	t1 = (double *)xmalloc(t1_sz * sizeof(*t1));
-	t2 = (double *)xmalloc(t2_sz * sizeof(*t2));
-	i_oovo = (double *)xmalloc(i_oovo_sz * sizeof(*i_oovo));
-	i_oovv = (double *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i_ovvv = (double *)xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
+	d_ov = (T *)xmalloc(d_ov_sz * sizeof(*d_ov));
+	f_ov = (T *)xmalloc(f_ov_sz * sizeof(*f_ov));
+	t1 = (T *)xmalloc(t1_sz * sizeof(*t1));
+	t2 = (T *)xmalloc(t2_sz * sizeof(*t2));
+	i_oovo = (T *)xmalloc(i_oovo_sz * sizeof(*i_oovo));
+	i_oovv = (T *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i_ovvv = (T *)xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
 
 	read_test_data_upt(fp, oa, va, ob, vb, d_ov, f_ov, t1, t2,
 	    i_oovo, i_oovv, i_ovvv);
@@ -859,53 +819,11 @@ test_upt(FILE *fp, double *e_ref, double *e_cmp)
 	free(i_ovvv);
 }
 
-static void
-test_upt_mp(FILE *fp, double *e_ref, double *e_cmp)
-{
-	float *d_ov, *f_ov, *t1, *t2;
-	float *i_oovo, *i_oovv, *i_ovvv;
-	size_t oa, va, ob, vb, d_ov_sz, f_ov_sz, t1_sz, t2_sz;
-	size_t i_oovo_sz, i_oovv_sz, i_ovvv_sz;
-
-	read_test_header(fp, 1, &oa, &va, &ob, &vb, e_ref);
-
-	d_ov_sz = oa*va + ob*vb;
-	f_ov_sz = oa*va + ob*vb;
-	t1_sz = oa*va + ob*vb;
-	t2_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
-	i_oovo_sz = oa*oa*va*oa + oa*ob*va*ob + ob*oa*vb*oa +
-	    ob*ob*vb*ob;
-	i_oovv_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
-	i_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
-	    ob*vb*vb*(vb-1)/2;
-
-	d_ov = (float *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f_ov = (float *)xmalloc(f_ov_sz * sizeof(*f_ov));
-	t1 = (float *)xmalloc(t1_sz * sizeof(*t1));
-	t2 = (float *)xmalloc(t2_sz * sizeof(*t2));
-	i_oovo = (float *)xmalloc(i_oovo_sz * sizeof(*i_oovo));
-	i_oovv = (float *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i_ovvv = (float *)xmalloc(i_ovvv_sz * sizeof(*i_ovvv));
-
-	read_test_data_upt(fp, oa, va, ob, vb, d_ov, f_ov, t1, t2,
-	    i_oovo, i_oovv, i_ovvv);
-	*e_cmp = libpt_upt(oa, va, ob, vb, d_ov, f_ov, t1, t2,
-	    i_oovo, i_oovv, i_ovvv);
-
-	free(d_ov);
-	free(f_ov);
-	free(t1);
-	free(t2);
-	free(i_oovo);
-	free(i_oovv);
-	free(i_ovvv);
-}
-
-static void
+template<class T> void
 test_rft(FILE *fp, double *e_ref, double *e_cmp)
 {
-	double *d_ov, *f2_ov, *l1, *t2, *l2;
-	double *i_oovv, *i2_t2f2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
+	T *d_ov, *f2_ov, *l1, *t2, *l2;
+	T *i_oovv, *i2_t2f2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
 	size_t oa, va, ob, vb, d_ov_sz, f2_ov_sz, l1_sz, t2_sz, l2_sz;
 	size_t i_oovv_sz, i2_t2f2_oovo_sz, i3_ovvv_sz, i6_oovo_sz, i7_ovvv_sz;
 
@@ -922,16 +840,16 @@ test_rft(FILE *fp, double *e_ref, double *e_cmp)
 	i6_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
 	i7_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
 
-	d_ov = (double *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f2_ov = (double *)xmalloc(f2_ov_sz * sizeof(*f2_ov));
-	l1 = (double *)xmalloc(l1_sz * sizeof(*l1));
-	t2 = (double *)xmalloc(t2_sz * sizeof(*t2));
-	l2 = (double *)xmalloc(l2_sz * sizeof(*l2));
-	i_oovv = (double *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i2_t2f2_oovo = (double *)xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
-	i3_ovvv = (double *)xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
-	i6_oovo = (double *)xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
-	i7_ovvv = (double *)xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
+	d_ov = (T *)xmalloc(d_ov_sz * sizeof(*d_ov));
+	f2_ov = (T *)xmalloc(f2_ov_sz * sizeof(*f2_ov));
+	l1 = (T *)xmalloc(l1_sz * sizeof(*l1));
+	t2 = (T *)xmalloc(t2_sz * sizeof(*t2));
+	l2 = (T *)xmalloc(l2_sz * sizeof(*l2));
+	i_oovv = (T *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i2_t2f2_oovo = (T *)xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
+	i3_ovvv = (T *)xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
+	i6_oovo = (T *)xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
+	i7_ovvv = (T *)xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
 
 	read_test_data_rft(fp, oa, va, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
@@ -950,60 +868,11 @@ test_rft(FILE *fp, double *e_ref, double *e_cmp)
 	free(i7_ovvv);
 }
 
-static void
-test_rft_mp(FILE *fp, double *e_ref, double *e_cmp)
-{
-	float *d_ov, *f2_ov, *l1, *t2, *l2;
-	float *i_oovv, *i2_t2f2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
-	size_t oa, va, ob, vb, d_ov_sz, f2_ov_sz, l1_sz, t2_sz, l2_sz;
-	size_t i_oovv_sz, i2_t2f2_oovo_sz, i3_ovvv_sz, i6_oovo_sz, i7_ovvv_sz;
-
-	read_test_header(fp, 0, &oa, &va, &ob, &vb, e_ref);
-
-	d_ov_sz = oa*va;
-	f2_ov_sz = oa*va;
-	l1_sz = oa*va;
-	t2_sz = oa*oa*va*va + oa*ob*va*vb;
-	l2_sz = oa*oa*va*va + oa*ob*va*vb;
-	i_oovv_sz = oa*oa*va*va + oa*ob*va*vb;
-	i2_t2f2_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
-	i3_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
-	i6_oovo_sz = oa*oa*va*oa + oa*ob*va*ob;
-	i7_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb;
-
-	d_ov = (float *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f2_ov = (float *)xmalloc(f2_ov_sz * sizeof(*f2_ov));
-	l1 = (float *)xmalloc(l1_sz * sizeof(*l1));
-	t2 = (float *)xmalloc(t2_sz * sizeof(*t2));
-	l2 = (float *)xmalloc(l2_sz * sizeof(*l2));
-	i_oovv = (float *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i2_t2f2_oovo = (float *)xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
-	i3_ovvv = (float *)xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
-	i6_oovo = (float *)xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
-	i7_ovvv = (float *)xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
-
-	read_test_data_rft(fp, oa, va, d_ov, f2_ov, l1, t2, l2,
-	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
-	*e_cmp = libpt_rft(oa, va, d_ov, f2_ov, l1, t2, l2,
-	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
-
-	free(d_ov);
-	free(f2_ov);
-	free(l1);
-	free(t2);
-	free(l2);
-	free(i_oovv);
-	free(i2_t2f2_oovo);
-	free(i3_ovvv);
-	free(i6_oovo);
-	free(i7_ovvv);
-}
-
-static void
+template<class T> void
 test_uft(FILE *fp, double *e_ref, double *e_cmp)
 {
-	double *d_ov, *f2_ov, *l1, *t2, *l2;
-	double *i_oovv, *i2_t2f2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
+	T *d_ov, *f2_ov, *l1, *t2, *l2;
+	T *i_oovv, *i2_t2f2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
 	size_t oa, va, ob, vb, d_ov_sz, f2_ov_sz, l1_sz, t2_sz, l2_sz;
 	size_t i_oovv_sz, i2_t2f2_oovo_sz, i3_ovvv_sz, i6_oovo_sz, i7_ovvv_sz;
 
@@ -1024,69 +893,16 @@ test_uft(FILE *fp, double *e_ref, double *e_cmp)
 	i7_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
 	    ob*vb*vb*(vb-1)/2;
 
-	d_ov = (double *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f2_ov = (double *)xmalloc(f2_ov_sz * sizeof(*f2_ov));
-	l1 = (double *)xmalloc(l1_sz * sizeof(*l1));
-	t2 = (double *)xmalloc(t2_sz * sizeof(*t2));
-	l2 = (double *)xmalloc(l2_sz * sizeof(*l2));
-	i_oovv = (double *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i2_t2f2_oovo = (double *)xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
-	i3_ovvv = (double *)xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
-	i6_oovo = (double *)xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
-	i7_ovvv = (double *)xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
-
-	read_test_data_uft(fp, oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
-	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
-	*e_cmp = libpt_uft(oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
-	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
-
-	free(d_ov);
-	free(f2_ov);
-	free(l1);
-	free(t2);
-	free(l2);
-	free(i_oovv);
-	free(i2_t2f2_oovo);
-	free(i3_ovvv);
-	free(i6_oovo);
-	free(i7_ovvv);
-}
-
-static void
-test_uft_mp(FILE *fp, double *e_ref, double *e_cmp)
-{
-	float *d_ov, *f2_ov, *l1, *t2, *l2;
-	float *i_oovv, *i2_t2f2_oovo, *i3_ovvv, *i6_oovo, *i7_ovvv;
-	size_t oa, va, ob, vb, d_ov_sz, f2_ov_sz, l1_sz, t2_sz, l2_sz;
-	size_t i_oovv_sz, i2_t2f2_oovo_sz, i3_ovvv_sz, i6_oovo_sz, i7_ovvv_sz;
-
-	read_test_header(fp, 1, &oa, &va, &ob, &vb, e_ref);
-
-	d_ov_sz = oa*va + ob*vb;
-	f2_ov_sz = oa*va + ob*vb;
-	l1_sz = oa*va + ob*vb;
-	t2_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
-	l2_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
-	i_oovv_sz = oa*oa*va*va + 2*oa*ob*va*vb + ob*ob*vb*vb;
-	i2_t2f2_oovo_sz = oa*oa*va*oa + oa*ob*va*ob + ob*oa*vb*oa +
-	    ob*ob*vb*ob;
-	i3_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
-	    ob*vb*vb*(vb-1)/2;
-	i6_oovo_sz = oa*oa*va*oa + oa*ob*va*ob + ob*oa*vb*oa +
-	    ob*ob*vb*ob;
-	i7_ovvv_sz = oa*va*va*(va-1)/2 + oa*vb*va*vb + ob*va*vb*va +
-	    ob*vb*vb*(vb-1)/2;
-
-	d_ov = (float *)xmalloc(d_ov_sz * sizeof(*d_ov));
-	f2_ov = (float *)xmalloc(f2_ov_sz * sizeof(*f2_ov));
-	l1 = (float *)xmalloc(l1_sz * sizeof(*l1));
-	t2 = (float *)xmalloc(t2_sz * sizeof(*t2));
-	l2 = (float *)xmalloc(l2_sz * sizeof(*l2));
-	i_oovv = (float *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
-	i2_t2f2_oovo = (float *)xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
-	i3_ovvv = (float *)xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
-	i6_oovo = (float *)xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
-	i7_ovvv = (float *)xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
+	d_ov = (T *)xmalloc(d_ov_sz * sizeof(*d_ov));
+	f2_ov = (T *)xmalloc(f2_ov_sz * sizeof(*f2_ov));
+	l1 = (T *)xmalloc(l1_sz * sizeof(*l1));
+	t2 = (T *)xmalloc(t2_sz * sizeof(*t2));
+	l2 = (T *)xmalloc(l2_sz * sizeof(*l2));
+	i_oovv = (T *)xmalloc(i_oovv_sz * sizeof(*i_oovv));
+	i2_t2f2_oovo = (T *)xmalloc(i2_t2f2_oovo_sz * sizeof(*i2_t2f2_oovo));
+	i3_ovvv = (T *)xmalloc(i3_ovvv_sz * sizeof(*i3_ovvv));
+	i6_oovo = (T *)xmalloc(i6_oovo_sz * sizeof(*i6_oovo));
+	i7_ovvv = (T *)xmalloc(i7_ovvv_sz * sizeof(*i7_ovvv));
 
 	read_test_data_uft(fp, oa, va, ob, vb, d_ov, f2_ov, l1, t2, l2,
 	    i_oovv, i2_t2f2_oovo, i3_ovvv, i6_oovo, i7_ovvv);
@@ -1110,42 +926,42 @@ static const struct {
 	int is_mixed_precision;
 	void (*fn)(FILE *, double *, double *);
 } tests[] = {
-	{ "rpt01", 0, test_rpt },
-	{ "rpt02", 0, test_rpt },
-	{ "rpt03", 0, test_rpt },
-	{ "rpt04", 0, test_rpt },
-	{ "rpt05", 0, test_rpt },
-	{ "rpt06", 0, test_rpt },
-	{ "rpt07", 0, test_rpt },
-	{ "rpt08", 0, test_rpt },
-	{ "rpt09", 0, test_rpt },
-	{ "upt01", 0, test_upt },
-	{ "upt02", 0, test_upt },
-	{ "upt03", 0, test_upt },
-	{ "rft01", 0, test_rft },
-	{ "rft02", 0, test_rft },
-	{ "rft03", 0, test_rft },
-	{ "uft01", 0, test_uft },
-	{ "uft02", 0, test_uft },
-	{ "uft03", 0, test_uft },
-	{ "rpt01", 1, test_rpt_mp },
-	{ "rpt02", 1, test_rpt_mp },
-	{ "rpt03", 1, test_rpt_mp },
-	{ "rpt04", 1, test_rpt_mp },
-	{ "rpt05", 1, test_rpt_mp },
-	{ "rpt06", 1, test_rpt_mp },
-	{ "rpt07", 1, test_rpt_mp },
-	{ "rpt08", 1, test_rpt_mp },
-	{ "rpt09", 1, test_rpt_mp },
-	{ "upt01", 1, test_upt_mp },
-	{ "upt02", 1, test_upt_mp },
-	{ "upt03", 1, test_upt_mp },
-	{ "rft01", 1, test_rft_mp },
-	{ "rft02", 1, test_rft_mp },
-	{ "rft03", 1, test_rft_mp },
-	{ "uft01", 1, test_uft_mp },
-	{ "uft02", 1, test_uft_mp },
-	{ "uft03", 1, test_uft_mp },
+	{ "rpt01", 0, test_rpt<double> },
+	{ "rpt02", 0, test_rpt<double> },
+	{ "rpt03", 0, test_rpt<double> },
+	{ "rpt04", 0, test_rpt<double> },
+	{ "rpt05", 0, test_rpt<double> },
+	{ "rpt06", 0, test_rpt<double> },
+	{ "rpt07", 0, test_rpt<double> },
+	{ "rpt08", 0, test_rpt<double> },
+	{ "rpt09", 0, test_rpt<double> },
+	{ "upt01", 0, test_upt<double> },
+	{ "upt02", 0, test_upt<double> },
+	{ "upt03", 0, test_upt<double> },
+	{ "rft01", 0, test_rft<double> },
+	{ "rft02", 0, test_rft<double> },
+	{ "rft03", 0, test_rft<double> },
+	{ "uft01", 0, test_uft<double> },
+	{ "uft02", 0, test_uft<double> },
+	{ "uft03", 0, test_uft<double> },
+	{ "rpt01", 1, test_rpt<float> },
+	{ "rpt02", 1, test_rpt<float> },
+	{ "rpt03", 1, test_rpt<float> },
+	{ "rpt04", 1, test_rpt<float> },
+	{ "rpt05", 1, test_rpt<float> },
+	{ "rpt06", 1, test_rpt<float> },
+	{ "rpt07", 1, test_rpt<float> },
+	{ "rpt08", 1, test_rpt<float> },
+	{ "rpt09", 1, test_rpt<float> },
+	{ "upt01", 1, test_upt<float> },
+	{ "upt02", 1, test_upt<float> },
+	{ "upt03", 1, test_upt<float> },
+	{ "rft01", 1, test_rft<float> },
+	{ "rft02", 1, test_rft<float> },
+	{ "rft03", 1, test_rft<float> },
+	{ "uft01", 1, test_uft<float> },
+	{ "uft02", 1, test_uft<float> },
+	{ "uft03", 1, test_uft<float> },
 };
 static const size_t ntests = sizeof(tests) / sizeof(*tests);
 
