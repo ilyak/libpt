@@ -13,6 +13,10 @@ The API defines several functions:
 - `libpt_upt` - compute CCSD(T) energy correction for the unrestricted case
 - `libpt_rft` - compute EOM-CCSD(fT) energy correction for the restricted case
 - `libpt_uft` - compute EOM-CCSD(fT) energy correction for the unrestricted case
+- `libpt_rpt_mp` - mixed-precision variant of the `libpt_rpt` function
+- `libpt_upt_mp` - mixed-precision variant of the `libpt_upt` function
+- `libpt_rft_mp` - mixed-precision variant of the `libpt_rft` function
+- `libpt_uft_mp` - mixed-precision variant of the `libpt_uft` function
 
 ### Compilation
 
